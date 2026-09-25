@@ -15,8 +15,12 @@ export default defineNuxtConfig({
       meta: [
         { name: 'viewport', content: 'width=device-width, initial-scale=1, viewport-fit=cover' },
         { name: 'theme-color', content: '#2f4a3a' },
+        { name: 'format-detection', content: 'telephone=no' },
       ],
       link: [
+        { rel: 'icon', type: 'image/svg+xml', href: '/favicon.svg' },
+        { rel: 'icon', type: 'image/png', sizes: '32x32', href: '/favicon-32.png' },
+        { rel: 'apple-touch-icon', sizes: '180x180', href: '/apple-touch-icon.png' },
         { rel: 'preconnect', href: 'https://fonts.googleapis.com' },
         { rel: 'preconnect', href: 'https://fonts.gstatic.com', crossorigin: '' },
         { rel: 'stylesheet', href: 'https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Marcellus&display=swap' },
@@ -48,8 +52,9 @@ export default defineNuxtConfig({
     public: {
       // Nomor WhatsApp admin untuk pemesanan, format 628xxxx (env NUXT_PUBLIC_ADMIN_WHATSAPP)
       adminWhatsapp: '6281234567890',
-      siteName: 'Undangin',
-      siteUrl: '',
+      siteName: 'Undangan Virtual',
+      // Domain kanonik untuk SEO & magic link (env NUXT_PUBLIC_SITE_URL)
+      siteUrl: 'https://undanganvirtual.com',
     },
   },
 

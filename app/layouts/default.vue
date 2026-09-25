@@ -12,7 +12,7 @@ watch(() => route.fullPath, () => (menuOpen.value = false))
   <div class="min-h-screen bg-cream">
     <header class="sticky top-0 z-40 border-b border-brand-100/70 bg-cream/90 backdrop-blur">
       <div class="mx-auto flex h-16 max-w-6xl items-center justify-between px-4">
-        <NuxtLink to="/" class="flex items-center gap-2">
+        <NuxtLink to="/" class="flex items-center gap-2" :aria-label="`${config.public.siteName} — beranda`">
           <span class="grid h-9 w-9 place-items-center rounded-xl bg-brand text-white">
             <svg viewBox="0 0 100 100" class="h-5 w-5" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-width="7"><rect x="22" y="22" width="56" height="56" /><rect x="22" y="22" width="56" height="56" transform="rotate(45 50 50)" /></g></svg>
           </span>
@@ -48,8 +48,17 @@ watch(() => route.fullPath, () => (menuOpen.value = false))
       <slot />
     </main>
 
-    <footer class="mt-16 border-t border-brand-100 py-8 text-center text-xs text-brand-500">
-      © {{ new Date().getFullYear() }} {{ config.public.siteName }} · Undangan digital untuk momen sakral Anda
+    <footer class="mt-16 border-t border-brand-100 py-10 text-center text-xs text-brand-500">
+      <p class="font-display text-lg text-brand">{{ config.public.siteName }}</p>
+      <p class="mt-1 italic text-clay-600">{{ BRAND.tagline }}</p>
+      <nav class="mt-4 flex flex-wrap justify-center gap-x-5 gap-y-2 text-brand-600" aria-label="Tautan footer">
+        <NuxtLink to="/#katalog" class="hover:text-brand">Katalog Tema</NuxtLink>
+        <NuxtLink to="/#harga" class="hover:text-brand">Harga</NuxtLink>
+        <NuxtLink to="/#faq" class="hover:text-brand">FAQ</NuxtLink>
+        <NuxtLink to="/reseller" class="hover:text-brand">Program Reseller</NuxtLink>
+        <a :href="waLink(config.public.adminWhatsapp, 'Assalamu\'alaikum, saya ingin bertanya tentang Undangan Virtual.')" target="_blank" rel="noopener" class="hover:text-brand">Hubungi Kami</a>
+      </nav>
+      <p class="mt-4">© {{ new Date().getFullYear() }} {{ config.public.siteName }} · Undangan pernikahan digital syar'i & modern</p>
     </footer>
   </div>
 </template>

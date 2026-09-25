@@ -15,6 +15,8 @@ const props = withDefaults(defineProps<{
   guestName?: string
   slug?: string | null
   preview?: boolean
+  /** Musik bawaan tema; dipakai bila user tidak mengunggah musik sendiri. */
+  themeMusic?: string | null
   /** page: halaman penuh; frame: di dalam bingkai ponsel; thumb: hanya section pertama (katalog) */
   mode?: 'page' | 'frame' | 'thumb'
 }>(), {
@@ -24,6 +26,7 @@ const props = withDefaults(defineProps<{
   guestName: '',
   slug: null,
   preview: false,
+  themeMusic: null,
   mode: 'page',
 })
 
@@ -50,13 +53,34 @@ const body = computed(() => {
   return props.mode === 'thumb' && !cover.value ? list.slice(0, 1) : list
 })
 
+// ---------- Musik latar ----------
+const musicSrc = computed(() => {
+  if (props.mode === 'thumb') return ''
+  const m = contentWithDefaults(props.content).music
+  if (!m.enabled) return ''
+  return safeUrl(m.url) || safeUrl(props.themeMusic) || ''
+})
+const music = ref<{ play: () => void } | null>(null)
+
 const coverOpen = ref(!cover.value)
 const wishesVersion = ref(0)
 function openCover() {
   coverOpen.value = true
+  // Diputar langsung di dalam handler klik agar tidak diblokir kebijakan autoplay
+  music.value?.play()
   if (props.mode === 'page' && import.meta.client) window.scrollTo({ top: 0 })
 }
 watch(cover, (c) => { if (!c) coverOpen.value = true })
+
+// Tema tanpa sampul: musik mulai pada sentuhan pertama tamu
+if (import.meta.client && props.mode === 'page') {
+  const start = () => {
+    if (!cover.value) music.value?.play()
+    window.removeEventListener('pointerdown', start)
+  }
+  onMounted(() => window.addEventListener('pointerdown', start, { once: true }))
+  onBeforeUnmount(() => window.removeEventListener('pointerdown', start))
+}
 
 provide(INVITE_KEY, {
   ctx,
@@ -82,43 +106,54 @@ const bgUrl = (bg?: string) => {
 </script>
 
 <template>
-  <div
-    class="invite-root relative isolate overflow-x-hidden bg-base font-body text-ink"
-    :class="`invite-${mode}`"
-    :style="cssVars"
-  >
-    <!-- CSS tema di-scope ke .invite-root, jadi root_class dipasang di pembungkus dalam -->
-    <div :class="definition.root_class">
-      <!-- Cover (dibuka dengan tombol open_button) -->
-      <Transition name="invite-cover">
-        <section
-          v-if="cover && (!coverOpen || mode === 'thumb')"
-          data-section="cover"
-          :class="[cover.class, mode === 'page' ? 'fixed inset-0 z-50 mx-auto max-w-[480px]' : mode === 'frame' ? 'relative min-h-[736px]' : 'relative min-h-[606px]']"
-          :style="bgUrl(cover.bg)"
-        >
-          <InviteNode v-for="(n, i) in cover.children" :key="i" :node="n" />
-        </section>
-      </Transition>
+  <div class="invite-wrap">
+    <div
+      class="invite-root relative isolate overflow-x-hidden bg-base font-body text-ink"
+      :class="`invite-${mode}`"
+      :style="cssVars"
+    >
+      <!-- CSS tema di-scope ke .invite-root, jadi root_class dipasang di pembungkus dalam -->
+      <div :class="definition.root_class">
+        <!-- Cover (dibuka dengan tombol open_button) -->
+        <Transition name="invite-cover">
+          <section
+            v-if="cover && (!coverOpen || mode === 'thumb')"
+            data-section="cover"
+            :class="[cover.class, mode === 'page' ? 'fixed inset-0 z-50 mx-auto max-w-[480px]' : mode === 'frame' ? 'relative min-h-[736px]' : 'relative min-h-[606px]']"
+            :style="bgUrl(cover.bg)"
+          >
+            <InviteNode v-for="(n, i) in cover.children" :key="i" :node="n" />
+          </section>
+        </Transition>
 
-      <template v-if="(mode !== 'thumb' || !cover) && (mode !== 'frame' || coverOpen)">
-        <section
-          v-for="(s, si) in body"
-          :key="si"
-          :data-section="s.type"
-          :id="`s-${s.type}`"
-          :class="s.class"
-          :style="bgUrl(s.bg)"
-        >
-          <InviteNode v-for="(n, i) in s.children" :key="i" :node="n" />
-        </section>
-      </template>
+        <template v-if="(mode !== 'thumb' || !cover) && (mode !== 'frame' || coverOpen)">
+          <section
+            v-for="(s, si) in body"
+            :key="si"
+            :data-section="s.type"
+            :id="`s-${s.type}`"
+            :class="s.class"
+            :style="bgUrl(s.bg)"
+          >
+            <InviteNode v-for="(n, i) in s.children" :key="i" :node="n" />
+          </section>
+        </template>
+      </div>
     </div>
+    <InviteMusic
+      v-if="musicSrc"
+      ref="music"
+      :src="musicSrc"
+      :show="coverOpen"
+      :color="globals.primary_color"
+      :surface="globals.surface_color"
+    />
   </div>
 </template>
 
 <style>
-.invite-root { min-height: 100%; }
+.invite-wrap { min-height: 100%; display: flex; flex-direction: column; }
+.invite-root { min-height: 100%; flex: 1 0 auto; }
 .invite-page { max-width: 480px; margin: 0 auto; min-height: 100vh; box-shadow: 0 0 40px rgb(0 0 0 / 0.08); }
 .invite-cover-leave-active { transition: transform 0.8s cubic-bezier(0.7, 0, 0.3, 1), opacity 0.8s; }
 .invite-cover-leave-to { transform: translateY(-100%); opacity: 0; }

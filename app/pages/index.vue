@@ -1,10 +1,11 @@
 <script setup lang="ts">
 import type { CatalogTheme } from '~/composables/useCatalog'
 
-const config = useRuntimeConfig()
 useSeoMeta({
-  title: `${config.public.siteName} — Marketplace Undangan Digital`,
-  description: 'Pilih tema undangan pernikahan digital: syar\'i, minimalis, floral, dan lainnya. Isi sendiri, bagikan link personal ke setiap tamu.',
+  title: 'Undangan Pernikahan Digital Syar\'i & Modern',
+  ogTitle: `${BRAND.name} — Undangan Pernikahan Digital Syar'i & Modern`,
+  description: BRAND.description,
+  ogDescription: BRAND.description,
 })
 
 const { data } = await useCatalog()
@@ -37,10 +38,72 @@ const ordering = ref<CatalogTheme | null>(null)
 
 const steps = [
   { t: 'Pilih tema', d: 'Jelajahi katalog dan lihat pratinjau langsung di layar ponsel.' },
-  { t: 'Pesan via WhatsApp', d: 'Pilih paket kuota tamu, selesaikan pembayaran dengan admin.' },
-  { t: 'Terima token', d: 'Masukkan token 6 karakter untuk membuat akun dan workspace.' },
-  { t: 'Isi & bagikan', d: 'Isi data di dashboard, lalu kirim link personal ke setiap tamu.' },
+  { t: 'Bayar online', d: 'Pilih paket kuota tamu, bayar via QRIS, virtual account, atau e-wallet.' },
+  { t: 'Aktifkan token', d: 'Token 6 karakter langsung muncul setelah lunas. Pakai untuk membuat akun.' },
+  { t: 'Isi & bagikan', d: 'Isi data dari ponsel, lalu kirim link personal ke setiap tamu.' },
 ]
+
+const features = [
+  { i: '💌', t: 'Link personal per tamu', d: 'Nama tamu tampil di sampul undangan, dan Anda bisa melihat siapa yang sudah membuka.' },
+  { i: '🎵', t: 'Musik latar', d: 'Unggah lagu atau nasyid pilihan Anda, diputar otomatis saat undangan dibuka.' },
+  { i: '📝', t: 'RSVP & buku ucapan', d: 'Tamu konfirmasi kehadiran dan mengirim doa, rekapnya langsung di dashboard.' },
+  { i: '📍', t: 'Peta & kalender', d: 'Tombol Google Maps dan simpan ke kalender untuk akad maupun resepsi.' },
+  { i: '🎁', t: 'Amplop digital', d: 'Nomor rekening dengan tombol salin, tanpa perlu dikirim terpisah.' },
+  { i: '⏳', t: 'Hitung mundur & galeri', d: 'Countdown menuju hari bahagia dan galeri foto prewedding.' },
+]
+
+const faqs = [
+  { q: 'Apa itu Undangan Virtual?', a: 'Undangan Virtual adalah layanan undangan pernikahan digital berbentuk website. Anda memilih tema, mengisi data mempelai dan acara, lalu membagikan link undangan ke tamu lewat WhatsApp atau media sosial.' },
+  { q: 'Apakah tersedia tema undangan syar\'i?', a: 'Ya. Tersedia tema syar\'i dengan ornamen islami, ayat Al-Qur\'an, salam pembuka dan penutup islami, serta ilustrasi tanpa wajah. Tersedia juga tema minimalis, floral, dan modern.' },
+  { q: 'Bagaimana cara membayar?', a: 'Pembayaran dilakukan online melalui QRIS, virtual account bank, e-wallet, atau gerai ritel. Token aktivasi langsung muncul setelah pembayaran lunas.' },
+  { q: 'Apakah nama tamu bisa ditulis di undangan?', a: 'Bisa. Setiap tamu mendapat link personal sehingga namanya tampil di sampul undangan. Jumlah link tamu mengikuti paket yang dipilih.' },
+  { q: 'Bisakah menambahkan musik di undangan?', a: 'Bisa. Anda dapat mengunggah lagu sendiri (MP3/M4A) yang akan diputar saat tamu membuka undangan, atau memakai musik bawaan tema.' },
+  { q: 'Apakah undangan bisa diubah setelah dibagikan?', a: 'Bisa. Semua perubahan di dashboard langsung tampil di link yang sama, jadi tamu selalu melihat informasi terbaru.' },
+]
+const openFaq = ref<number | null>(0)
+
+const origin = useSiteOrigin()
+useJsonLd('site', () => ({
+  '@context': 'https://schema.org',
+  '@graph': [
+    {
+      '@type': 'Organization',
+      '@id': `${origin}/#org`,
+      'name': BRAND.name,
+      'slogan': BRAND.tagline,
+      'url': `${origin}/`,
+      'logo': `${origin}/icon-512.png`,
+    },
+    {
+      '@type': 'WebSite',
+      '@id': `${origin}/#website`,
+      'name': BRAND.name,
+      'url': `${origin}/`,
+      'inLanguage': 'id-ID',
+      'publisher': { '@id': `${origin}/#org` },
+    },
+    {
+      '@type': 'Product',
+      'name': 'Undangan Pernikahan Digital',
+      'description': BRAND.description,
+      'brand': { '@id': `${origin}/#org` },
+      'image': `${origin}/og-image.png`,
+      'offers': data.value?.packages.length
+        ? {
+            '@type': 'AggregateOffer',
+            'priceCurrency': 'IDR',
+            'lowPrice': Math.min(...data.value.packages.map(p => p.price)),
+            'highPrice': Math.max(...data.value.packages.map(p => p.price)),
+            'offerCount': data.value.packages.length,
+          }
+        : undefined,
+    },
+    {
+      '@type': 'FAQPage',
+      'mainEntity': faqs.map(f => ({ '@type': 'Question', 'name': f.q, 'acceptedAnswer': { '@type': 'Answer', 'text': f.a } })),
+    },
+  ],
+}))
 </script>
 
 <template>
@@ -49,12 +112,12 @@ const steps = [
     <section class="relative overflow-hidden">
       <div class="mx-auto grid max-w-6xl items-center gap-10 px-4 pb-12 pt-10 md:grid-cols-2 md:pb-20 md:pt-16">
         <div>
-          <span class="chip bg-clay-100 text-clay-700">✦ Syar'i · Minimalis · Floral · Modern</span>
+          <span class="chip bg-clay-100 text-clay-700">✦ {{ BRAND.tagline }}</span>
           <h1 class="mt-4 font-display text-4xl leading-tight text-brand md:text-5xl">
-            Undangan digital yang indah, <span class="text-clay">mudah diisi sendiri</span>.
+            Undangan pernikahan digital yang indah, <span class="text-clay">mudah diisi sendiri</span>.
           </h1>
           <p class="mt-4 max-w-md text-brand-600">
-            Pilih tema, isi data mempelai dan acara dari ponsel, lalu bagikan link undangan personal ke setiap tamu, lengkap dengan RSVP dan buku ucapan.
+            Tema syar'i, minimalis, floral, dan modern. Isi data mempelai dan acara dari ponsel, lalu bagikan link undangan personal ke setiap tamu, lengkap dengan musik, RSVP, dan buku ucapan.
           </p>
           <div class="mt-6 flex flex-wrap gap-3">
             <a href="#katalog" class="btn-primary">Lihat Katalog Tema</a>
@@ -71,7 +134,8 @@ const steps = [
     </section>
 
     <!-- Cara kerja -->
-    <section class="mx-auto max-w-6xl px-4">
+    <section class="mx-auto max-w-6xl px-4" aria-labelledby="cara-kerja">
+      <h2 id="cara-kerja" class="sr-only">Cara membuat undangan digital</h2>
       <ol class="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
         <li v-for="(s, i) in steps" :key="s.t" class="card p-5">
           <span class="grid h-8 w-8 place-items-center rounded-full bg-brand text-sm font-bold text-white">{{ i + 1 }}</span>
@@ -85,7 +149,7 @@ const steps = [
     <section id="katalog" class="mx-auto max-w-6xl scroll-mt-20 px-4 pt-16">
       <div class="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
         <div>
-          <h2 class="font-display text-3xl text-brand">Katalog Tema</h2>
+          <h2 class="font-display text-3xl text-brand">Katalog Tema Undangan</h2>
           <p class="mt-1 text-sm text-brand-600">{{ filtered.length }} tema tersedia</p>
         </div>
         <label class="relative md:w-72">
@@ -113,6 +177,7 @@ const steps = [
         <article v-for="t in filtered" :key="t.id" class="card group overflow-hidden">
           <NuxtLink :to="`/tema/${t.slug}`" class="block">
             <ThemeThumb :definition="t.definition" :css="t.compiled_css" :slug="t.slug" />
+            <span class="sr-only">Preview tema undangan {{ t.name }}</span>
           </NuxtLink>
           <div class="p-3 sm:p-4">
             <div class="flex items-center justify-between gap-2 text-[11px] font-semibold uppercase tracking-wider">
@@ -144,7 +209,40 @@ const steps = [
             <li>✓ Editor konten + live preview</li>
             <li>✓ RSVP & buku ucapan</li>
             <li>✓ Amplop digital & galeri</li>
+            <li>✓ Musik latar pilihan sendiri</li>
           </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- Fitur -->
+    <section class="mx-auto max-w-6xl px-4 pt-16" aria-labelledby="fitur">
+      <h2 id="fitur" class="font-display text-3xl text-brand">Fitur Lengkap di Setiap Tema</h2>
+      <div class="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+        <div v-for="f in features" :key="f.t" class="card p-5">
+          <p class="text-2xl" aria-hidden="true">{{ f.i }}</p>
+          <h3 class="mt-2 font-semibold text-brand-900">{{ f.t }}</h3>
+          <p class="mt-1 text-sm text-brand-600">{{ f.d }}</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- FAQ -->
+    <section id="faq" class="mx-auto max-w-3xl scroll-mt-20 px-4 pt-16" aria-labelledby="faq-title">
+      <h2 id="faq-title" class="font-display text-3xl text-brand">Pertanyaan Umum</h2>
+      <div class="card mt-6 divide-y divide-brand-50">
+        <div v-for="(f, i) in faqs" :key="f.q">
+          <h3>
+            <button
+              type="button"
+              class="flex w-full items-center justify-between gap-3 p-4 text-left text-sm font-semibold text-brand-900"
+              :aria-expanded="openFaq === i"
+              @click="openFaq = openFaq === i ? null : i"
+            >
+              {{ f.q }} <span class="text-brand-400" aria-hidden="true">{{ openFaq === i ? '−' : '+' }}</span>
+            </button>
+          </h3>
+          <p v-show="openFaq === i" class="px-4 pb-4 text-sm text-brand-600">{{ f.a }}</p>
         </div>
       </div>
     </section>

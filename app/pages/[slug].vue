@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import type { PublicInvitation } from '#shared/types/models'
 import { withDefaults as contentWithDefaults } from '#shared/theme/content'
+import { safeUrl } from '#shared/theme/context'
 
 definePageMeta({ layout: false })
 
@@ -22,7 +23,9 @@ useSeoMeta({
   ogTitle: title,
   description: () => guest.value ? `Kepada Yth. ${guest.value} — kami mengundang Anda di hari bahagia kami.` : 'Kami mengundang Anda di hari bahagia kami.',
   ogDescription: () => content.value.opening.text,
-  robots: 'noindex',
+  // Pratinjau link WhatsApp: foto sampul/galeri pasangan bila ada
+  ogImage: () => safeUrl(inv.value?.assets?.hero_image) || safeUrl(content.value.gallery[0]?.url) || undefined,
+  robots: 'noindex, nofollow',
 })
 useHead({ meta: [{ name: 'theme-color', content: inv.value.theme.definition.globals.background_color }] })
 
@@ -40,6 +43,7 @@ onMounted(() => {
       :content="inv.content"
       :style-override="inv.style"
       :asset-override="inv.assets"
+      :theme-music="inv.theme.music_url"
       :guest-name="guest"
       :slug="inv.slug"
       mode="page"

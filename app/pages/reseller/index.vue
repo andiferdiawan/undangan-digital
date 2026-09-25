@@ -1,5 +1,8 @@
 <script setup lang="ts">
-useSeoMeta({ title: 'Program Reseller', description: 'Jual undangan digital dan dapatkan bagi hasil dari setiap penjualan.' })
+useSeoMeta({
+  title: 'Program Reseller Undangan Digital',
+  description: 'Jadi reseller Undangan Virtual: jual undangan pernikahan digital tanpa modal dan tanpa desain, dapatkan bagi hasil dari setiap penjualan, pencairan dua kali sebulan.',
+})
 
 const supabase = useSupabaseClient()
 const user = useSupabaseUser()

@@ -1,4 +1,4 @@
-# Undangin — Marketplace Undangan Digital
+# Undangan Virtual — Marketplace Undangan Digital
 
 Marketplace undangan pernikahan digital dengan **Nuxt 4 + Supabase**. Pengunjung memilih tema di katalog, memesan lewat WhatsApp,
 lalu mengaktifkan **token 6 karakter** dari admin untuk membuat akun dan workspace undangannya sendiri.
@@ -65,7 +65,7 @@ npm run dev               # http://localhost:3000
    | `SUPABASE_KEY` | publishable key (Supabase → Project Settings → API Keys) |
    | `NUXT_PUBLIC_ADMIN_WHATSAPP` | nomor WA admin, mis. `6281234567890` |
    | `NUXT_PUBLIC_SITE_URL` | domain undangan, mis. `https://undangin.id` |
-   | `NUXT_PUBLIC_SITE_NAME` | nama brand (opsional, default `Undangin`) |
+   | `NUXT_PUBLIC_SITE_NAME` | nama brand (opsional, default `Undangan Virtual`) |
    | `NUXT_ANTHROPIC_API_KEY` | API key Claude untuk generator tema AI (rahasia) |
    | `NUXT_TRIPAY_MODE` | `sandbox` atau `production` |
    | `NUXT_TRIPAY_API_KEY` | API key Tripay (rahasia) |

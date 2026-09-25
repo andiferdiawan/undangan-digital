@@ -14,6 +14,7 @@ export interface ThemeRow {
   definition: ThemeDefinition
   compiled_css: string
   status: 'draft' | 'published' | 'archived'
+  music_url: string | null
   source: 'manual' | 'ai'
   created_at: string
   updated_at: string
@@ -76,5 +77,5 @@ export interface PublicInvitation {
   content: unknown
   style: Record<string, string>
   assets: Record<string, string>
-  theme: { code: string, slug: string, name: string, definition: ThemeDefinition, compiled_css: string }
+  theme: { code: string, slug: string, name: string, definition: ThemeDefinition, compiled_css: string, music_url: string | null }
 }

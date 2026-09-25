@@ -32,6 +32,8 @@ export interface InvitationContent {
   gallery: { url: string, caption: string }[]
   gifts: { bank: string, number: string, holder: string }[]
   rsvp: { enabled: boolean }
+  /** Musik latar: url kosong = pakai musik bawaan tema (bila ada). */
+  music: { enabled: boolean, url: string, title: string }
   closing: { text: string, greeting: string }
 }
 
@@ -91,6 +93,7 @@ export const DEFAULT_CONTENT: InvitationContent = {
     { bank: 'Bank Syariah Indonesia', number: '1234567890', holder: 'Ahmad Fauzan' },
   ],
   rsvp: { enabled: true },
+  music: { enabled: true, url: '', title: '' },
   closing: {
     text: 'Merupakan suatu kehormatan dan kebahagiaan bagi kami apabila Bapak/Ibu/Saudara/i berkenan hadir dan memberikan doa restu.',
     greeting: 'Wassalamu\'alaikum Warahmatullahi Wabarakatuh',

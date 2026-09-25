@@ -6,6 +6,7 @@ const Body = z.object({
   category_id: z.number().int().positive().optional(),
   status: z.enum(['draft', 'published', 'archived']).optional(),
   definition: z.unknown().optional(),
+  music_url: z.string().trim().url().startsWith('https://').max(500).nullable().optional(),
 })
 
 export default defineEventHandler(async (event) => {

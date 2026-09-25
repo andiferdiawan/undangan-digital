@@ -256,6 +256,10 @@ const url = computed(() => inviteUrl(inv.value!.slug))
           </label>
         </EditorCard>
 
+        <EditorCard v-model:open="open.music" title="Musik Latar" :hint="content.music.enabled ? (content.music.url ? 'Musik Anda' : theme.music_url ? 'Musik bawaan tema' : 'Belum ada musik') : 'Nonaktif'">
+          <MusicField v-model="content.music" :invitation-id="id" :theme-music="theme.music_url" />
+        </EditorCard>
+
         <EditorCard v-model:open="open.closing" title="Penutup">
           <label class="label">Kalimat penutup
             <textarea v-model="content.closing.text" rows="3" class="input" />
@@ -306,6 +310,7 @@ const url = computed(() => inviteUrl(inv.value!.slug))
             <InviteRenderer
               :definition="theme.definition" :css="theme.compiled_css" :theme-slug="theme.slug"
               :content="content" :style-override="style" :asset-override="assets"
+              :theme-music="theme.music_url"
               guest-name="Nama Tamu" mode="frame" preview
             />
           </PhoneFrame>
