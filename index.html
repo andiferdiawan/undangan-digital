@@ -3,212 +3,365 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <meta name="theme-color" content="#1f3b33">
+  <meta name="theme-color" content="#0e2629">
   <title>Walimatul 'Urs — Ahmad &amp; Aisyah</title>
   <meta name="description" content="Undangan Walimatul 'Urs Ahmad & Aisyah">
   <meta property="og:title" content="Walimatul 'Urs — Ahmad & Aisyah">
   <meta property="og:description" content="Dengan memohon rahmat Allah, kami mengundang Anda untuk hadir di acara pernikahan kami.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=Poppins:wght@300;400;500&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="assets/style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Great+Vibes&family=Marcellus&family=Plus+Jakarta+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/modern.css">
 </head>
 <body class="locked">
 
-  <!-- Pola SVG yang dipakai ulang -->
-  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <!-- ================= Aset SVG: ornamen & karakter ================= -->
+  <svg class="svg-defs" width="0" height="0" aria-hidden="true">
     <defs>
+      <!-- Bintang segi delapan -->
       <symbol id="star8" viewBox="0 0 100 100">
-        <g fill="none" stroke="currentColor" stroke-width="2">
+        <g fill="none" stroke="currentColor" stroke-width="2.5">
           <rect x="20" y="20" width="60" height="60"/>
           <rect x="20" y="20" width="60" height="60" transform="rotate(45 50 50)"/>
-          <circle cx="50" cy="50" r="14"/>
+          <circle cx="50" cy="50" r="12"/>
         </g>
       </symbol>
+
+      <!-- Pembatas -->
       <symbol id="divider" viewBox="0 0 240 24">
         <g fill="none" stroke="currentColor" stroke-width="1.2">
-          <path d="M0 12 H92"/><path d="M148 12 H240"/>
-          <path d="M120 2 L130 12 L120 22 L110 12 Z"/>
-          <path d="M100 12 L106 6 L112 12 L106 18 Z"/>
-          <path d="M128 12 L134 6 L140 12 L134 18 Z"/>
+          <path d="M0 12 H90"/><path d="M150 12 H240"/>
+          <rect x="112" y="4" width="16" height="16"/>
+          <rect x="112" y="4" width="16" height="16" transform="rotate(45 120 12)"/>
+          <circle cx="98" cy="12" r="2.5" fill="currentColor"/>
+          <circle cx="142" cy="12" r="2.5" fill="currentColor"/>
         </g>
       </symbol>
+
+      <!-- Ornamen sudut -->
+      <symbol id="corner" viewBox="0 0 100 100">
+        <g fill="none" stroke="currentColor" stroke-width="1.4">
+          <path d="M4 4 H78"/><path d="M4 4 V78"/>
+          <path d="M4 28 Q28 28 28 4"/>
+          <path d="M4 50 Q50 50 50 4"/>
+          <path d="M12 12 l8 -6 l8 6 l-8 6 Z" transform="translate(16 16)"/>
+          <circle cx="4" cy="4" r="3.5" fill="currentColor"/>
+          <circle cx="78" cy="4" r="2" fill="currentColor"/>
+          <circle cx="4" cy="78" r="2" fill="currentColor"/>
+        </g>
+      </symbol>
+
+      <!-- Lampion / fanous -->
+      <symbol id="lantern" viewBox="0 0 40 92">
+        <circle cx="20" cy="4" r="3" fill="none" stroke="#d4af6a" stroke-width="1.5"/>
+        <path d="M11 19 L20 7 L29 19Z" fill="#d4af6a"/>
+        <rect x="9" y="19" width="22" height="4" rx="1" fill="#b8924d"/>
+        <path d="M9 23 H31 L35 45 L31 67 H9 L5 45Z" fill="#ffd98a" fill-opacity=".9"/>
+        <path d="M9 23 H31 L35 45 L31 67 H9 L5 45Z M20 23 V67 M5 45 H35 M12 34 L20 26 L28 34 L20 42Z M12 56 L20 48 L28 56 L20 64Z" fill="none" stroke="#b8924d" stroke-width="1.3"/>
+        <rect x="11" y="67" width="18" height="4" rx="1" fill="#b8924d"/>
+        <path d="M14 71 L20 82 L26 71Z" fill="#d4af6a"/>
+        <circle cx="20" cy="86" r="2.5" fill="#d4af6a"/>
+      </symbol>
+
+      <!-- Bulan sabit -->
+      <symbol id="crescent" viewBox="0 0 60 60">
+        <path d="M34 4 A26 26 0 1 0 56 42 A21 21 0 1 1 34 4Z" fill="currentColor"/>
+      </symbol>
+
+      <!-- Siluet masjid -->
+      <symbol id="skyline" viewBox="0 0 400 120" preserveAspectRatio="xMidYMax slice">
+        <g fill="currentColor">
+          <rect x="0" y="96" width="400" height="24"/>
+          <!-- menara kiri -->
+          <rect x="44" y="44" width="14" height="56"/><path d="M42 46 L51 22 L60 46Z"/><rect x="40" y="58" width="22" height="4"/>
+          <!-- kubah kecil kiri -->
+          <path d="M80 98 C80 80 92 72 104 70 C116 72 128 80 128 98Z"/><rect x="102" y="60" width="4" height="12"/>
+          <!-- kubah utama -->
+          <rect x="120" y="86" width="160" height="14"/>
+          <path d="M140 90 C140 58 170 44 200 40 C230 44 260 58 260 90Z"/>
+          <rect x="198" y="22" width="4" height="20"/>
+          <path d="M206 14 A7 7 0 1 0 206 26 A5.5 5.5 0 1 1 206 14Z"/>
+          <!-- kubah kecil kanan -->
+          <path d="M272 98 C272 80 284 72 296 70 C308 72 320 80 320 98Z"/><rect x="294" y="60" width="4" height="12"/>
+          <!-- menara kanan -->
+          <rect x="342" y="44" width="14" height="56"/><path d="M340 46 L349 22 L358 46Z"/><rect x="338" y="58" width="22" height="4"/>
+        </g>
+      </symbol>
+
+      <!-- Karakter mempelai pria (faceless) -->
+      <g id="groomG">
+        <ellipse cx="115" cy="344" rx="52" ry="6" fill="#000" opacity=".12"/>
+        <path d="M76 210 L154 210 L160 338 L70 338Z" fill="#1f5b4a"/>
+        <path d="M100 210 H130 L132 338 H98Z" fill="#174a3c"/>
+        <g stroke="#d4af6a" stroke-width="1.5" opacity=".85">
+          <path d="M73 252 H157"/><path d="M72 259 H158"/><path d="M71 306 H159"/>
+        </g>
+        <path d="M115 222 l8 12 -8 12 -8 -12Z M115 272 l8 12 -8 12 -8 -12Z" fill="none" stroke="#d4af6a" stroke-width="1.5"/>
+        <ellipse cx="98" cy="341" rx="15" ry="6" fill="#2a211b"/>
+        <ellipse cx="132" cy="341" rx="15" ry="6" fill="#2a211b"/>
+        <path d="M81 122 Q70 160 67 200 L80 204 Q86 165 95 140Z" fill="#efe8da"/>
+        <path d="M149 122 Q160 160 163 200 L150 204 Q144 165 135 140Z" fill="#efe8da"/>
+        <circle cx="73.5" cy="208" r="6.5" fill="#f0c7a2"/>
+        <circle cx="156.5" cy="208" r="6.5" fill="#f0c7a2"/>
+        <path d="M82 124 Q84 110 102 106 H128 Q146 110 148 124 L154 218 H76Z" fill="#fbf8f1"/>
+        <path d="M115 120 V192" stroke="#d4af6a" stroke-width="1.5"/>
+        <g fill="#d4af6a"><circle cx="115" cy="134" r="2"/><circle cx="115" cy="150" r="2"/><circle cx="115" cy="166" r="2"/></g>
+        <rect x="107" y="94" width="16" height="16" rx="4" fill="#e6b891"/>
+        <path d="M103 106 L115 121 L127 106" fill="none" stroke="#d4af6a" stroke-width="2"/>
+        <circle cx="115" cy="78" r="24" fill="#f0c7a2"/>
+        <path d="M93 80 Q94 104 115 108 Q136 104 137 80 Q130 96 115 96 Q100 96 93 80Z" fill="#3b2a20"/>
+        <path d="M92 68 L93 51 Q115 43 137 51 L138 68 Q115 63 92 68Z" fill="#1c1c1c"/>
+        <path d="M93 63 Q115 58 137 63" stroke="#d4af6a" stroke-width="1.2" fill="none"/>
+      </g>
+
+      <!-- Karakter mempelai wanita (faceless, berkhimar) -->
+      <g id="brideG">
+        <ellipse cx="210" cy="344" rx="60" ry="6" fill="#000" opacity=".12"/>
+        <path d="M172 190 Q168 280 154 340 H266 Q252 280 248 190Z" fill="#efdcd4"/>
+        <path d="M188 230 Q184 290 176 338 M232 230 Q236 290 244 338" fill="none" stroke="#e2c7bd" stroke-width="2"/>
+        <path d="M154 340 H266" stroke="#d4af6a" stroke-width="3"/>
+        <path d="M210 46 C188 46 177 64 177 88 C170 115 162 150 162 212 Q210 232 258 212 C258 150 250 115 243 88 C243 64 232 46 210 46Z" fill="#c9978b"/>
+        <path d="M186 112 Q182 160 180 208 M234 112 Q238 160 240 208" fill="none" stroke="#b7857a" stroke-width="2"/>
+        <path d="M162 212 Q210 232 258 212" fill="none" stroke="#d4af6a" stroke-width="2.2"/>
+        <ellipse cx="210" cy="85" rx="20.5" ry="24.5" fill="#e3bdb2"/>
+        <ellipse cx="210" cy="87" rx="16" ry="19.5" fill="#f0c7a2"/>
+        <path d="M194 55 L198 45 L204 51 L210 39 L216 51 L222 45 L226 55 Q210 50 194 55Z" fill="#d4af6a"/>
+        <circle cx="210" cy="45" r="2" fill="#fff"/>
+        <rect x="208" y="186" width="4" height="18" fill="#6f917f"/>
+        <circle cx="201" cy="196" r="5.5" fill="#f0c7a2"/>
+        <circle cx="219" cy="196" r="5.5" fill="#f0c7a2"/>
+        <ellipse cx="196" cy="184" rx="9" ry="4" transform="rotate(-30 196 184)" fill="#6f917f"/>
+        <ellipse cx="224" cy="184" rx="9" ry="4" transform="rotate(30 224 184)" fill="#6f917f"/>
+        <circle cx="203" cy="182" r="8" fill="#fff7f2"/>
+        <circle cx="217" cy="182" r="8" fill="#f4d6cc"/>
+        <circle cx="210" cy="173" r="8" fill="#fbe9e2"/>
+        <g fill="#d4af6a"><circle cx="203" cy="182" r="2"/><circle cx="217" cy="182" r="2"/><circle cx="210" cy="173" r="2"/></g>
+      </g>
     </defs>
   </svg>
 
-  <!-- ============ COVER ============ -->
-  <section id="cover" class="cover">
+  <!-- ================= COVER ================= -->
+  <section id="cover" class="cover night">
+    <div class="stars" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+    <div class="lanterns" aria-hidden="true">
+      <span style="--len:40px;--d:0s"><svg><use href="#lantern"/></svg></span>
+      <span style="--len:90px;--d:.6s"><svg><use href="#lantern"/></svg></span>
+      <span style="--len:20px;--d:1.2s"><svg><use href="#lantern"/></svg></span>
+    </div>
+    <svg class="moon" aria-hidden="true"><use href="#crescent"/></svg>
+
     <div class="cover-inner">
-      <svg class="cover-star spin" aria-hidden="true"><use href="#star8"/></svg>
-      <p class="label">Walimatul 'Urs</p>
-      <h1 class="couple-names"><span data-bind="groomNick">Ahmad</span><em>&amp;</em><span data-bind="brideNick">Aisyah</span></h1>
-      <svg class="divider" aria-hidden="true"><use href="#divider"/></svg>
-      <p class="to-label">Kepada Yth. Bapak/Ibu/Saudara/i</p>
-      <p class="guest-name" id="guestName">Tamu Undangan</p>
-      <p class="to-note">Mohon maaf apabila ada kesalahan penulisan nama/gelar</p>
-      <button class="btn btn-primary" id="openBtn" type="button">
+      <p class="eyebrow">Walimatul 'Urs</p>
+      <div class="window">
+        <svg class="window-pattern" aria-hidden="true"><use href="#star8"/></svg>
+        <svg class="couple" viewBox="55 26 232 330" role="img" aria-label="Ilustrasi kedua mempelai">
+          <use href="#groomG"/><use href="#brideG" x="8"/>
+        </svg>
+      </div>
+      <h1 class="names"><span data-bind="groomNick">Ahmad</span> <em>&amp;</em> <span data-bind="brideNick">Aisyah</span></h1>
+      <div class="guest">
+        <p class="guest-to">Kepada Yth. Bapak/Ibu/Saudara/i</p>
+        <p class="guest-name" id="guestName">Tamu Undangan</p>
+      </div>
+      <button class="btn btn-gold" id="openBtn" type="button">
         <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path fill="currentColor" d="M20 4H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2Zm0 4-8 5-8-5V6l8 5 8-5v2Z"/></svg>
         Buka Undangan
       </button>
     </div>
+    <svg class="skyline" aria-hidden="true"><use href="#skyline"/></svg>
   </section>
 
   <main id="main" class="main" aria-hidden="true">
 
-    <!-- ============ PEMBUKA ============ -->
-    <section class="section hero">
-      <div class="arch">
-        <p class="arabic bismillah">بِسْمِ اللّٰهِ الرَّحْمٰنِ الرَّحِيْمِ</p>
-        <p class="label">The Wedding of</p>
-        <h2 class="couple-names big"><span data-bind="groomNick">Ahmad</span><em>&amp;</em><span data-bind="brideNick">Aisyah</span></h2>
-        <svg class="divider" aria-hidden="true"><use href="#divider"/></svg>
-        <p class="hero-date" data-bind="akadDateText">Sabtu, 12 Desember 2026</p>
+    <!-- ================= HERO ================= -->
+    <section class="hero">
+      <svg class="corner tl" aria-hidden="true"><use href="#corner"/></svg>
+      <svg class="corner tr" aria-hidden="true"><use href="#corner"/></svg>
+      <p class="arabic bismillah">بِسْمِ اللّٰهِ الرَّحْمٰنِ الرَّحِيْمِ</p>
+      <p class="eyebrow dark">The Wedding of</p>
+      <h2 class="names dark"><span data-bind="groomNick">Ahmad</span> <em>&amp;</em> <span data-bind="brideNick">Aisyah</span></h2>
+      <div class="date-chips">
+        <div><small>Hari</small><b data-bind="akadDay">Sabtu</b></div>
+        <div class="main-chip"><b data-bind="akadDateNum">12</b></div>
+        <div><small data-bind="akadMonth">Desember</small><b data-bind="akadYear">2026</b></div>
       </div>
+      <p class="hijri" data-bind="akadHijri"></p>
+      <div class="scroll-hint" aria-hidden="true"><span></span></div>
     </section>
 
-    <!-- ============ AYAT ============ -->
+    <!-- ================= AYAT ================= -->
     <section class="section reveal">
-      <div class="card ayat">
+      <div class="ayat-card night">
+        <svg class="ayat-star" aria-hidden="true"><use href="#star8"/></svg>
         <p class="arabic">وَمِنْ اٰيٰتِهٖٓ اَنْ خَلَقَ لَكُمْ مِّنْ اَنْفُسِكُمْ اَزْوَاجًا لِّتَسْكُنُوْٓا اِلَيْهَا وَجَعَلَ بَيْنَكُمْ مَّوَدَّةً وَّرَحْمَةً ۗاِنَّ فِيْ ذٰلِكَ لَاٰيٰتٍ لِّقَوْمٍ يَّتَفَكَّرُوْنَ</p>
         <p class="translation">"Dan di antara tanda-tanda (kebesaran)-Nya ialah Dia menciptakan pasangan-pasangan untukmu dari jenismu sendiri, agar kamu cenderung dan merasa tenteram kepadanya, dan Dia menjadikan di antaramu rasa kasih dan sayang. Sungguh, pada yang demikian itu benar-benar terdapat tanda-tanda (kebesaran Allah) bagi kaum yang berpikir."</p>
         <p class="source">QS. Ar-Rum : 21</p>
       </div>
     </section>
 
-    <!-- ============ MEMPELAI ============ -->
+    <!-- ================= MEMPELAI ================= -->
     <section class="section reveal" id="mempelai">
       <p class="arabic salam">اَلسَّلَامُ عَلَيْكُمْ وَرَحْمَةُ اللّٰهِ وَبَرَكَاتُهُ</p>
       <p class="lead">Dengan memohon rahmat dan ridha Allah Subhanahu wa Ta'ala, kami bermaksud menyelenggarakan pernikahan putra-putri kami:</p>
 
-      <div class="person">
-        <div class="monogram" aria-hidden="true"><svg><use href="#star8"/></svg><span data-bind="groomInitial">A</span></div>
+      <article class="person">
+        <div class="person-arch groom">
+          <svg viewBox="58 30 114 322" role="img" aria-label="Ilustrasi mempelai pria"><use href="#groomG"/></svg>
+        </div>
+        <p class="tag">Mempelai Pria</p>
         <h3 class="person-name" data-bind="groomName">Ahmad Fauzan, S.Pd.</h3>
-        <p class="person-parent">Putra dari <span data-bind="groomParents">Bapak Abdullah &amp; Ibu Khadijah</span></p>
+        <p class="person-parent">Putra dari<br><span data-bind="groomParents">Bapak Abdullah &amp; Ibu Khadijah</span></p>
         <a class="ig" data-bind-href="groomIg" href="#" target="_blank" rel="noopener">@ahmadfauzan</a>
-      </div>
+      </article>
 
-      <p class="and">&amp;</p>
+      <div class="and" aria-hidden="true"><span></span><em>&amp;</em><span></span></div>
 
-      <div class="person">
-        <div class="monogram" aria-hidden="true"><svg><use href="#star8"/></svg><span data-bind="brideInitial">A</span></div>
+      <article class="person">
+        <div class="person-arch bride">
+          <svg viewBox="148 30 128 322" role="img" aria-label="Ilustrasi mempelai wanita"><use href="#brideG"/></svg>
+        </div>
+        <p class="tag">Mempelai Wanita</p>
         <h3 class="person-name" data-bind="brideName">Aisyah Humaira, S.Kom.</h3>
-        <p class="person-parent">Putri dari <span data-bind="brideParents">Bapak Umar &amp; Ibu Fatimah</span></p>
+        <p class="person-parent">Putri dari<br><span data-bind="brideParents">Bapak Umar &amp; Ibu Fatimah</span></p>
         <a class="ig" data-bind-href="brideIg" href="#" target="_blank" rel="noopener">@aisyahhumaira</a>
-      </div>
+      </article>
     </section>
 
-    <!-- ============ COUNTDOWN ============ -->
-    <section class="section reveal">
-      <h2 class="section-title">Menuju Hari Bahagia</h2>
+    <!-- ================= PERJALANAN ================= -->
+    <section class="section reveal" id="kisah">
+      <p class="eyebrow dark">Perjalanan</p>
+      <h2 class="title">Menjemput Ridha-Nya</h2>
       <svg class="divider" aria-hidden="true"><use href="#divider"/></svg>
-      <div class="countdown" id="countdown">
+      <ol class="timeline" id="storyList"></ol>
+    </section>
+
+    <!-- ================= COUNTDOWN ================= -->
+    <section class="section countdown-band night reveal">
+      <div class="lanterns small" aria-hidden="true">
+        <span style="--len:10px;--d:.3s"><svg><use href="#lantern"/></svg></span>
+        <span style="--len:36px;--d:.9s"><svg><use href="#lantern"/></svg></span>
+      </div>
+      <p class="eyebrow">Menuju Hari Bahagia</p>
+      <h2 class="title light">Insya Allah</h2>
+      <div class="countdown">
         <div><b id="cd-d">00</b><span>Hari</span></div>
         <div><b id="cd-h">00</b><span>Jam</span></div>
         <div><b id="cd-m">00</b><span>Menit</span></div>
         <div><b id="cd-s">00</b><span>Detik</span></div>
       </div>
-      <a class="btn btn-outline" id="calendarBtn" href="#" target="_blank" rel="noopener">
+      <a class="btn btn-ghost" id="calendarBtn" href="#" target="_blank" rel="noopener">
         <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path fill="currentColor" d="M7 2v2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2h-2V2h-2v2H9V2H7Zm12 8v10H5V10h14Z"/></svg>
         Simpan ke Kalender
       </a>
     </section>
 
-    <!-- ============ ACARA ============ -->
+    <!-- ================= ACARA ================= -->
     <section class="section reveal" id="acara">
-      <h2 class="section-title">Waktu &amp; Tempat</h2>
+      <p class="eyebrow dark">Save the Date</p>
+      <h2 class="title">Waktu &amp; Tempat</h2>
       <svg class="divider" aria-hidden="true"><use href="#divider"/></svg>
 
-      <div class="card event">
-        <p class="event-title">Akad Nikah</p>
-        <p class="event-date" data-bind="akadDateText">Sabtu, 12 Desember 2026</p>
-        <p class="event-time" data-bind="akadTime">08.00 – 10.00 WIB</p>
-        <p class="event-place" data-bind="akadPlace">Masjid Al-Ikhlas</p>
-        <p class="event-address" data-bind="akadAddress">Jl. Contoh No. 1, Kota Anda</p>
-        <a class="btn btn-primary small" data-bind-href="akadMaps" href="#" target="_blank" rel="noopener">Lihat Lokasi</a>
-      </div>
+      <article class="event">
+        <div class="event-head"><svg aria-hidden="true"><use href="#star8"/></svg><h3>Akad Nikah</h3></div>
+        <ul class="event-info">
+          <li><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M7 2v2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2h-2V2h-2v2H9V2H7Zm12 8v10H5V10h14Z"/></svg><span data-bind="akadDateText">Sabtu, 12 Desember 2026</span></li>
+          <li><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20Zm1 10.4 3.2 3.2-1.4 1.4L11 13.2V6h2v6.4Z"/></svg><span data-bind="akadTime">08.00 – 10.00 WIB</span></li>
+          <li><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 2a7 7 0 0 0-7 7c0 5.2 7 13 7 13s7-7.8 7-13a7 7 0 0 0-7-7Zm0 9.5A2.5 2.5 0 1 1 12 6.5a2.5 2.5 0 0 1 0 5Z"/></svg><span><b data-bind="akadPlace">Masjid Al-Ikhlas</b><br><span data-bind="akadAddress">Jl. Contoh No. 1, Kota Anda</span></span></li>
+        </ul>
+        <a class="btn btn-night small" data-bind-href="akadMaps" href="#" target="_blank" rel="noopener">Petunjuk Lokasi</a>
+      </article>
 
-      <div class="card event">
-        <p class="event-title">Walimatul 'Urs</p>
-        <p class="event-date" data-bind="walimahDateText">Sabtu, 12 Desember 2026</p>
-        <p class="event-time" data-bind="walimahTime">11.00 – 14.00 WIB</p>
-        <p class="event-place" data-bind="walimahPlace">Kediaman Mempelai Wanita</p>
-        <p class="event-address" data-bind="walimahAddress">Jl. Contoh No. 2, Kota Anda</p>
-        <a class="btn btn-primary small" data-bind-href="walimahMaps" href="#" target="_blank" rel="noopener">Lihat Lokasi</a>
-      </div>
+      <article class="event">
+        <div class="event-head"><svg aria-hidden="true"><use href="#star8"/></svg><h3>Walimatul 'Urs</h3></div>
+        <ul class="event-info">
+          <li><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M7 2v2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2h-2V2h-2v2H9V2H7Zm12 8v10H5V10h14Z"/></svg><span data-bind="walimahDateText">Sabtu, 12 Desember 2026</span></li>
+          <li><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20Zm1 10.4 3.2 3.2-1.4 1.4L11 13.2V6h2v6.4Z"/></svg><span data-bind="walimahTime">11.00 – 14.00 WIB</span></li>
+          <li><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 2a7 7 0 0 0-7 7c0 5.2 7 13 7 13s7-7.8 7-13a7 7 0 0 0-7-7Zm0 9.5A2.5 2.5 0 1 1 12 6.5a2.5 2.5 0 0 1 0 5Z"/></svg><span><b data-bind="walimahPlace">Kediaman Mempelai Wanita</b><br><span data-bind="walimahAddress">Jl. Contoh No. 2, Kota Anda</span></span></li>
+        </ul>
+        <a class="btn btn-night small" data-bind-href="walimahMaps" href="#" target="_blank" rel="noopener">Petunjuk Lokasi</a>
+      </article>
     </section>
 
-    <!-- ============ ADAB WALIMAH ============ -->
+    <!-- ================= ADAB ================= -->
     <section class="section reveal">
-      <h2 class="section-title">Adab Menghadiri Walimah</h2>
+      <p class="eyebrow dark">Tanpa Mengurangi Rasa Hormat</p>
+      <h2 class="title">Adab Walimah</h2>
       <svg class="divider" aria-hidden="true"><use href="#divider"/></svg>
       <ul class="adab">
-        <li><span>1</span>Tempat tamu ikhwan dan akhwat dipisah.</li>
-        <li><span>2</span>Mengenakan pakaian yang menutup aurat dan sopan.</li>
-        <li><span>3</span>Makan dan minum dengan tangan kanan sambil duduk.</li>
-        <li><span>4</span>Mendoakan kedua mempelai dengan doa yang dicontohkan Rasulullah ﷺ.</li>
-        <li><span>5</span>Menjaga pandangan dan tidak berikhtilath.</li>
+        <li><b>01</b>Tempat tamu ikhwan dan akhwat dipisah</li>
+        <li><b>02</b>Berpakaian sopan dan menutup aurat</li>
+        <li><b>03</b>Makan &amp; minum dengan tangan kanan sambil duduk</li>
+        <li><b>04</b>Menjaga pandangan dan tidak berikhtilath</li>
+        <li class="wide"><b>05</b>Mendoakan kedua mempelai dengan doa yang dicontohkan Rasulullah ﷺ</li>
       </ul>
     </section>
 
-    <!-- ============ DOA ============ -->
+    <!-- ================= DOA ================= -->
     <section class="section reveal">
-      <div class="card ayat">
+      <div class="doa">
+        <svg class="corner tl" aria-hidden="true"><use href="#corner"/></svg>
+        <svg class="corner br" aria-hidden="true"><use href="#corner"/></svg>
         <p class="arabic">بَارَكَ اللّٰهُ لَكَ وَبَارَكَ عَلَيْكَ وَجَمَعَ بَيْنَكُمَا فِيْ خَيْرٍ</p>
         <p class="translation">"Semoga Allah memberkahimu di waktu bahagia dan memberkahimu di waktu susah, serta semoga Allah mempersatukan kalian berdua dalam kebaikan."</p>
         <p class="source">HR. Abu Dawud, At-Tirmidzi, Ibnu Majah</p>
       </div>
     </section>
 
-    <!-- ============ RSVP ============ -->
+    <!-- ================= RSVP ================= -->
     <section class="section reveal" id="rsvp">
-      <h2 class="section-title">Konfirmasi Kehadiran</h2>
+      <p class="eyebrow dark">RSVP</p>
+      <h2 class="title">Konfirmasi Kehadiran</h2>
       <svg class="divider" aria-hidden="true"><use href="#divider"/></svg>
-      <p class="lead">Kehadiran dan doa restu Anda merupakan kebahagiaan bagi kami.</p>
       <form class="form" id="rsvpForm" novalidate>
         <label>Nama
-          <input type="text" name="nama" id="rsvpName" required maxlength="60" autocomplete="name">
+          <input type="text" name="nama" id="rsvpName" required maxlength="60" autocomplete="name" placeholder="Nama lengkap">
         </label>
+        <div class="segmented" role="radiogroup" aria-label="Kehadiran">
+          <label><input type="radio" name="hadir" value="Insya Allah hadir" checked><span>Insya Allah hadir</span></label>
+          <label><input type="radio" name="hadir" value="Mohon maaf, tidak dapat hadir"><span>Tidak dapat hadir</span></label>
+        </div>
         <label>Jumlah tamu
           <select name="jumlah">
             <option>1</option><option>2</option><option>3</option><option>4</option>
           </select>
         </label>
-        <fieldset class="radio-group">
-          <legend>Kehadiran</legend>
-          <label><input type="radio" name="hadir" value="Insya Allah hadir" checked> Insya Allah hadir</label>
-          <label><input type="radio" name="hadir" value="Mohon maaf, tidak dapat hadir"> Tidak dapat hadir</label>
-        </fieldset>
         <label>Doa &amp; ucapan
-          <textarea name="ucapan" rows="4" maxlength="400" placeholder="Barakallahu lakuma..."></textarea>
+          <textarea name="ucapan" rows="4" maxlength="400" placeholder="Barakallahu lakuma wa baraka 'alaikuma..."></textarea>
         </label>
         <p class="form-error" id="formError" role="alert"></p>
-        <button class="btn btn-primary block" type="submit">
+        <button class="btn btn-night block" type="submit">
           <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path fill="currentColor" d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2Zm5.3 14.1c-.2.6-1.3 1.2-1.8 1.2-.5.1-1 .1-3.2-.7-2.7-1.1-4.4-3.8-4.5-4-.1-.2-1.1-1.4-1.1-2.7 0-1.3.7-1.9.9-2.2.2-.3.5-.3.7-.3h.5c.2 0 .4 0 .6.5l.8 2c.1.2.1.4 0 .5l-.3.5-.4.4c-.1.1-.3.3-.1.6.2.3.7 1.2 1.5 1.9 1 .9 1.9 1.2 2.2 1.3.3.1.4.1.6-.1l.8-1c.2-.3.4-.2.6-.1l1.9.9c.3.1.5.2.5.3.1.2.1.7-.1 1.2Z"/></svg>
           Kirim via WhatsApp
         </button>
       </form>
     </section>
 
-    <!-- ============ AMPLOP DIGITAL ============ -->
+    <!-- ================= AMPLOP ================= -->
     <section class="section reveal" id="hadiah">
-      <h2 class="section-title">Amplop Digital</h2>
+      <p class="eyebrow dark">Tanda Kasih</p>
+      <h2 class="title">Amplop Digital</h2>
       <svg class="divider" aria-hidden="true"><use href="#divider"/></svg>
       <p class="lead">Doa restu Anda sudah lebih dari cukup. Namun apabila ingin memberikan tanda kasih, dapat melalui:</p>
-      <div id="giftList"></div>
+      <div id="giftList" class="gifts"></div>
     </section>
 
-    <!-- ============ PENUTUP ============ -->
-    <section class="section reveal closing">
-      <p class="lead">Merupakan suatu kehormatan dan kebahagiaan bagi kami apabila Bapak/Ibu/Saudara/i berkenan hadir dan memberikan doa restu.</p>
-      <p class="lead">Jazakumullahu khairan.</p>
-      <p class="arabic salam">وَالسَّلَامُ عَلَيْكُمْ وَرَحْمَةُ اللّٰهِ وَبَرَكَاتُهُ</p>
-      <p class="label">Kami yang berbahagia</p>
-      <h2 class="couple-names"><span data-bind="groomNick">Ahmad</span><em>&amp;</em><span data-bind="brideNick">Aisyah</span></h2>
-      <p class="family">Beserta keluarga besar kedua mempelai</p>
-      <svg class="cover-star" aria-hidden="true"><use href="#star8"/></svg>
+    <!-- ================= PENUTUP ================= -->
+    <section class="closing night">
+      <div class="stars" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i></div>
+      <svg class="moon" aria-hidden="true"><use href="#crescent"/></svg>
+      <div class="closing-inner reveal">
+        <p class="lead light">Merupakan suatu kehormatan dan kebahagiaan bagi kami apabila Bapak/Ibu/Saudara/i berkenan hadir dan memberikan doa restu.</p>
+        <p class="lead light">Jazakumullahu khairan.</p>
+        <p class="arabic salam">وَالسَّلَامُ عَلَيْكُمْ وَرَحْمَةُ اللّٰهِ وَبَرَكَاتُهُ</p>
+        <svg class="couple small" viewBox="55 26 232 330" role="img" aria-label="Ilustrasi kedua mempelai">
+          <use href="#groomG"/><use href="#brideG" x="8"/>
+        </svg>
+        <p class="eyebrow">Kami yang berbahagia</p>
+        <h2 class="names"><span data-bind="groomNick">Ahmad</span> <em>&amp;</em> <span data-bind="brideNick">Aisyah</span></h2>
+        <p class="family">Beserta keluarga besar kedua mempelai</p>
+      </div>
+      <svg class="skyline" aria-hidden="true"><use href="#skyline"/></svg>
     </section>
-
-    <footer class="footer">Undangan Digital · Tema Syar'i</footer>
   </main>
 
   <!-- Navigasi bawah -->

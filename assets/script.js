@@ -10,18 +10,38 @@
     "Agustus", "September", "Oktober", "November", "Desember"];
 
   // Format tanggal sesuai zona waktu pada string ISO (bukan zona waktu perangkat)
-  function formatDate(iso) {
+  function dateParts(iso) {
     var m = /^(\d{4})-(\d{2})-(\d{2})/.exec(iso);
-    var d = new Date(Date.UTC(+m[1], +m[2] - 1, +m[3]));
-    return DAYS[d.getUTCDay()] + ", " + (+m[3]) + " " + MONTHS[+m[2] - 1] + " " + m[1];
+    var d = new Date(Date.UTC(+m[1], +m[2] - 1, +m[3], 12));
+    return { date: d, day: DAYS[d.getUTCDay()], num: +m[3], month: MONTHS[+m[2] - 1], year: m[1] };
   }
+  function formatDate(iso) {
+    var p = dateParts(iso);
+    return p.day + ", " + p.num + " " + p.month + " " + p.year;
+  }
+  function hijriDate(iso) {
+    try {
+      var s = new Intl.DateTimeFormat("id-u-ca-islamic-umalqura", {
+        day: "numeric", month: "long", year: "numeric", timeZone: "UTC"
+      }).format(dateParts(iso).date);
+      return /\bH\b|AH/.test(s) ? s : s + " H";
+    } catch (e) {
+      return "";
+    }
+  }
+  var akad = dateParts(W.akadStart);
 
   // ---------- Isi data ----------
   var data = Object.assign({}, W, {
     groomInitial: W.groomNick.charAt(0),
     brideInitial: W.brideNick.charAt(0),
     akadDateText: formatDate(W.akadStart),
-    walimahDateText: formatDate(W.walimahStart)
+    walimahDateText: formatDate(W.walimahStart),
+    akadDay: akad.day,
+    akadDateNum: akad.num,
+    akadMonth: akad.month,
+    akadYear: akad.year,
+    akadHijri: hijriDate(W.akadStart)
   });
 
   $$("[data-bind]").forEach(function (el) {
@@ -44,6 +64,21 @@
   });
 
   document.title = "Walimatul 'Urs — " + W.groomNick + " & " + W.brideNick;
+
+  // ---------- Perjalanan ----------
+  var storyList = $("#storyList");
+  if (storyList && W.story && W.story.length) {
+    W.story.forEach(function (st) {
+      var li = document.createElement("li");
+      li.innerHTML = "<time></time><h3></h3><p></p>";
+      $("time", li).textContent = st.date;
+      $("h3", li).textContent = st.title;
+      $("p", li).textContent = st.text;
+      storyList.appendChild(li);
+    });
+  } else if (storyList) {
+    storyList.closest("section").remove();
+  }
 
   // ---------- Nama tamu dari URL ----------
   var params = new URLSearchParams(location.search);

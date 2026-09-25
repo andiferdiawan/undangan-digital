@@ -3,11 +3,19 @@
 Undangan pernikahan digital satu halaman, dirancang **khusus untuk ponsel** (mobile-first).
 Di layar lebar tampilannya tetap selebar ponsel (maks. 480px) di tengah layar.
 
-Tema syar'i: tanpa foto mempelai (diganti monogram inisial dan ornamen geometri Islami),
-tanpa musik, dilengkapi Bismillah, QS. Ar-Rum: 21, doa untuk pengantin, dan adab menghadiri walimah.
+Tersedia dua desain (data sama, dari `assets/config.js`):
+
+| Halaman | Desain |
+|---|---|
+| `index.html` | **Modern** — nuansa malam hijau-emas, lampion berayun, bulan sabit, siluet masjid, ilustrasi karakter mempelai muslim *faceless* (tanpa wajah), tanggal Hijriah, dan linimasa ta'aruf → khitbah → akad |
+| `klasik.html` | **Klasik** — krem & hijau dengan monogram inisial |
+
+Tema syar'i: tanpa foto mempelai dan tanpa musik, dilengkapi Bismillah, QS. Ar-Rum: 21,
+doa untuk pengantin, dan adab menghadiri walimah.
 
 ## Fitur
 - Sampul dengan nama tamu dari URL: `index.html?to=Bapak+Fulan`
+- Tanggal Masehi & Hijriah otomatis
 - Hitung mundur ke akad nikah + tombol simpan ke Google Calendar
 - Detail Akad & Walimah dengan tautan Google Maps
 - Konfirmasi kehadiran (RSVP) & ucapan dikirim via WhatsApp

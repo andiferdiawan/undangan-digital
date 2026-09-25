@@ -33,6 +33,13 @@ window.WEDDING = {
   // Nomor WhatsApp penerima RSVP (format internasional tanpa +)
   whatsapp: "6281234567890",
 
+  // Perjalanan (kosongkan array untuk menyembunyikan bagian ini)
+  story: [
+    { date: "Maret 2026", title: "Ta'aruf", text: "Allah pertemukan kami melalui perantara guru dan keluarga, dengan niat menyempurnakan separuh agama." },
+    { date: "Agustus 2026", title: "Khitbah", text: "Dengan restu kedua orang tua, lamaran disampaikan dan diterima dengan penuh syukur." },
+    { date: "Desember 2026", title: "Akad Nikah", text: "Insya Allah, kami mengikat janji suci di hadapan Allah dan para saksi." }
+  ],
+
   // Amplop digital
   gifts: [
     { bank: "Bank Syariah Indonesia", number: "1234567890", holder: "Ahmad Fauzan" },
