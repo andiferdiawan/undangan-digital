@@ -152,7 +152,7 @@ const STATUS: Record<string, [string, string]> = {
     </div>
 
     <div v-else-if="!active" class="card p-8 text-center">
-      <p class="text-2xl">⏳</p>
+      <FeatureIcon name="pending" class="mx-auto" />
       <p class="mt-2 font-semibold text-brand-900">Status akun: {{ summary.reseller.status === 'pending' ? 'menunggu persetujuan admin' : summary.reseller.status }}</p>
       <p class="mt-1 text-sm text-brand-600">Fitur penjualan aktif setelah akun disetujui.</p>
     </div>

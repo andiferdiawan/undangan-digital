@@ -84,9 +84,18 @@ const days = computed(() => settings.value?.payout_days?.join(' & ') ?? '5 & 25'
         <h1 class="mt-3 font-display text-4xl leading-tight text-brand">Jual undangan digital, dapatkan <span class="text-clay">{{ settings?.default_reseller_rate ?? 30 }}%</span> dari setiap penjualan.</h1>
         <p class="mt-4 text-brand-600">Tanpa stok, tanpa desain. Bagikan link Anda atau buatkan link pembayaran untuk pelanggan. Semua pembayaran diproses platform secara otomatis, komisi langsung masuk saldo Anda.</p>
         <ul class="mt-6 grid gap-3 text-sm text-brand-800">
-          <li class="card p-4">🔗 <b>Link referral pribadi</b> — pembeli lewat link Anda otomatis tercatat sebagai penjualan Anda, dan tombol WhatsApp mengarah ke nomor Anda.</li>
-          <li class="card p-4">🧾 <b>Buat pesanan untuk pelanggan</b> — kirim link pembayaran, token aktivasi muncul di dashboard Anda setelah lunas.</li>
-          <li class="card p-4">💸 <b>Pencairan tanggal {{ days }}</b> — ajukan kapan saja, minimal {{ rupiah(settings?.min_payout ?? 50000) }}, ditransfer ke rekening Anda.</li>
+          <li class="card flex items-start gap-4 p-4">
+            <FeatureIcon name="link" />
+            <div><h2 class="font-semibold text-brand-900">Link referral pribadi</h2><p class="mt-1 text-brand-600">Pembeli lewat link Anda otomatis tercatat sebagai penjualan Anda, dan tombol WhatsApp mengarah ke nomor Anda.</p></div>
+          </li>
+          <li class="card flex items-start gap-4 p-4">
+            <FeatureIcon name="receipt" />
+            <div><h2 class="font-semibold text-brand-900">Buat pesanan untuk pelanggan</h2><p class="mt-1 text-brand-600">Kirim link pembayaran, token aktivasi muncul di dashboard Anda setelah lunas.</p></div>
+          </li>
+          <li class="card flex items-start gap-4 p-4">
+            <FeatureIcon name="wallet" />
+            <div><h2 class="font-semibold text-brand-900">Pencairan tanggal {{ days }}</h2><p class="mt-1 text-brand-600">Ajukan kapan saja, minimal {{ rupiah(settings?.min_payout ?? 50000) }}, ditransfer ke rekening Anda.</p></div>
+          </li>
         </ul>
       </div>
 
@@ -96,7 +105,7 @@ const days = computed(() => settings.value?.payout_days?.join(' & ') ?? '5 & 25'
           <NuxtLink to="/reseller/dashboard" class="btn-primary mt-4">Buka Dashboard Reseller</NuxtLink>
         </div>
         <div v-else-if="mine?.status === 'pending' || done" class="card p-6 text-center">
-          <p class="text-2xl">⏳</p>
+          <FeatureIcon name="pending" class="mx-auto" />
           <p class="mt-2 font-semibold text-brand-900">Pendaftaran sedang ditinjau</p>
           <p class="mt-1 text-sm text-brand-600">Admin akan mengaktifkan akun Anda. Setelah aktif, dashboard reseller bisa dibuka.</p>
           <NuxtLink to="/reseller/dashboard" class="btn-ghost mt-4">Cek status</NuxtLink>

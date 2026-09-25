@@ -37,19 +37,19 @@ const counts = computed(() => {
 const ordering = ref<CatalogTheme | null>(null)
 
 const steps = [
-  { t: 'Pilih tema', d: 'Jelajahi katalog dan lihat pratinjau langsung di layar ponsel.' },
-  { t: 'Bayar online', d: 'Pilih paket kuota tamu, bayar via QRIS, virtual account, atau e-wallet.' },
-  { t: 'Aktifkan token', d: 'Token 6 karakter langsung muncul setelah lunas. Pakai untuk membuat akun.' },
-  { t: 'Isi & bagikan', d: 'Isi data dari ponsel, lalu kirim link personal ke setiap tamu.' },
+  { i: 'theme' as const, t: 'Pilih tema', d: 'Jelajahi katalog dan lihat pratinjau langsung di layar ponsel.' },
+  { i: 'payment' as const, t: 'Bayar online', d: 'Pilih paket kuota tamu, bayar via QRIS, virtual account, atau e-wallet.' },
+  { i: 'token' as const, t: 'Aktifkan token', d: 'Token 6 karakter langsung muncul setelah lunas. Pakai untuk membuat akun.' },
+  { i: 'share' as const, t: 'Isi & bagikan', d: 'Isi data dari ponsel, lalu kirim link personal ke setiap tamu.' },
 ]
 
 const features = [
-  { i: '💌', t: 'Link personal per tamu', d: 'Nama tamu tampil di sampul undangan, dan Anda bisa melihat siapa yang sudah membuka.' },
-  { i: '🎵', t: 'Musik latar', d: 'Unggah lagu atau nasyid pilihan Anda, diputar otomatis saat undangan dibuka.' },
-  { i: '📝', t: 'RSVP & buku ucapan', d: 'Tamu konfirmasi kehadiran dan mengirim doa, rekapnya langsung di dashboard.' },
-  { i: '📍', t: 'Peta & kalender', d: 'Tombol Google Maps dan simpan ke kalender untuk akad maupun resepsi.' },
-  { i: '🎁', t: 'Amplop digital', d: 'Nomor rekening dengan tombol salin, tanpa perlu dikirim terpisah.' },
-  { i: '⏳', t: 'Hitung mundur & galeri', d: 'Countdown menuju hari bahagia dan galeri foto prewedding.' },
+  { i: 'invite' as const, t: 'Link personal per tamu', d: 'Nama tamu tampil di sampul undangan, dan Anda bisa melihat siapa yang sudah membuka.' },
+  { i: 'music' as const, t: 'Musik latar', d: 'Unggah lagu atau nasyid pilihan Anda, diputar otomatis saat undangan dibuka.' },
+  { i: 'rsvp' as const, t: 'RSVP & buku ucapan', d: 'Tamu konfirmasi kehadiran dan mengirim doa, rekapnya langsung di dashboard.' },
+  { i: 'map' as const, t: 'Peta & kalender', d: 'Tombol Google Maps dan simpan ke kalender untuk akad maupun resepsi.' },
+  { i: 'gift' as const, t: 'Amplop digital', d: 'Nomor rekening dengan tombol salin, tanpa perlu dikirim terpisah.' },
+  { i: 'countdown' as const, t: 'Hitung mundur & galeri', d: 'Countdown menuju hari bahagia dan galeri foto prewedding.' },
 ]
 
 const faqs = [
@@ -138,8 +138,11 @@ useJsonLd('site', () => ({
       <h2 id="cara-kerja" class="sr-only">Cara membuat undangan digital</h2>
       <ol class="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
         <li v-for="(s, i) in steps" :key="s.t" class="card p-5">
-          <span class="grid h-8 w-8 place-items-center rounded-full bg-brand text-sm font-bold text-white">{{ i + 1 }}</span>
-          <h3 class="mt-3 font-semibold text-brand-900">{{ s.t }}</h3>
+          <div class="flex items-start justify-between">
+            <FeatureIcon :name="s.i" />
+            <span class="text-xs font-bold text-brand-300">0{{ i + 1 }}</span>
+          </div>
+          <h3 class="mt-4 font-semibold text-brand-900">{{ s.t }}</h3>
           <p class="mt-1 text-sm text-brand-600">{{ s.d }}</p>
         </li>
       </ol>
@@ -220,8 +223,8 @@ useJsonLd('site', () => ({
       <h2 id="fitur" class="font-display text-3xl text-brand">Fitur Lengkap di Setiap Tema</h2>
       <div class="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
         <div v-for="f in features" :key="f.t" class="card p-5">
-          <p class="text-2xl" aria-hidden="true">{{ f.i }}</p>
-          <h3 class="mt-2 font-semibold text-brand-900">{{ f.t }}</h3>
+          <FeatureIcon :name="f.i" />
+          <h3 class="mt-4 font-semibold text-brand-900">{{ f.t }}</h3>
           <p class="mt-1 text-sm text-brand-600">{{ f.d }}</p>
         </div>
       </div>

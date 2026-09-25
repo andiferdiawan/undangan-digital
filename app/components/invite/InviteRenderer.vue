@@ -122,7 +122,7 @@ const bgUrl = (bg?: string) => {
             :class="[cover.class, mode === 'page' ? 'fixed inset-0 z-50 mx-auto max-w-[480px]' : mode === 'frame' ? 'relative min-h-[736px]' : 'relative min-h-[606px]']"
             :style="bgUrl(cover.bg)"
           >
-            <InviteNode v-for="(n, i) in cover.children" :key="i" :node="n" />
+            <InviteNode v-for="(n, i) in cover.children" :key="i" :node="n" :headings="mode === 'page' ? 'h1' : 'none'" />
           </section>
         </Transition>
 
@@ -135,7 +135,7 @@ const bgUrl = (bg?: string) => {
             :class="s.class"
             :style="bgUrl(s.bg)"
           >
-            <InviteNode v-for="(n, i) in s.children" :key="i" :node="n" />
+            <InviteNode v-for="(n, i) in s.children" :key="i" :node="n" :headings="mode !== 'page' ? 'none' : si === 0 && !cover ? 'h1' : 'h2'" />
           </section>
         </template>
       </div>

@@ -33,6 +33,12 @@ export default defineComponent({
   props: {
     node: { type: Object as PropType<ThemeNode>, required: true },
     scope: { type: Object as PropType<Scope>, default: () => ({}) },
+    /**
+     * Level heading yang diizinkan agar halaman hanya punya satu <h1>:
+     * h1 = boleh h1 (sampul/section pertama), h2 = h1 diturunkan jadi h2,
+     * none = semua heading jadi div (pratinjau katalog/editor, bukan konten halaman).
+     */
+    headings: { type: String as PropType<'h1' | 'h2' | 'none'>, default: 'h1' },
   },
   setup(props) {
     const rt = useInvite()
@@ -98,7 +104,11 @@ export default defineComponent({
       if (node.text) children.push(str(node.text))
       for (const child of node.children ?? []) children.push(...renderNode(child, scope))
 
-      const tag = node.tag ?? 'div'
+      let tag: string = node.tag ?? 'div'
+      if (/^h[1-6]$/.test(tag)) {
+        if (props.headings === 'none') tag = 'div'
+        else if (props.headings === 'h2' && tag === 'h1') tag = 'h2'
+      }
       if (tag === 'img' || tag === 'hr' || tag === 'br') return h(tag, attrs)
       return h(tag, attrs, children)
     }
