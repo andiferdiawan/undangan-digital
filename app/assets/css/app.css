@@ -1,0 +1,6 @@
+html { -webkit-text-size-adjust: 100%; scroll-behavior: smooth; }
+body { font-family: "Plus Jakarta Sans", system-ui, sans-serif; color: #243a2d; background: #fbf7f0; -webkit-tap-highlight-color: transparent; }
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+}
