@@ -21,3 +21,12 @@ Ubah semua data (nama, orang tua, tanggal, lokasi, nomor WhatsApp, rekening) di
 ## Menjalankan
 Buka `index.html` langsung di browser, atau host di GitHub Pages / Netlify / Vercel
 (situs statis, tanpa build).
+
+## Hosting (GitHub Pages)
+1. Buka **Settings → Pages** di repositori ini.
+2. Pada *Build and deployment*, pilih **Source: Deploy from a branch**.
+3. Pilih branch `claude/undangan-digital-mobile-syari-l035x8`, folder `/ (root)`, lalu **Save**.
+4. Setelah 1–2 menit, undangan tersedia di
+   `https://andiferdiawan.github.io/undangan-digital/`
+
+Link per tamu: `https://andiferdiawan.github.io/undangan-digital/?to=Bapak+Fulan`
