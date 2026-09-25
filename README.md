@@ -7,7 +7,7 @@ Tersedia dua desain (data sama, dari `assets/config.js`):
 
 | Halaman | Desain |
 |---|---|
-| `index.html` | **Modern** — nuansa malam hijau-emas, lampion berayun, bulan sabit, siluet masjid, ilustrasi karakter mempelai muslim *faceless* (tanpa wajah), tanggal Hijriah, dan linimasa ta'aruf → khitbah → akad |
+| `index.html` | **Modern** — palet segar krem–sage–terakota, lampion berayun, bulan sabit, siluet masjid, ilustrasi karakter mempelai muslim *faceless* (tanpa wajah), tanggal Hijriah, dan linimasa ta'aruf → khitbah → akad |
 | `klasik.html` | **Klasik** — krem & hijau dengan monogram inisial |
 
 Tema syar'i: tanpa foto mempelai dan tanpa musik, dilengkapi Bismillah, QS. Ar-Rum: 21,
