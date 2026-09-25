@@ -27,7 +27,7 @@ async function checkToken() {
     return
   }
   loading.value = true
-  const { data, error: err } = await supabase.rpc('check_token', { p_code: token.value })
+  const { data, error: err } = await supabase.rpc('check_token', { p_code: token.value } as never)
   loading.value = false
   const row = (data as TokenInfo[] | null)?.[0]
   if (err || !row) {
@@ -52,7 +52,7 @@ watch(() => form.slug, (v) => {
   }
   slugState.value = 'checking'
   slugTimer = setTimeout(async () => {
-    const { data } = await supabase.rpc('is_slug_available', { p_slug: clean })
+    const { data } = await supabase.rpc('is_slug_available', { p_slug: clean } as never)
     if (form.slug === clean) slugState.value = data ? 'ok' : 'taken'
   }, 350)
 })
@@ -67,7 +67,7 @@ async function submit() {
 
   // User yang sudah login cukup menukar token ke workspace baru
   if (user.value) {
-    const { data, error: err } = await supabase.rpc('redeem_token', { p_code: token.value, p_slug: form.slug })
+    const { data, error: err } = await supabase.rpc('redeem_token', { p_code: token.value, p_slug: form.slug } as never)
     loading.value = false
     if (err) error.value = friendlyError(err)
     else await navigateTo(`/dashboard/${data}`)

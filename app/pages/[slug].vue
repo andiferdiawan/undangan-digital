@@ -10,7 +10,7 @@ const slug = String(route.params.slug).toLowerCase()
 const guest = computed(() => String(route.query.to ?? route.query.kepada ?? '').trim().slice(0, 100))
 
 const { data: inv } = await useAsyncData(`inv-${slug}`, async () => {
-  const { data } = await supabase.rpc('get_public_invitation', { p_slug: slug })
+  const { data } = await supabase.rpc('get_public_invitation', { p_slug: slug } as never)
   return (data as PublicInvitation | null) ?? null
 })
 if (!inv.value) throw createError({ statusCode: 404, statusMessage: 'Undangan tidak ditemukan', fatal: true })
@@ -27,7 +27,7 @@ useSeoMeta({
 useHead({ meta: [{ name: 'theme-color', content: inv.value.theme.definition.globals.background_color }] })
 
 onMounted(() => {
-  if (guest.value) supabase.rpc('mark_guest_opened', { p_slug: slug, p_guest: guest.value }).then(() => {})
+  if (guest.value) supabase.rpc('mark_guest_opened', { p_slug: slug, p_guest: guest.value } as never).then(() => {})
 })
 </script>
 

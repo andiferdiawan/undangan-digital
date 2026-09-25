@@ -35,6 +35,7 @@ export function slugify(s: string) {
     .replace(/&/g, '-').replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 50)
 }
 
-export function waLink(phone: string, text: string) {
-  return `https://wa.me/${phone.replace(/\D/g, '')}?text=${encodeURIComponent(text)}`
+/** Nomor dari runtime config bisa terbaca sebagai angka, jadi selalu dijadikan string. */
+export function waLink(phone: string | number, text: string) {
+  return `https://wa.me/${String(phone).replace(/\D/g, '')}?text=${encodeURIComponent(text)}`
 }

@@ -32,7 +32,7 @@ async function submit() {
     p_attendance: form.attendance,
     p_pax: form.pax,
     p_message: form.message.trim().slice(0, 500) || null,
-  })
+  } as never)
   if (err) {
     state.value = 'idle'
     error.value = err.message.includes('RSVP_LIMIT') ? 'Anda sudah mengirim konfirmasi. Terima kasih!' : 'Gagal mengirim, coba lagi.'

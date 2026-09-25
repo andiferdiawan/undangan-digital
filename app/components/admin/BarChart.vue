@@ -40,6 +40,7 @@ const labelled = computed(() => {
 })
 
 const active = ref<number | null>(null)
+const activeItem = computed(() => (active.value === null ? null : props.data[active.value] ?? null))
 const showTable = ref(false)
 function barPath(i: number, v: number) {
   const x0 = x(i)
@@ -87,12 +88,12 @@ function barPath(i: number, v: number) {
         </g>
       </svg>
       <div
-        v-if="active !== null && data[active]"
+        v-if="active !== null && activeItem"
         class="pointer-events-none absolute -translate-x-1/2 -translate-y-full rounded-lg bg-brand-900 px-2.5 py-1.5 text-center text-white shadow-lg"
-        :style="{ left: `${((x(active) + barW / 2) / W) * 100}%`, top: `${(y(data[active].value) / H) * 100}%` }"
+        :style="{ left: `${((x(active) + barW / 2) / W) * 100}%`, top: `${(y(activeItem.value) / H) * 100}%` }"
       >
-        <b class="block text-sm">{{ format(data[active].value) }}</b>
-        <span class="text-[11px] opacity-75">{{ data[active].label }}</span>
+        <b class="block text-sm">{{ format(activeItem.value) }}</b>
+        <span class="text-[11px] opacity-75">{{ activeItem.label }}</span>
       </div>
     </div>
 

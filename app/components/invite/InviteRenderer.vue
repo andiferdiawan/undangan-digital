@@ -84,33 +84,36 @@ const bgUrl = (bg?: string) => {
 <template>
   <div
     class="invite-root relative isolate overflow-x-hidden bg-base font-body text-ink"
-    :class="[definition.root_class, `invite-${mode}`]"
+    :class="`invite-${mode}`"
     :style="cssVars"
   >
-    <!-- Cover (dibuka dengan tombol open_button) -->
-    <Transition name="invite-cover">
-      <section
-        v-if="cover && (!coverOpen || mode === 'thumb')"
-        data-section="cover"
-        :class="[cover.class, mode === 'page' ? 'fixed inset-0 z-50 mx-auto max-w-[480px]' : mode === 'frame' ? 'relative min-h-[736px]' : 'relative min-h-[606px]']"
-        :style="bgUrl(cover.bg)"
-      >
-        <InviteNode v-for="(n, i) in cover.children" :key="i" :node="n" />
-      </section>
-    </Transition>
+    <!-- CSS tema di-scope ke .invite-root, jadi root_class dipasang di pembungkus dalam -->
+    <div :class="definition.root_class">
+      <!-- Cover (dibuka dengan tombol open_button) -->
+      <Transition name="invite-cover">
+        <section
+          v-if="cover && (!coverOpen || mode === 'thumb')"
+          data-section="cover"
+          :class="[cover.class, mode === 'page' ? 'fixed inset-0 z-50 mx-auto max-w-[480px]' : mode === 'frame' ? 'relative min-h-[736px]' : 'relative min-h-[606px]']"
+          :style="bgUrl(cover.bg)"
+        >
+          <InviteNode v-for="(n, i) in cover.children" :key="i" :node="n" />
+        </section>
+      </Transition>
 
-    <template v-if="(mode !== 'thumb' || !cover) && (mode !== 'frame' || coverOpen)">
-      <section
-        v-for="(s, si) in body"
-        :key="si"
-        :data-section="s.type"
-        :id="`s-${s.type}`"
-        :class="s.class"
-        :style="bgUrl(s.bg)"
-      >
-        <InviteNode v-for="(n, i) in s.children" :key="i" :node="n" />
-      </section>
-    </template>
+      <template v-if="(mode !== 'thumb' || !cover) && (mode !== 'frame' || coverOpen)">
+        <section
+          v-for="(s, si) in body"
+          :key="si"
+          :data-section="s.type"
+          :id="`s-${s.type}`"
+          :class="s.class"
+          :style="bgUrl(s.bg)"
+        >
+          <InviteNode v-for="(n, i) in s.children" :key="i" :node="n" />
+        </section>
+      </template>
+    </div>
   </div>
 </template>
 

@@ -94,14 +94,14 @@ const url = computed(() => inviteUrl(inv.value!.slug))
     <!-- Bar status + toggle form/preview di ponsel -->
     <div class="sticky top-16 z-30 border-b border-brand-100 bg-cream/95 backdrop-blur">
       <div class="mx-auto flex max-w-6xl items-center justify-between gap-2 px-4 py-2">
-        <div class="grid grid-cols-2 rounded-full bg-white p-1 text-xs font-semibold ring-1 ring-brand-100 lg:hidden">
-          <button class="rounded-full px-4 py-1.5" :class="view === 'form' ? 'bg-brand text-white' : 'text-brand-600'" @click="view = 'form'">Isi Data</button>
-          <button class="rounded-full px-4 py-1.5" :class="view === 'preview' ? 'bg-brand text-white' : 'text-brand-600'" @click="view = 'preview'">Preview</button>
+        <div class="grid shrink-0 grid-cols-2 whitespace-nowrap rounded-full bg-white p-1 text-xs font-semibold ring-1 ring-brand-100 lg:hidden">
+          <button class="rounded-full px-3 py-1.5" :class="view === 'form' ? 'bg-brand text-white' : 'text-brand-600'" @click="view = 'form'">Isi Data</button>
+          <button class="rounded-full px-3 py-1.5" :class="view === 'preview' ? 'bg-brand text-white' : 'text-brand-600'" @click="view = 'preview'">Preview</button>
         </div>
-        <span class="text-xs" :class="saveState === 'error' ? 'text-red-600' : 'text-brand-500'" role="status">
-          {{ { saved: '✓ Tersimpan', dirty: 'Perubahan belum disimpan…', saving: 'Menyimpan…', error: `Gagal: ${saveError}` }[saveState] }}
+        <span class="min-w-0 truncate text-xs" :class="saveState === 'error' ? 'text-red-600' : 'text-brand-500'" role="status" :title="saveError">
+          {{ { saved: '✓ Tersimpan', dirty: 'Belum disimpan', saving: 'Menyimpan…', error: 'Gagal menyimpan' }[saveState] }}
         </span>
-        <button class="btn-primary btn-sm" :disabled="saveState === 'saving' || saveState === 'saved'" @click="save">Simpan</button>
+        <button class="btn-primary btn-sm shrink-0" :disabled="saveState === 'saving' || saveState === 'saved'" @click="save">Simpan</button>
       </div>
     </div>
 

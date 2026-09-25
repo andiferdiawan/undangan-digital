@@ -12,7 +12,7 @@ const wishes = ref<Wish[]>(rt.preview ? SAMPLE : [])
 
 async function load() {
   if (rt.preview || !rt.slug) return
-  const { data } = await supabase.rpc('get_wishes', { p_slug: rt.slug })
+  const { data } = await supabase.rpc('get_wishes', { p_slug: rt.slug } as never)
   wishes.value = (data as Wish[] | null) ?? []
 }
 onMounted(load)

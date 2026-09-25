@@ -38,7 +38,7 @@ async function generate() {
   const { data, error: err } = await supabase.rpc('admin_generate_token', {
     p_theme_id: form.theme_id, p_package_id: form.package_id,
     p_customer_note: form.note || null, p_valid_days: form.days,
-  })
+  } as never)
   busy.value = false
   if (err) {
     error.value = friendlyError(err)
