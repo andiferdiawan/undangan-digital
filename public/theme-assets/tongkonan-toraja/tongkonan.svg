@@ -1,0 +1,34 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 170" preserveAspectRatio="xMidYMax slice">
+<defs>
+<g id="tk">
+<!-- atap perahu -->
+<path d="M-8 20 Q10 44 40 52 L120 52 Q150 44 168 20 Q150 36 120 40 L40 40 Q10 36 -8 20z" fill="#2a1a14"/>
+<path d="M-8 20 Q10 44 40 52 L120 52 Q150 44 168 20 L162 30 Q148 50 120 58 L40 58 Q12 50 -2 30z" fill="#3a2419"/>
+<!-- badan berukir -->
+<rect x="30" y="58" width="100" height="34" fill="#a8321f"/>
+<g fill="#1d1512"><path d="M30 58h100v5H30zM30 87h100v5H30z"/></g>
+<g fill="#e0a93a"><circle cx="50" cy="75" r="7"/><circle cx="80" cy="75" r="9"/><circle cx="110" cy="75" r="7"/></g>
+<g fill="#1d1512"><circle cx="50" cy="75" r="3.5"/><circle cx="80" cy="75" r="4.5"/><circle cx="110" cy="75" r="3.5"/></g>
+<path d="M60 68 l4 7 -4 7 M100 68 l-4 7 4 7" stroke="#f5ecd8" stroke-width="1.6" fill="none"/>
+<!-- kepala kerbau ukir (kabongo') di depan -->
+<path d="M72 50 q8 -8 16 0 q-3 5 -8 5 q-5 0 -8 -5z" fill="#f5ecd8"/>
+<!-- kolong & tiang -->
+<rect x="32" y="92" width="96" height="6" fill="#2a1a14"/>
+<g fill="#2a1a14"><rect x="36" y="98" width="6" height="32"/><rect x="62" y="98" width="6" height="32"/><rect x="92" y="98" width="6" height="32"/><rect x="118" y="98" width="6" height="32"/></g>
+<rect x="76" y="44" width="8" height="86" fill="#2a1a14"/>
+</g>
+<g id="al">
+<path d="M-4 30 Q8 48 26 52 L74 52 Q92 48 104 30 Q92 42 74 44 L26 44 Q8 42 -4 30z" fill="#2a1a14"/>
+<rect x="16" y="52" width="68" height="22" fill="#a8321f"/><path d="M16 52h68v4H16zM16 70h68v4H16z" fill="#1d1512"/>
+<circle cx="50" cy="63" r="5" fill="#e0a93a"/>
+<g fill="#2a1a14"><rect x="20" y="74" width="7" height="32" rx="3"/><rect x="46" y="74" width="7" height="32" rx="3"/><rect x="72" y="74" width="7" height="32" rx="3"/><rect x="10" y="84" width="80" height="4"/></g>
+</g>
+</defs>
+<!-- bukit -->
+<path d="M0 120 Q80 70 170 104 Q260 60 350 100 Q420 78 480 96 V170 H0z" fill="#3b4a2f" opacity=".35"/>
+<use href="#tk" transform="translate(10 40) scale(.9)"/>
+<use href="#tk" transform="translate(160 20)"/>
+<use href="#al" transform="translate(348 60) scale(1.1)"/>
+<rect y="148" width="480" height="22" fill="#2a1a14"/>
+<g fill="#4c5d3a"><path d="M0 150 q20 -14 40 0 q20 -10 40 0 q30 -16 60 0 q25 -12 50 0 q30 -14 60 0 q25 -10 50 0 q30 -16 60 0 q20 -12 40 0 q25 -14 50 0 q15 -8 30 0z"/></g>
+</svg>

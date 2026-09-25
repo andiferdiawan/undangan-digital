@@ -1,0 +1,64 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="55 20 240 336">
+<defs>
+<pattern id="sg" width="12" height="12" patternUnits="userSpaceOnUse"><rect width="12" height="12" fill="#c46a3c"/><rect width="6" height="6" fill="#d88150"/><rect x="6" y="6" width="6" height="6" fill="#d88150"/><path d="M0 .5h12M.5 0v12" stroke="#f3d38a" stroke-width=".8" opacity=".8"/></pattern>
+<pattern id="sn" width="12" height="12" patternUnits="userSpaceOnUse"><rect width="12" height="12" fill="#1a2547"/><rect width="6" height="6" fill="#26345f"/><rect x="6" y="6" width="6" height="6" fill="#26345f"/><path d="M0 .5h12M.5 0v12" stroke="#e3b964" stroke-width=".8" opacity=".7"/></pattern>
+</defs>
+<!-- ===== MEMPELAI PRIA (Makassar) ===== -->
+<g>
+<ellipse cx="115" cy="344" rx="52" ry="6" fill="#000" opacity=".12"/>
+<path d="M84 292 H146 L144 338 H86Z" fill="#141c36"/>
+<path d="M77 200 L153 200 L158 300 L72 300Z" fill="url(#sg)"/>
+<path d="M72 300 L158 300" stroke="#e3b964" stroke-width="2.5"/>
+<ellipse cx="98" cy="341" rx="15" ry="6" fill="#2a211b"/><ellipse cx="132" cy="341" rx="15" ry="6" fill="#2a211b"/>
+<path d="M82 122 Q70 160 67 200 L80 204 Q86 165 95 140Z" fill="#1a2547"/>
+<path d="M148 122 Q160 160 163 200 L150 204 Q144 165 135 140Z" fill="#1a2547"/>
+<path d="M67 196 L80 200 M163 196 L150 200" stroke="#e3b964" stroke-width="3"/>
+<circle cx="73.5" cy="208" r="6.5" fill="#e3b08a"/><circle cx="156.5" cy="208" r="6.5" fill="#e3b08a"/>
+<path d="M82 124 Q84 110 102 106 H128 Q146 110 148 124 L154 214 H76Z" fill="#1a2547"/>
+<path d="M102 108 L115 130 L128 108" fill="none" stroke="#e3b964" stroke-width="1.6"/>
+<g fill="#e3b964"><circle cx="115" cy="138" r="2.6"/><circle cx="115" cy="154" r="2.6"/><circle cx="115" cy="170" r="2.6"/><circle cx="115" cy="186" r="2.6"/></g>
+<!-- rantai emas & keris -->
+<path d="M92 128 Q104 150 115 138" stroke="#e3b964" stroke-width="1.4" fill="none"/>
+<path d="M121 198 L134 178" stroke="#5a3b1f" stroke-width="5" stroke-linecap="round"/><path d="M133 174 q5 -4 8 2 q-2 5 -8 4z" fill="#e3b964"/>
+<path d="M76 214 H154" stroke="#e3b964" stroke-width="2"/>
+<rect x="107" y="88" width="16" height="12" rx="4" fill="#d6a17a"/>
+<circle cx="115" cy="72" r="23" fill="#e3b08a"/>
+<!-- passapu' (destar Makassar) dengan ujung runcing -->
+<path d="M90 66 Q88 42 115 36 Q142 42 140 66 Q115 58 90 66Z" fill="#8e2f3c"/>
+<path d="M112 38 L126 14 L130 40Z" fill="#8e2f3c"/>
+<path d="M90 66 Q115 58 140 66 L139 60 Q115 52 91 60Z" fill="#e3b964"/>
+<path d="M96 50 Q115 44 134 50" stroke="#e3b964" stroke-width="1.4" fill="none"/>
+<path d="M115 40 L127 18" stroke="#e3b964" stroke-width="1.2"/>
+</g>
+<!-- ===== MEMPELAI WANITA (Makassar, berhijab) ===== -->
+<g transform="translate(10 0)">
+<ellipse cx="210" cy="344" rx="60" ry="6" fill="#000" opacity=".12"/>
+<path d="M170 206 Q166 280 154 340 H266 Q254 280 250 206Z" fill="url(#sn)"/>
+<path d="M154 340 H266" stroke="#e3b964" stroke-width="3"/>
+<path d="M168 128 Q160 170 176 206 L186 200 Q176 168 182 138Z" fill="#f6ead6"/>
+<path d="M252 128 Q260 170 244 206 L234 200 Q244 168 238 138Z" fill="#f6ead6"/>
+<!-- baju bodo ungu -->
+<path d="M150 118 Q210 100 270 118 L262 222 Q210 234 158 222Z" fill="#7e3673" opacity=".93"/>
+<path d="M150 118 L140 160 L162 166 L166 132Z" fill="#7e3673" opacity=".93"/>
+<path d="M270 118 L280 160 L258 166 L254 132Z" fill="#7e3673" opacity=".93"/>
+<path d="M140 160 L162 166 M280 160 L258 166" stroke="#e3b964" stroke-width="2.2"/>
+<path d="M158 222 Q210 234 262 222" stroke="#e3b964" stroke-width="2.5" fill="none"/>
+<g stroke="#a55597" stroke-width="1" opacity=".6"><path d="M175 120 L178 224M195 114 L196 229M225 114 L224 229M245 120 L242 224"/></g>
+<!-- ponto (gelang naga) -->
+<g fill="#e3b964"><rect x="173" y="184" width="13" height="5" rx="2" transform="rotate(-20 180 186)"/><rect x="171" y="193" width="13" height="5" rx="2" transform="rotate(-20 178 195)"/><rect x="234" y="184" width="13" height="5" rx="2" transform="rotate(20 240 186)"/><rect x="236" y="193" width="13" height="5" rx="2" transform="rotate(20 242 195)"/></g>
+<circle cx="200" cy="206" r="7" fill="#e3b08a"/><circle cx="220" cy="206" r="7" fill="#e3b08a"/>
+<!-- sapu tangan / kipas lipat emas -->
+<path d="M200 200 L210 186 L220 200Z" fill="#f3d38a"/><path d="M204 196 L210 188 L216 196" stroke="#c9973f" stroke-width="1" fill="none"/>
+<!-- hijab krem -->
+<path d="M210 40 C186 40 174 60 174 86 C170 104 172 122 178 132 Q210 148 242 132 C248 122 250 104 246 86 C246 60 234 40 210 40Z" fill="#f4e4c6"/>
+<path d="M178 132 Q210 148 242 132" stroke="#e3b964" stroke-width="1.8" fill="none"/>
+<ellipse cx="210" cy="82" rx="17" ry="21" fill="#e3b08a"/>
+<!-- kalung susun tiga -->
+<g fill="none" stroke="#e3b964" stroke-width="2.2"><path d="M186 134 Q210 150 234 134"/><path d="M189 139 Q210 157 231 139"/><path d="M192 144 Q210 164 228 144"/></g>
+<!-- mahkota (bando emas) dengan bunga -->
+<path d="M182 60 Q210 44 238 60 L236 67 Q210 53 184 67Z" fill="#e3b964"/>
+<g fill="#e3b964"><circle cx="190" cy="54" r="4"/><circle cx="200" cy="48" r="4.5"/><circle cx="210" cy="45" r="5.5"/><circle cx="220" cy="48" r="4.5"/><circle cx="230" cy="54" r="4"/></g>
+<g fill="#7e3673"><circle cx="210" cy="45" r="2.2"/><circle cx="200" cy="48" r="1.6"/><circle cx="220" cy="48" r="1.6"/></g>
+<g stroke="#e3b964" stroke-width="1.2"><path d="M180 66 v14M240 66 v14"/></g><path d="M177 82 l3 5 3 -5z M237 82 l3 5 3 -5z" fill="#e3b964"/>
+</g>
+</svg>
