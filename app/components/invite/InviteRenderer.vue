@@ -39,7 +39,11 @@ const ctx = computed(() =>
   buildContext(contentWithDefaults(props.content), { guestName: props.guestName, assets: assets.value }),
 )
 
-const sections = computed(() => props.definition.sections)
+// Section RSVP & ucapan disembunyikan bila user menonaktifkan RSVP
+const sections = computed(() => {
+  const rsvpOn = contentWithDefaults(props.content).rsvp.enabled
+  return props.definition.sections.filter(s => rsvpOn || (s.type !== 'rsvp' && s.type !== 'wishes'))
+})
 const cover = computed(() => (sections.value[0]?.type === 'cover' ? sections.value[0] : null))
 const body = computed(() => {
   const list = cover.value ? sections.value.slice(1) : sections.value
@@ -88,14 +92,14 @@ const bgUrl = (bg?: string) => {
       <section
         v-if="cover && (!coverOpen || mode === 'thumb')"
         data-section="cover"
-        :class="[cover.class, mode === 'page' ? 'fixed inset-0 z-50 mx-auto max-w-[480px]' : mode === 'frame' ? 'absolute inset-0 z-30' : 'relative']"
+        :class="[cover.class, mode === 'page' ? 'fixed inset-0 z-50 mx-auto max-w-[480px]' : mode === 'frame' ? 'relative min-h-[736px]' : 'relative min-h-[606px]']"
         :style="bgUrl(cover.bg)"
       >
         <InviteNode v-for="(n, i) in cover.children" :key="i" :node="n" />
       </section>
     </Transition>
 
-    <template v-if="mode !== 'thumb' || !cover">
+    <template v-if="(mode !== 'thumb' || !cover) && (mode !== 'frame' || coverOpen)">
       <section
         v-for="(s, si) in body"
         :key="si"
