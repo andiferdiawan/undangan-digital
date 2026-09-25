@@ -14,6 +14,11 @@ const { data: list } = await useAsyncData('my-invitations', async () => {
   return (data ?? []) as any[]
 })
 
+const { data: isReseller } = await useAsyncData('is-reseller', async () => {
+  const { data } = await supabase.from('resellers').select('status').maybeSingle()
+  return !!data
+})
+
 async function logout() {
   await supabase.auth.signOut()
   await navigateTo('/')
@@ -29,6 +34,11 @@ async function logout() {
       </div>
       <button class="btn-ghost btn-sm" @click="logout">Keluar</button>
     </div>
+
+    <NuxtLink v-if="isReseller" to="/reseller/dashboard" class="card mt-6 flex items-center justify-between p-4 hover:ring-brand-300">
+      <span><b class="text-brand-900">Dashboard Reseller</b><span class="block text-xs text-brand-500">Penjualan, komisi, dan pencairan saldo</span></span>
+      <span class="text-brand-300">›</span>
+    </NuxtLink>
 
     <div class="mt-8 flex items-center justify-between">
       <h2 class="font-semibold text-brand-900">Undangan Saya</h2>

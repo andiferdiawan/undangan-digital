@@ -30,7 +30,7 @@ export default defineNuxtConfig({
     redirectOptions: {
       login: '/masuk',
       callback: '/confirm',
-      include: ['/dashboard(/*)?', '/admin(/*)?'],
+      include: ['/dashboard(/*)?', '/admin(/*)?', '/reseller/dashboard(/*)?'],
       exclude: [],
       saveRedirectToCookie: true,
     },
@@ -40,6 +40,11 @@ export default defineNuxtConfig({
     // Server-only (diisi via env NUXT_ANTHROPIC_API_KEY)
     anthropicApiKey: '',
     anthropicModel: 'claude-opus-5',
+    // Payment gateway Tripay (server-only): NUXT_TRIPAY_MODE, NUXT_TRIPAY_API_KEY,
+    // NUXT_TRIPAY_PRIVATE_KEY, NUXT_TRIPAY_MERCHANT_CODE
+    tripay: { mode: 'sandbox', apiKey: '', privateKey: '', merchantCode: '' },
+    // Secret untuk RPC server_* di database (NUXT_SERVER_RPC_SECRET)
+    serverRpcSecret: '',
     public: {
       // Nomor WhatsApp admin untuk pemesanan, format 628xxxx (env NUXT_PUBLIC_ADMIN_WHATSAPP)
       adminWhatsapp: '6281234567890',

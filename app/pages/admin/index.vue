@@ -13,6 +13,13 @@ interface Stats {
   rsvps_total: number
   monthly: { month: string, revenue: number, tokens: number, redeemed: number, new_users: number }[]
   leaderboard: { theme_id: string, code: string, name: string, category: string | null, sold: number, redeemed: number, revenue: number }[]
+  platform_share_total: number
+  reseller_commission_total: number
+  reseller_balance_total: number
+  payouts_pending: number
+  orders_unpaid: number
+  channels: Record<string, { count: number, revenue: number }>
+  resellers: { id: string, code: string, business_name: string, sold: number, revenue: number, commission: number, balance: number }[]
 }
 
 const supabase = useSupabaseClient()
@@ -74,6 +81,24 @@ const maxSold = computed(() => Math.max(1, ...(stats.value?.leaderboard ?? []).m
           </div>
         </div>
 
+        <!-- Penjualan per kanal -->
+        <div class="mt-3 grid gap-3 md:grid-cols-3">
+          <div v-for="c in ([['platform', 'Langsung platform', 'bg-brand-500'], ['reseller', 'Via reseller', 'bg-clay'], ['manual', 'Token manual', 'bg-brand-200']] as const)" :key="c[0]" class="card flex items-center gap-3 p-4">
+            <span class="h-10 w-1.5 rounded-full" :class="c[2]" />
+            <div class="flex-1">
+              <p class="text-xs text-brand-500">{{ c[1] }}</p>
+              <p class="text-lg font-semibold text-brand-900">{{ rupiah(stats.channels[c[0]]?.revenue ?? 0) }}</p>
+              <p class="text-xs text-brand-400">{{ num(stats.channels[c[0]]?.count ?? 0) }} penjualan</p>
+            </div>
+          </div>
+        </div>
+        <div class="mt-3 grid grid-cols-2 gap-3 lg:grid-cols-4">
+          <div class="card p-4"><p class="text-xs text-brand-500">Bagian platform (online)</p><p class="mt-1 text-lg font-semibold">{{ rupiah(stats.platform_share_total) }}</p></div>
+          <div class="card p-4"><p class="text-xs text-brand-500">Komisi reseller</p><p class="mt-1 text-lg font-semibold">{{ rupiah(stats.reseller_commission_total) }}</p></div>
+          <div class="card p-4"><p class="text-xs text-brand-500">Saldo reseller belum cair</p><p class="mt-1 text-lg font-semibold">{{ rupiah(stats.reseller_balance_total + stats.payouts_pending) }}</p><p class="text-xs text-brand-400">{{ rupiah(stats.payouts_pending) }} sudah diajukan</p></div>
+          <NuxtLink to="/admin/pesanan" class="card p-4 hover:ring-brand-300"><p class="text-xs text-brand-500">Menunggu pembayaran</p><p class="mt-1 text-lg font-semibold">{{ num(stats.orders_unpaid) }} pesanan →</p></NuxtLink>
+        </div>
+
         <!-- Grafik: dua ukuran berbeda = dua grafik terpisah (tanpa sumbu ganda) -->
         <div class="mt-4 grid gap-4 lg:grid-cols-2">
           <BarChart
@@ -86,6 +111,37 @@ const maxSold = computed(() => Math.max(1, ...(stats.value?.leaderboard ?? []).m
             :data="stats.monthly.map(m => ({ label: monthLabel(m.month), value: m.new_users }))"
             :format="n => `${num(n)} user`" :compact="num"
           />
+        </div>
+
+        <!-- Pendapatan per reseller -->
+        <div class="card mt-4 overflow-hidden">
+          <div class="flex items-center justify-between p-4">
+            <h2 class="font-semibold text-brand-900">Penjualan per reseller</h2>
+            <NuxtLink to="/admin/reseller" class="text-xs font-semibold text-brand">Kelola reseller →</NuxtLink>
+          </div>
+          <div class="overflow-x-auto">
+            <table class="w-full min-w-[560px] text-sm">
+              <thead>
+                <tr class="border-y border-brand-50 bg-brand-50/50 text-left text-xs text-brand-500">
+                  <th class="px-4 py-2 font-medium">Reseller</th>
+                  <th class="px-4 py-2 text-right font-medium">Terjual</th>
+                  <th class="px-4 py-2 text-right font-medium">Penjualan</th>
+                  <th class="px-4 py-2 text-right font-medium">Komisi</th>
+                  <th class="px-4 py-2 text-right font-medium">Saldo</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="r in stats.resellers" :key="r.id" class="border-b border-brand-50 last:border-0">
+                  <td class="px-4 py-2.5"><p class="font-medium text-brand-900">{{ r.business_name }}</p><p class="font-mono text-xs text-brand-500">{{ r.code }}</p></td>
+                  <td class="px-4 py-2.5 text-right">{{ r.sold }}</td>
+                  <td class="px-4 py-2.5 text-right">{{ rupiah(r.revenue) }}</td>
+                  <td class="px-4 py-2.5 text-right">{{ rupiah(r.commission) }}</td>
+                  <td class="px-4 py-2.5 text-right font-medium">{{ rupiah(r.balance) }}</td>
+                </tr>
+                <tr v-if="!stats.resellers.length"><td colspan="5" class="p-6 text-center text-brand-500">Belum ada reseller aktif.</td></tr>
+              </tbody>
+            </table>
+          </div>
         </div>
 
         <!-- Leaderboard -->

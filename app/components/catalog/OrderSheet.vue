@@ -4,25 +4,16 @@ import type { CatalogTheme } from '~/composables/useCatalog'
 
 const props = defineProps<{ theme: CatalogTheme | null, packages: Package[] }>()
 const emit = defineEmits<{ close: [] }>()
-const config = useRuntimeConfig()
+const { reseller, whatsapp } = await useReferral()
 
 const selected = ref<number | null>(null)
-watch(() => props.theme, () => { selected.value = props.packages[0]?.id ?? null })
-
+watch(() => props.theme, () => { selected.value = props.packages[1]?.id ?? props.packages[0]?.id ?? null }, { immediate: true })
 const pkg = computed(() => props.packages.find(p => p.id === selected.value) ?? null)
-const link = computed(() => {
+
+const checkoutUrl = computed(() => props.theme && pkg.value ? `/checkout/${props.theme.slug}?paket=${pkg.value.id}` : '')
+const waUrl = computed(() => {
   if (!props.theme || !pkg.value) return ''
-  const msg = [
-    'Assalamu\'alaikum, saya ingin memesan undangan digital:',
-    '',
-    `• Tema: ${props.theme.name}`,
-    `• ID Tema: ${props.theme.code}`,
-    `• Paket: ${pkg.value.name} (${pkg.value.guest_limit} tamu)`,
-    `• Harga: ${rupiah(pkg.value.price)}`,
-    '',
-    'Mohon info langkah pembayarannya. Terima kasih.',
-  ].join('\n')
-  return waLink(config.public.adminWhatsapp, msg)
+  return waLink(whatsapp.value, `Assalamu'alaikum, saya ingin bertanya tentang tema ${props.theme.name} (${props.theme.code}) ${pkg.value.name}.`)
 })
 
 function onKey(e: KeyboardEvent) { if (e.key === 'Escape') emit('close') }
@@ -61,11 +52,13 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKey))
           </label>
         </div>
 
-        <a :href="link" target="_blank" rel="noopener" class="btn mt-5 w-full bg-[#25d366] text-white hover:bg-[#1eb957]" :class="{ 'pointer-events-none opacity-50': !link }">
-          <svg viewBox="0 0 24 24" class="h-5 w-5" aria-hidden="true"><path fill="currentColor" d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2Zm5.3 14.1c-.2.6-1.3 1.2-1.8 1.2-.5.1-1 .1-3.2-.7-2.7-1.1-4.4-3.8-4.5-4-.1-.2-1.1-1.4-1.1-2.7 0-1.3.7-1.9.9-2.2.2-.3.5-.3.7-.3h.5c.2 0 .4 0 .6.5l.8 2c.1.2.1.4 0 .5l-.3.5-.4.4c-.1.1-.3.3-.1.6.2.3.7 1.2 1.5 1.9 1 .9 1.9 1.2 2.2 1.3.3.1.4.1.6-.1l.8-1c.2-.3.4-.2.6-.1l1.9.9c.3.1.5.2.5.3.1.2.1.7-.1 1.2Z" /></svg>
-          Pesan via WhatsApp
+        <NuxtLink :to="checkoutUrl" class="btn-primary mt-5 w-full" :class="{ 'pointer-events-none opacity-50': !checkoutUrl }" @click="emit('close')">
+          Bayar Sekarang
+        </NuxtLink>
+        <a :href="waUrl" target="_blank" rel="noopener" class="btn-ghost mt-2 w-full">
+          Tanya dulu via WhatsApp{{ reseller ? ` · ${reseller.business_name}` : '' }}
         </a>
-        <p class="mt-3 text-center text-xs text-brand-500">Setelah pembayaran, admin akan mengirim <b>token 6 karakter</b> untuk membuat akun Anda.</p>
+        <p class="mt-3 text-center text-xs text-brand-500">Pembayaran aman via QRIS, virtual account, atau e-wallet. Token aktivasi langsung muncul setelah lunas.</p>
       </div>
     </div>
   </Transition>

@@ -67,6 +67,11 @@ npm run dev               # http://localhost:3000
    | `NUXT_PUBLIC_SITE_URL` | domain undangan, mis. `https://undangin.id` |
    | `NUXT_PUBLIC_SITE_NAME` | nama brand (opsional, default `Undangin`) |
    | `NUXT_ANTHROPIC_API_KEY` | API key Claude untuk generator tema AI (rahasia) |
+   | `NUXT_TRIPAY_MODE` | `sandbox` atau `production` |
+   | `NUXT_TRIPAY_API_KEY` | API key Tripay (rahasia) |
+   | `NUXT_TRIPAY_PRIVATE_KEY` | private key Tripay (rahasia) |
+   | `NUXT_TRIPAY_MERCHANT_CODE` | kode merchant Tripay, mis. `T12345` |
+   | `NUXT_SERVER_RPC_SECRET` | string acak panjang; hash SHA-256-nya disimpan di `private.secrets` (rahasia) |
 
 3. Di Supabase → **Authentication → URL Configuration**: isi *Site URL* dengan domain Vercel Anda dan tambahkan
    `https://domain-anda/confirm` serta `https://domain-anda/reset-password` ke *Redirect URLs*.
@@ -81,6 +86,23 @@ update public.profiles set role = 'admin' where email = 'email-anda@contoh.com';
 ```
 
 Untuk membuat akun admin tanpa token, buat user di **Authentication → Users → Add user**, lalu jalankan query di atas.
+
+## Reseller & pembayaran (Tripay)
+
+- **Alur pembeli:** katalog → `/checkout/<tema>` → pilih metode (QRIS/VA/e-wallet) → `/pesanan/<id>` → setelah lunas
+  token aktivasi muncul otomatis → `/daftar?token=…`.
+- **Callback Tripay:** set di dashboard merchant ke `https://<domain>/api/payments/tripay/callback`. Signature
+  `X-Callback-Signature` diverifikasi, lalu status dicek ulang ke API Tripay sebelum pesanan ditandai lunas.
+  Callback dengan `merchant_ref` yang tidak diawali `UDG-` diabaikan (aman jika merchant dipakai situs lain).
+- **Reseller:** daftar di `/reseller`, disetujui admin di `/admin/reseller` (bisa pakai tarif default atau tarif
+  khusus). Pembeli lewat `/r/KODE` atau `?ref=KODE` tercatat 30 hari sebagai penjualan reseller; reseller juga bisa
+  membuat link pembayaran dari dashboard-nya.
+- **Bagi hasil:** dihitung dari harga paket (biaya gateway ditanggung pembeli/platform) dan tarifnya dikunci per
+  pesanan. Semua saldo berasal dari ledger append-only `ledger_entries`.
+- **Pencairan:** reseller mengajukan kapan saja (≥ minimum), saldo langsung ditahan, dan dijadwalkan ke tanggal
+  pencairan berikutnya (atur di `/admin/pengaturan`, default 5 & 25). Admin mentransfer **manual** ke rekening
+  reseller, lalu menandai "sudah ditransfer" dengan nomor referensi di `/admin/pencairan` (ada ekspor CSV).
+- **Produksi:** ganti `NUXT_TRIPAY_MODE=production` + kunci produksi, dan ubah URL callback di merchant produksi.
 
 ## Database
 
