@@ -7,8 +7,12 @@ import { compileTheme } from '../server/utils/theme-compiler'
 import * as sakinah from './themes/sakinah-sage'
 import * as minimalis from './themes/minimalis-monokrom'
 import * as floral from './themes/floral-blush'
+import * as bugis from './themes/walasuji-bugis'
+import * as noir from './themes/royal-noir'
+import * as arka from './themes/arka-modern'
+import * as rustic from './themes/rustic-ilalang'
 
-const themes = [sakinah, minimalis, floral]
+const themes = [sakinah, minimalis, floral, arka, noir, rustic, bugis]
 const q = (s: string) => `'${s.replace(/'/g, "''")}'`
 const rows: string[] = []
 let failed = false
