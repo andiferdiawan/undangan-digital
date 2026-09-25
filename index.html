@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#1f3b33">
+  <title>Walimatul 'Urs — Ahmad &amp; Aisyah</title>
+  <meta name="description" content="Undangan Walimatul 'Urs Ahmad & Aisyah">
+  <meta property="og:title" content="Walimatul 'Urs — Ahmad & Aisyah">
+  <meta property="og:description" content="Dengan memohon rahmat Allah, kami mengundang Anda untuk hadir di acara pernikahan kami.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=Poppins:wght@300;400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/style.css">
+</head>
+<body class="locked">
+
+  <!-- Pola SVG yang dipakai ulang -->
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <defs>
+      <symbol id="star8" viewBox="0 0 100 100">
+        <g fill="none" stroke="currentColor" stroke-width="2">
+          <rect x="20" y="20" width="60" height="60"/>
+          <rect x="20" y="20" width="60" height="60" transform="rotate(45 50 50)"/>
+          <circle cx="50" cy="50" r="14"/>
+        </g>
+      </symbol>
+      <symbol id="divider" viewBox="0 0 240 24">
+        <g fill="none" stroke="currentColor" stroke-width="1.2">
+          <path d="M0 12 H92"/><path d="M148 12 H240"/>
+          <path d="M120 2 L130 12 L120 22 L110 12 Z"/>
+          <path d="M100 12 L106 6 L112 12 L106 18 Z"/>
+          <path d="M128 12 L134 6 L140 12 L134 18 Z"/>
+        </g>
+      </symbol>
+    </defs>
+  </svg>
+
+  <!-- ============ COVER ============ -->
+  <section id="cover" class="cover">
+    <div class="cover-inner">
+      <svg class="cover-star spin" aria-hidden="true"><use href="#star8"/></svg>
+      <p class="label">Walimatul 'Urs</p>
+      <h1 class="couple-names"><span data-bind="groomNick">Ahmad</span><em>&amp;</em><span data-bind="brideNick">Aisyah</span></h1>
+      <svg class="divider" aria-hidden="true"><use href="#divider"/></svg>
+      <p class="to-label">Kepada Yth. Bapak/Ibu/Saudara/i</p>
+      <p class="guest-name" id="guestName">Tamu Undangan</p>
+      <p class="to-note">Mohon maaf apabila ada kesalahan penulisan nama/gelar</p>
+      <button class="btn btn-primary" id="openBtn" type="button">
+        <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path fill="currentColor" d="M20 4H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2Zm0 4-8 5-8-5V6l8 5 8-5v2Z"/></svg>
+        Buka Undangan
+      </button>
+    </div>
+  </section>
+
+  <main id="main" class="main" aria-hidden="true">
+
+    <!-- ============ PEMBUKA ============ -->
+    <section class="section hero">
+      <div class="arch">
+        <p class="arabic bismillah">بِسْمِ اللّٰهِ الرَّحْمٰنِ الرَّحِيْمِ</p>
+        <p class="label">The Wedding of</p>
+        <h2 class="couple-names big"><span data-bind="groomNick">Ahmad</span><em>&amp;</em><span data-bind="brideNick">Aisyah</span></h2>
+        <svg class="divider" aria-hidden="true"><use href="#divider"/></svg>
+        <p class="hero-date" data-bind="akadDateText">Sabtu, 12 Desember 2026</p>
+      </div>
+    </section>
+
+    <!-- ============ AYAT ============ -->
+    <section class="section reveal">
+      <div class="card ayat">
+        <p class="arabic">وَمِنْ اٰيٰتِهٖٓ اَنْ خَلَقَ لَكُمْ مِّنْ اَنْفُسِكُمْ اَزْوَاجًا لِّتَسْكُنُوْٓا اِلَيْهَا وَجَعَلَ بَيْنَكُمْ مَّوَدَّةً وَّرَحْمَةً ۗاِنَّ فِيْ ذٰلِكَ لَاٰيٰتٍ لِّقَوْمٍ يَّتَفَكَّرُوْنَ</p>
+        <p class="translation">"Dan di antara tanda-tanda (kebesaran)-Nya ialah Dia menciptakan pasangan-pasangan untukmu dari jenismu sendiri, agar kamu cenderung dan merasa tenteram kepadanya, dan Dia menjadikan di antaramu rasa kasih dan sayang. Sungguh, pada yang demikian itu benar-benar terdapat tanda-tanda (kebesaran Allah) bagi kaum yang berpikir."</p>
+        <p class="source">QS. Ar-Rum : 21</p>
+      </div>
+    </section>
+
+    <!-- ============ MEMPELAI ============ -->
+    <section class="section reveal" id="mempelai">
+      <p class="arabic salam">اَلسَّلَامُ عَلَيْكُمْ وَرَحْمَةُ اللّٰهِ وَبَرَكَاتُهُ</p>
+      <p class="lead">Dengan memohon rahmat dan ridha Allah Subhanahu wa Ta'ala, kami bermaksud menyelenggarakan pernikahan putra-putri kami:</p>
+
+      <div class="person">
+        <div class="monogram" aria-hidden="true"><svg><use href="#star8"/></svg><span data-bind="groomInitial">A</span></div>
+        <h3 class="person-name" data-bind="groomName">Ahmad Fauzan, S.Pd.</h3>
+        <p class="person-parent">Putra dari <span data-bind="groomParents">Bapak Abdullah &amp; Ibu Khadijah</span></p>
+        <a class="ig" data-bind-href="groomIg" href="#" target="_blank" rel="noopener">@ahmadfauzan</a>
+      </div>
+
+      <p class="and">&amp;</p>
+
+      <div class="person">
+        <div class="monogram" aria-hidden="true"><svg><use href="#star8"/></svg><span data-bind="brideInitial">A</span></div>
+        <h3 class="person-name" data-bind="brideName">Aisyah Humaira, S.Kom.</h3>
+        <p class="person-parent">Putri dari <span data-bind="brideParents">Bapak Umar &amp; Ibu Fatimah</span></p>
+        <a class="ig" data-bind-href="brideIg" href="#" target="_blank" rel="noopener">@aisyahhumaira</a>
+      </div>
+    </section>
+
+    <!-- ============ COUNTDOWN ============ -->
+    <section class="section reveal">
+      <h2 class="section-title">Menuju Hari Bahagia</h2>
+      <svg class="divider" aria-hidden="true"><use href="#divider"/></svg>
+      <div class="countdown" id="countdown">
+        <div><b id="cd-d">00</b><span>Hari</span></div>
+        <div><b id="cd-h">00</b><span>Jam</span></div>
+        <div><b id="cd-m">00</b><span>Menit</span></div>
+        <div><b id="cd-s">00</b><span>Detik</span></div>
+      </div>
+      <a class="btn btn-outline" id="calendarBtn" href="#" target="_blank" rel="noopener">
+        <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path fill="currentColor" d="M7 2v2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2h-2V2h-2v2H9V2H7Zm12 8v10H5V10h14Z"/></svg>
+        Simpan ke Kalender
+      </a>
+    </section>
+
+    <!-- ============ ACARA ============ -->
+    <section class="section reveal" id="acara">
+      <h2 class="section-title">Waktu &amp; Tempat</h2>
+      <svg class="divider" aria-hidden="true"><use href="#divider"/></svg>
+
+      <div class="card event">
+        <p class="event-title">Akad Nikah</p>
+        <p class="event-date" data-bind="akadDateText">Sabtu, 12 Desember 2026</p>
+        <p class="event-time" data-bind="akadTime">08.00 – 10.00 WIB</p>
+        <p class="event-place" data-bind="akadPlace">Masjid Al-Ikhlas</p>
+        <p class="event-address" data-bind="akadAddress">Jl. Contoh No. 1, Kota Anda</p>
+        <a class="btn btn-primary small" data-bind-href="akadMaps" href="#" target="_blank" rel="noopener">Lihat Lokasi</a>
+      </div>
+
+      <div class="card event">
+        <p class="event-title">Walimatul 'Urs</p>
+        <p class="event-date" data-bind="walimahDateText">Sabtu, 12 Desember 2026</p>
+        <p class="event-time" data-bind="walimahTime">11.00 – 14.00 WIB</p>
+        <p class="event-place" data-bind="walimahPlace">Kediaman Mempelai Wanita</p>
+        <p class="event-address" data-bind="walimahAddress">Jl. Contoh No. 2, Kota Anda</p>
+        <a class="btn btn-primary small" data-bind-href="walimahMaps" href="#" target="_blank" rel="noopener">Lihat Lokasi</a>
+      </div>
+    </section>
+
+    <!-- ============ ADAB WALIMAH ============ -->
+    <section class="section reveal">
+      <h2 class="section-title">Adab Menghadiri Walimah</h2>
+      <svg class="divider" aria-hidden="true"><use href="#divider"/></svg>
+      <ul class="adab">
+        <li><span>1</span>Tempat tamu ikhwan dan akhwat dipisah.</li>
+        <li><span>2</span>Mengenakan pakaian yang menutup aurat dan sopan.</li>
+        <li><span>3</span>Makan dan minum dengan tangan kanan sambil duduk.</li>
+        <li><span>4</span>Mendoakan kedua mempelai dengan doa yang dicontohkan Rasulullah ﷺ.</li>
+        <li><span>5</span>Menjaga pandangan dan tidak berikhtilath.</li>
+      </ul>
+    </section>
+
+    <!-- ============ DOA ============ -->
+    <section class="section reveal">
+      <div class="card ayat">
+        <p class="arabic">بَارَكَ اللّٰهُ لَكَ وَبَارَكَ عَلَيْكَ وَجَمَعَ بَيْنَكُمَا فِيْ خَيْرٍ</p>
+        <p class="translation">"Semoga Allah memberkahimu di waktu bahagia dan memberkahimu di waktu susah, serta semoga Allah mempersatukan kalian berdua dalam kebaikan."</p>
+        <p class="source">HR. Abu Dawud, At-Tirmidzi, Ibnu Majah</p>
+      </div>
+    </section>
+
+    <!-- ============ RSVP ============ -->
+    <section class="section reveal" id="rsvp">
+      <h2 class="section-title">Konfirmasi Kehadiran</h2>
+      <svg class="divider" aria-hidden="true"><use href="#divider"/></svg>
+      <p class="lead">Kehadiran dan doa restu Anda merupakan kebahagiaan bagi kami.</p>
+      <form class="form" id="rsvpForm" novalidate>
+        <label>Nama
+          <input type="text" name="nama" id="rsvpName" required maxlength="60" autocomplete="name">
+        </label>
+        <label>Jumlah tamu
+          <select name="jumlah">
+            <option>1</option><option>2</option><option>3</option><option>4</option>
+          </select>
+        </label>
+        <fieldset class="radio-group">
+          <legend>Kehadiran</legend>
+          <label><input type="radio" name="hadir" value="Insya Allah hadir" checked> Insya Allah hadir</label>
+          <label><input type="radio" name="hadir" value="Mohon maaf, tidak dapat hadir"> Tidak dapat hadir</label>
+        </fieldset>
+        <label>Doa &amp; ucapan
+          <textarea name="ucapan" rows="4" maxlength="400" placeholder="Barakallahu lakuma..."></textarea>
+        </label>
+        <p class="form-error" id="formError" role="alert"></p>
+        <button class="btn btn-primary block" type="submit">
+          <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path fill="currentColor" d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2Zm5.3 14.1c-.2.6-1.3 1.2-1.8 1.2-.5.1-1 .1-3.2-.7-2.7-1.1-4.4-3.8-4.5-4-.1-.2-1.1-1.4-1.1-2.7 0-1.3.7-1.9.9-2.2.2-.3.5-.3.7-.3h.5c.2 0 .4 0 .6.5l.8 2c.1.2.1.4 0 .5l-.3.5-.4.4c-.1.1-.3.3-.1.6.2.3.7 1.2 1.5 1.9 1 .9 1.9 1.2 2.2 1.3.3.1.4.1.6-.1l.8-1c.2-.3.4-.2.6-.1l1.9.9c.3.1.5.2.5.3.1.2.1.7-.1 1.2Z"/></svg>
+          Kirim via WhatsApp
+        </button>
+      </form>
+    </section>
+
+    <!-- ============ AMPLOP DIGITAL ============ -->
+    <section class="section reveal" id="hadiah">
+      <h2 class="section-title">Amplop Digital</h2>
+      <svg class="divider" aria-hidden="true"><use href="#divider"/></svg>
+      <p class="lead">Doa restu Anda sudah lebih dari cukup. Namun apabila ingin memberikan tanda kasih, dapat melalui:</p>
+      <div id="giftList"></div>
+    </section>
+
+    <!-- ============ PENUTUP ============ -->
+    <section class="section reveal closing">
+      <p class="lead">Merupakan suatu kehormatan dan kebahagiaan bagi kami apabila Bapak/Ibu/Saudara/i berkenan hadir dan memberikan doa restu.</p>
+      <p class="lead">Jazakumullahu khairan.</p>
+      <p class="arabic salam">وَالسَّلَامُ عَلَيْكُمْ وَرَحْمَةُ اللّٰهِ وَبَرَكَاتُهُ</p>
+      <p class="label">Kami yang berbahagia</p>
+      <h2 class="couple-names"><span data-bind="groomNick">Ahmad</span><em>&amp;</em><span data-bind="brideNick">Aisyah</span></h2>
+      <p class="family">Beserta keluarga besar kedua mempelai</p>
+      <svg class="cover-star" aria-hidden="true"><use href="#star8"/></svg>
+    </section>
+
+    <footer class="footer">Undangan Digital · Tema Syar'i</footer>
+  </main>
+
+  <!-- Navigasi bawah -->
+  <nav class="bottom-nav" id="bottomNav" aria-label="Navigasi">
+    <a href="#mempelai"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 21s-7-4.4-9.3-9A5.3 5.3 0 0 1 12 6a5.3 5.3 0 0 1 9.3 6c-2.3 4.6-9.3 9-9.3 9Z"/></svg>Mempelai</a>
+    <a href="#acara"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M7 2v2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2h-2V2h-2v2H9V2H7Zm12 8v10H5V10h14Z"/></svg>Acara</a>
+    <a href="#rsvp"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M4 4h16a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H7l-5 4V6a2 2 0 0 1 2-2Z"/></svg>RSVP</a>
+    <a href="#hadiah"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M20 7h-2.2A3 3 0 0 0 12 4a3 3 0 0 0-5.8 3H4a1 1 0 0 0-1 1v3h8V7h2v4h8V8a1 1 0 0 0-1-1ZM9 7a1 1 0 1 1 1-1v1H9Zm6 0h-1V6a1 1 0 1 1 1 1ZM4 13v7a1 1 0 0 0 1 1h6v-8H4Zm9 8h6a1 1 0 0 0 1-1v-7h-7v8Z"/></svg>Hadiah</a>
+  </nav>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script src="assets/config.js"></script>
+  <script src="assets/script.js"></script>
+</body>
+</html>
