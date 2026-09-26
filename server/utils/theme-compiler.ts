@@ -27,7 +27,8 @@ export async function compileTheme(definition: unknown): Promise<CompileResult> 
   // Di-scope ke .invite-root: specificity lebih tinggi dari reset CSS dan tidak bocor ke UI aplikasi
   const { css, matched } = await uno.generate(tokens, { preflights: false, minify: true, scope: '.invite-root' })
 
-  const unknown = [...tokens].filter(t => !matched.has(t))
+  // uv-* = kelas motion yang di-style oleh renderer (InviteRenderer.vue), bukan UnoCSS
+  const unknown = [...tokens].filter(t => !matched.has(t) && !t.startsWith('uv-'))
   if (unknown.length)
     result.warnings.push(`Kelas tidak dikenali & diabaikan: ${unknown.slice(0, 20).join(', ')}${unknown.length > 20 ? ', …' : ''}`)
 

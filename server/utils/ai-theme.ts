@@ -115,6 +115,7 @@ Tema dirender oleh sistem dari JSON terstruktur (Standardized Template Framework
 - DILARANG: url(...) di kelas, breakpoint, kelas custom yang bukan utilitas Tailwind.
 - Jangan pakai "text-base" (bentrok dengan warna latar "base"): untuk ukuran pakai "text-[16px]", untuk warna teks pakai "text-ink".
 - Tema berbasis foto boleh memakai komponen "photo_slider" (foto dari Foto Sampul pelanggan, fallback galeri) sebagai latar section yang "relative overflow-hidden".
+- Kelas motion (opsional): "uv-reveal", "uv-reveal-zoom", "uv-reveal-left", "uv-reveal-right", "uv-reveal-flip" = muncul beranimasi saat digulir, tunda dengan "uv-d1".."uv-d5"; "uv-tilt" = kartu 3D mengikuti kemiringan ponsel, anaknya boleh "uv-depth-1".."uv-depth-3" untuk lapisan (jangan beri overflow-hidden pada "uv-tilt"); "uv-float3d"/"uv-spin3d" = ornamen berputar 3D; "uv-shine" = kilau. Jangan gabungkan kelas motion dengan kelas translate/rotate/scale di elemen yang sama.
 - Warna WAJIB lewat variabel global agar user bisa menggantinya:
 ${colors}
 - Font: font-heading, font-body, font-script, dan font-arabic (Amiri, untuk teks Arab).

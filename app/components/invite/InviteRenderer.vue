@@ -76,12 +76,17 @@ const musicSrc = computed(() => {
 })
 const music = ref<{ play: () => void } | null>(null)
 
+// ---------- Motion (reveal saat scroll, kartu 3D) ----------
+const rootEl = ref<HTMLElement | null>(null)
+const motion = useInviteMotion(rootEl, () => props.mode !== 'thumb')
+
 const coverOpen = ref(!cover.value)
 const wishesVersion = ref(0)
 function openCover() {
   coverOpen.value = true
   // Diputar langsung di dalam handler klik agar tidak diblokir kebijakan autoplay
   music.value?.play()
+  motion.enableGyro()
   if (props.mode === 'page' && import.meta.client) window.scrollTo({ top: 0 })
 }
 watch(cover, (c) => { if (!c) coverOpen.value = true })
@@ -123,8 +128,9 @@ const bgUrl = (bg?: string) => {
 <template>
   <div class="invite-wrap">
     <div
+      ref="rootEl"
       class="invite-root relative isolate overflow-x-hidden bg-base font-body text-ink"
-      :class="`invite-${mode}`"
+      :class="[`invite-${mode}`, { 'uv-motion': motion.active.value }]"
       :style="cssVars"
     >
       <!-- CSS tema di-scope ke .invite-root, jadi root_class dipasang di pembungkus dalam -->
@@ -172,4 +178,49 @@ const bgUrl = (bg?: string) => {
 .invite-page { max-width: 480px; margin: 0 auto; min-height: 100vh; box-shadow: 0 0 40px rgb(0 0 0 / 0.08); }
 .invite-cover-leave-active { transition: transform 0.8s cubic-bezier(0.7, 0, 0.3, 1), opacity 0.8s; }
 .invite-cover-leave-to { transform: translateY(-100%); opacity: 0; }
+
+/* ---------- Motion tema (lihat useInviteMotion) ---------- */
+.invite-root { --uv-rx: 0deg; --uv-ry: 0deg; }
+.invite-root.uv-motion [class*="uv-reveal"]:not(.uv-in) { opacity: 0; }
+.invite-root .uv-in.uv-reveal { animation: uv-up 0.9s cubic-bezier(0.2, 0.7, 0.2, 1) backwards; }
+.invite-root .uv-in.uv-reveal-zoom { animation: uv-zoom 1s cubic-bezier(0.2, 0.7, 0.2, 1) backwards; }
+.invite-root .uv-in.uv-reveal-left { animation: uv-left 0.9s cubic-bezier(0.2, 0.7, 0.2, 1) backwards; }
+.invite-root .uv-in.uv-reveal-right { animation: uv-right 0.9s cubic-bezier(0.2, 0.7, 0.2, 1) backwards; }
+.invite-root .uv-in.uv-reveal-flip { animation: uv-flip 1.1s cubic-bezier(0.2, 0.7, 0.2, 1) backwards; }
+.invite-root .uv-in.uv-d1 { animation-delay: 0.12s; }
+.invite-root .uv-in.uv-d2 { animation-delay: 0.24s; }
+.invite-root .uv-in.uv-d3 { animation-delay: 0.36s; }
+.invite-root .uv-in.uv-d4 { animation-delay: 0.5s; }
+.invite-root .uv-in.uv-d5 { animation-delay: 0.7s; }
+.invite-root .uv-tilt {
+  transform: perspective(1000px) rotateX(var(--uv-rx)) rotateY(var(--uv-ry));
+  transform-style: preserve-3d;
+  will-change: transform;
+}
+.invite-root .uv-tilt .uv-depth-1 { transform: translateZ(24px); }
+.invite-root .uv-tilt .uv-depth-2 { transform: translateZ(48px); }
+.invite-root .uv-tilt .uv-depth-3 { transform: translateZ(80px); }
+.invite-root .uv-float3d { animation: uv-float3d 7s ease-in-out infinite; transform-style: preserve-3d; }
+.invite-root .uv-spin3d { animation: uv-spin3d 14s linear infinite; transform-style: preserve-3d; }
+.invite-root .uv-shine { position: relative; overflow: hidden; }
+.invite-root .uv-shine::after {
+  content: ''; position: absolute; inset: 0; pointer-events: none;
+  background: linear-gradient(115deg, transparent 35%, rgb(255 255 255 / 0.45) 50%, transparent 65%);
+  transform: translateX(-120%); animation: uv-shine 5.5s ease-in-out infinite;
+}
+@keyframes uv-up { from { opacity: 0; transform: translateY(28px); filter: blur(4px); } }
+@keyframes uv-zoom { from { opacity: 0; transform: scale(0.86); filter: blur(6px); } }
+@keyframes uv-left { from { opacity: 0; transform: translateX(-40px); } }
+@keyframes uv-right { from { opacity: 0; transform: translateX(40px); } }
+@keyframes uv-flip { from { opacity: 0; transform: perspective(900px) rotateX(55deg) translateY(30px); } }
+@keyframes uv-float3d {
+  0%, 100% { transform: perspective(700px) translateY(0) rotateY(-14deg) rotateX(4deg); }
+  50% { transform: perspective(700px) translateY(-10px) rotateY(14deg) rotateX(-4deg); }
+}
+@keyframes uv-spin3d { from { transform: perspective(700px) rotateY(0deg); } to { transform: perspective(700px) rotateY(360deg); } }
+@keyframes uv-shine { 0%, 55% { transform: translateX(-120%); } 85%, 100% { transform: translateX(120%); } }
+@media (prefers-reduced-motion: reduce) {
+  .invite-root .uv-float3d, .invite-root .uv-spin3d, .invite-root .uv-shine::after { animation: none; }
+  .invite-root .uv-tilt { transform: none; }
+}
 </style>

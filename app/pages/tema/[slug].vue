@@ -9,15 +9,15 @@ const ordering = ref(false)
 const frameKey = ref(0)
 
 const desc = computed(() => `Tema undangan pernikahan digital ${theme.value?.name}${category.value ? ` (${category.value.name})` : ''}. ${theme.value?.description ?? ''} Lihat preview langsung, isi sendiri dari ponsel, dan bagikan link personal ke setiap tamu.`.replace(/\s+/g, ' ').trim())
+const origin = useSiteOrigin()
 useSeoMeta({
   title: () => `Tema ${theme.value?.name}${category.value ? ` — Undangan ${category.value.name}` : ''}`,
   description: desc,
   ogTitle: () => `Tema Undangan ${theme.value?.name} · ${BRAND.name}`,
   ogDescription: desc,
-  ogImage: () => `${useSiteOrigin()}/og/tema/${theme.value?.slug}.png?v=brand1`,
+  ogImage: () => `${origin}/og/tema/${theme.value?.slug}.png?v=brand1`,
   twitterCard: 'summary_large_image',
 })
-const origin = useSiteOrigin()
 useJsonLd('theme', () => !theme.value ? null : ({
   '@context': 'https://schema.org',
   '@graph': [
