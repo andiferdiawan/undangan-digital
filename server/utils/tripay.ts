@@ -36,10 +36,14 @@ export interface TripayTransaction {
 }
 
 export function tripayConfig(event?: H3Event) {
-  const c = useRuntimeConfig(event).tripay as { mode: string, apiKey: string, privateKey: string, merchantCode: string }
+  const raw = useRuntimeConfig(event).tripay as { mode: string, apiKey: string, privateKey: string, merchantCode: string }
+  // Spasi/baris baru ikut tersalin saat paste ke dashboard Vercel → Tripay membalas "Invalid API Key".
+  const c = { mode: String(raw.mode ?? '').trim(), apiKey: String(raw.apiKey ?? '').trim(), privateKey: String(raw.privateKey ?? '').trim(), merchantCode: String(raw.merchantCode ?? '').trim() }
   if (!c.apiKey || !c.privateKey || !c.merchantCode)
     throw createError({ statusCode: 500, statusMessage: 'Payment gateway belum dikonfigurasi' })
   const production = c.mode === 'production'
+  if (production === c.apiKey.startsWith('DEV-'))
+    throw createError({ statusCode: 500, statusMessage: production ? 'Tripay: API key sandbox (DEV-…) dipakai di mode production' : 'Tripay: API key production dipakai di mode sandbox' })
   return { ...c, baseUrl: production ? 'https://tripay.co.id/api/' : 'https://tripay.co.id/api-sandbox/' }
 }
 
