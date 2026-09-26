@@ -1,166 +1,106 @@
-import { createHash } from 'node:crypto'
 import satori from 'satori'
 import { Resvg } from '@resvg/resvg-js'
-import type { ThemeDefinition, ThemeGlobals } from '#shared/theme/schema'
-import { withDefaults as contentWithDefaults, type InvitationContent } from '#shared/theme/content'
-import { dateParts, safeUrl } from '#shared/theme/context'
-import { mergeGlobals } from '#shared/theme/style'
 
 /**
- * Gambar pratinjau link (Open Graph) 1200×630 untuk WhatsApp/medsos.
- * Isi penting diletakkan di tengah karena WhatsApp memotong bagian tengah
- * menjadi persegi pada pratinjau kecil.
+ * Gambar pratinjau link (Open Graph) 1200×630 bergaya iklan brand Undangan Virtual:
+ * logo, tagline, dan fitur tetap sama; hanya nama mempelai & tanggal di layar ponsel
+ * yang dinamis mengikuti undangan.
  */
 export const OG_W = 1200
 export const OG_H = 630
 
-export interface OgInput {
-  definition: ThemeDefinition
-  style?: Record<string, string>
-  assets?: Record<string, string>
-  content: InvitationContent
-  themeName: string
-  /** Teks kecil di bawah, mis. undanganvirtual.com/asdar */
-  footer: string
+const C = {
+  cream: '#fbf7f0', green: '#2f4a3a', greenDark: '#243a2d', sage: '#5f8666',
+  text: '#4a6c52', clay: '#d9825b', clayDark: '#964c30', clayLight: '#fbe3d2',
 }
 
 type Node = { type: string, props: Record<string, any> }
 const h = (type: string, style: Record<string, any>, children?: (Node | string | null)[] | string, extra: Record<string, any> = {}): Node =>
   ({ type, props: { style: { display: 'flex', ...style }, children, ...extra } })
 
+const svgUri = (svg: string) => `data:image/svg+xml;base64,${Buffer.from(svg).toString('base64')}`
+
+const LOGO = svgUri(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none"><rect width="64" height="64" rx="16" fill="#eef3ec"/><rect x="17" y="10" width="30" height="27" rx="3.5" fill="#b9d3b3"/><path d="M32 27.5s-6.6-3.9-6.6-8.2a3.6 3.6 0 0 1 6.6-2 3.6 3.6 0 0 1 6.6 2c0 4.3-6.6 8.2-6.6 8.2z" fill="#d9825b"/><path d="M8 27 L32 43.5 L56 27 V49 a5 5 0 0 1 -5 5 H13 a5 5 0 0 1 -5 -5Z" fill="#3b5744"/><path d="M13.5 32.5 L32 45.5 L50.5 32.5" stroke="#ffffff" stroke-width="4.2" stroke-linecap="round" stroke-linejoin="round"/><path d="M52 6.5 l1.7 4.4 4.4 1.7 -4.4 1.7 -1.7 4.4 -1.7 -4.4 -4.4 -1.7 4.4 -1.7z" fill="#d9825b"/></svg>`)
+
+/** Panel kanan: hijau dengan pola bintang delapan tipis */
+const PANEL = svgUri(`<svg xmlns="http://www.w3.org/2000/svg" width="430" height="630"><defs><pattern id="p" width="70" height="70" patternUnits="userSpaceOnUse"><g fill="none" stroke="#fbf7f0" stroke-opacity=".13" stroke-width="1.5"><rect x="20" y="20" width="30" height="30"/><rect x="20" y="20" width="30" height="30" transform="rotate(45 35 35)"/></g></pattern></defs><rect width="430" height="630" fill="${C.green}"/><rect width="430" height="630" fill="url(#p)"/></svg>`)
+
 // ---------- Font (TTF dari Google Fonts, disimpan di memori) ----------
-const fontCache = new Map<string, Promise<ArrayBuffer | null>>()
-function loadFont(family: string, weight = 400): Promise<ArrayBuffer | null> {
+const fontCache = new Map<string, Promise<ArrayBuffer>>()
+function loadFont(family: string, weight: number): Promise<ArrayBuffer> {
   const key = `${family}:${weight}`
   if (!fontCache.has(key)) {
-    fontCache.set(key, (async () => {
-      try {
-        const css = await $fetch<string>(`https://fonts.googleapis.com/css2?family=${encodeURIComponent(family).replace(/%20/g, '+')}:wght@${weight}`, { responseType: 'text' })
-        const url = /src:\s*url\((https:[^)]+\.ttf)\)/.exec(css)?.[1]
-        return url ? await $fetch<ArrayBuffer>(url, { responseType: 'arrayBuffer' }) : null
-      }
-      catch { return null }
-    })())
+    const p = (async () => {
+      const css = await $fetch<string>(`https://fonts.googleapis.com/css2?family=${family.replace(/ /g, '+')}:wght@${weight}`, { responseType: 'text' })
+      const url = /src:\s*url\((https:[^)]+\.ttf)\)/.exec(css)?.[1]
+      if (!url) throw new Error(`Font ${family} tidak ditemukan`)
+      return await $fetch<ArrayBuffer>(url, { responseType: 'arrayBuffer' })
+    })()
+    p.catch(() => fontCache.delete(key)) // coba lagi pada permintaan berikutnya
+    fontCache.set(key, p)
   }
   return fontCache.get(key)!
 }
 
-// ---------- Gambar → data URI (SVG & foto) ----------
-async function toDataUri(url: string, origin: string): Promise<{ src: string, ratio: number } | null> {
-  if (!url) return null
-  const abs = url.startsWith('/') ? `${origin}${url}` : url
-  if (!/^https?:\/\//.test(abs)) return null
-  try {
-    const res = await fetch(abs, { signal: AbortSignal.timeout(6000) })
-    if (!res.ok) return null
-    const type = (res.headers.get('content-type') || '').split(';')[0]!.trim()
-    const buf = Buffer.from(await res.arrayBuffer())
-    if (buf.length > 6_000_000) return null
-    let ratio = 1
-    if (type.includes('svg')) {
-      const vb = /viewBox="\s*[-\d.]+[\s,]+[-\d.]+[\s,]+([\d.]+)[\s,]+([\d.]+)/.exec(buf.toString('utf8'))
-      if (vb) ratio = Number(vb[1]) / Number(vb[2])
-    }
-    return { src: `data:${type || 'image/png'};base64,${buf.toString('base64')}`, ratio }
-  }
-  catch { return null }
+/** Ukuran huruf nama agar muat di layar ponsel (lebar ±190px). */
+function nameSize(name: string) {
+  return Math.max(18, Math.min(30, Math.floor(190 / Math.max(1, name.length * 0.56))))
 }
 
-/** Aset ilustrasi utama tema untuk pratinjau (bukan pola/bingkai/ornamen kecil). */
-const DECOR = /pattern|fan|grain|kraft|sabbe|passura|ombak|frame|corner|divider|line|lights|twine|star|crescent|walasuji|ukiran|atap|petals|squiggle/
-function pickIllustration(assets: Record<string, string>): string {
-  for (const k of ['couple', 'hero', 'shapes', 'floral', 'pampas', 'rumah', 'tongkonan', 'losari', 'barre'])
-    if (assets[k]) return assets[k]!
-  return Object.entries(assets).find(([k, v]) => !DECOR.test(k) && /\.(svg|png|jpe?g|webp)$/i.test(v))?.[1] ?? ''
-}
-
-function isDark(hex: string): boolean {
-  const m = /^#?([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})$/i.exec(hex)
-  if (!m) return false
-  const [r, g, b] = [m[1], m[2], m[3]].map(x => parseInt(x!, 16) / 255)
-  return 0.2126 * r! + 0.7152 * g! + 0.0722 * b! < 0.45
-}
-
-export function ogVersion(input: { names: string, date: string, themeId: string, photo: string, style?: unknown }): string {
-  return createHash('sha1').update(JSON.stringify(input)).digest('hex').slice(0, 10)
-}
-
-export async function renderOgImage(input: OgInput, origin: string): Promise<Buffer> {
-  const g: ThemeGlobals = mergeGlobals(input.definition.globals, input.style)
-  const c = input.content
-  const names = `${c.groom.nickname} & ${c.bride.nickname}`
-  const date = dateParts(c.events[0]?.date ?? '')?.full ?? ''
-
-  // Sumber visual: foto (Foto Sampul → galeri → foto sampul override) atau ilustrasi tema
-  const assets = { ...(input.definition.assets ?? {}), ...(input.assets ?? {}) }
-  const photoUrl = safeUrl(c.cover_photos[0]?.url) || safeUrl(input.assets?.hero_image) || safeUrl(c.gallery[0]?.url)
-  const [photo, illus, fHead, fScript, fBody, fBodyBold] = await Promise.all([
-    photoUrl ? toDataUri(photoUrl, origin) : Promise.resolve(null),
-    photoUrl ? Promise.resolve(null) : toDataUri(pickIllustration(assets), origin),
-    loadFont(g.font_heading),
-    loadFont(g.font_script),
-    loadFont(g.font_body),
-    loadFont(g.font_body, 600),
+export async function renderBrandOg(opts: { groom: string, bride: string, date: string }): Promise<Buffer> {
+  const [marcellus, jakarta500, jakarta600] = await Promise.all([
+    loadFont('Marcellus', 400),
+    loadFont('Plus Jakarta Sans', 500),
+    loadFont('Plus Jakarta Sans', 600),
   ])
-  const fonts = [
-    fHead && { name: 'Heading', data: fHead, weight: 400 as const, style: 'normal' as const },
-    fScript && { name: 'Script', data: fScript, weight: 400 as const, style: 'normal' as const },
-    fBody && { name: 'Body', data: fBody, weight: 400 as const, style: 'normal' as const },
-    fBodyBold && { name: 'Body', data: fBodyBold, weight: 600 as const, style: 'normal' as const },
-  ].filter(Boolean) as { name: string, data: ArrayBuffer, weight: 400 | 600, style: 'normal' }[]
-  if (!fonts.length) throw createError({ statusCode: 503, statusMessage: 'Font tidak tersedia' })
+  const groom = opts.groom.trim().slice(0, 28) || 'Mempelai'
+  const bride = opts.bride.trim().slice(0, 28) || 'Mempelai'
+  const tag = (t: string) => h('div', { fontSize: 17, fontWeight: 600, color: C.clayDark, backgroundColor: C.clayLight, padding: '9px 16px', borderRadius: 999 }, t)
+  const name = (t: string) => h('div', { fontFamily: 'Marcellus', fontSize: nameSize(t), color: C.green, lineHeight: 1.15, textAlign: 'center', justifyContent: 'center', maxWidth: 190 }, t)
 
-  const nameSize = names.length > 22 ? 84 : names.length > 16 ? 100 : 118
-  const onPhoto = !!photo
-  const dark = !onPhoto && isDark(g.background_color)
-  const ink = onPhoto ? '#ffffff' : g.primary_color
-  const sub = onPhoto ? 'rgba(255,255,255,0.88)' : g.muted_color
+  const tree = h('div', { width: OG_W, height: OG_H, position: 'relative', backgroundColor: C.cream, fontFamily: 'Jakarta' }, [
+    // Kiri: brand
+    h('div', { position: 'absolute', left: 80, top: 0, width: 640, height: OG_H, flexDirection: 'column', justifyContent: 'center' }, [
+      h('div', { alignItems: 'center' }, [
+        h('img', { width: 60, height: 60 }, undefined, { src: LOGO, width: 60, height: 60 }),
+        h('div', { fontFamily: 'Marcellus', fontSize: 34, color: C.green, marginLeft: 16 }, 'Undangan Virtual'),
+      ]),
+      h('div', { flexDirection: 'column', fontFamily: 'Marcellus', fontSize: 66, lineHeight: 1.08, marginTop: 38 }, [
+        h('div', { color: C.green }, 'Satu Link,'),
+        h('div', { color: C.clay }, 'Sejuta Doa Restu'),
+      ]),
+      h('div', { flexDirection: 'column', fontSize: 23, fontWeight: 500, color: C.text, marginTop: 22, lineHeight: 1.45 }, [
+        h('div', {}, 'Undangan pernikahan digital syar\'i & modern.'),
+        h('div', {}, 'Isi sendiri dari ponsel, kirim ke setiap tamu.'),
+      ]),
+      h('div', { marginTop: 34, gap: 10 }, [tag('Syar\'i'), tag('Musik latar'), tag('RSVP'), tag('Amplop digital')]),
+    ]),
+    h('div', { position: 'absolute', left: 80, bottom: 42, fontSize: 19, fontWeight: 600, color: C.sage, letterSpacing: 0.4 }, 'undanganvirtual.com'),
 
-  const textBlock = h('div', { flexDirection: 'column', alignItems: 'center', textAlign: 'center' }, [
-    h('div', { fontFamily: 'Body', fontSize: 22, fontWeight: 600, letterSpacing: 8, textTransform: 'uppercase', color: onPhoto ? '#ffffff' : g.accent_color }, 'The Wedding of'),
-    h('div', { fontFamily: 'Script', fontSize: nameSize, lineHeight: 1.15, color: ink, marginTop: 8, maxWidth: 1000, justifyContent: 'center' }, names),
-    date ? h('div', { fontFamily: 'Heading', fontSize: 30, color: sub, marginTop: 10 }, date) : null,
-  ])
-
-  const footer = h('div', {
-    position: 'absolute', bottom: 28, left: 0, right: 0, justifyContent: 'center',
-  }, [
+    // Kanan: panel hijau + ponsel berisi nama mempelai (dinamis)
+    h('img', { position: 'absolute', right: 0, top: 0, width: 430, height: OG_H }, undefined, { src: PANEL, width: 430, height: OG_H }),
     h('div', {
-      fontFamily: 'Body', fontSize: 20, fontWeight: 600, color: onPhoto ? '#ffffff' : g.primary_color,
-      backgroundColor: onPhoto ? 'rgba(0,0,0,0.28)' : dark ? 'rgba(255,255,255,0.08)' : 'rgba(255,255,255,0.75)',
-      border: dark ? `1px solid ${g.primary_color}66` : 'none', padding: '8px 22px', borderRadius: 999,
-    }, `${input.footer}  ·  ${input.themeName}`),
+      position: 'absolute', left: 870, top: 100, width: 230, height: 430, borderRadius: 34,
+      backgroundColor: C.cream, border: `8px solid ${C.greenDark}`, boxShadow: '0 30px 60px rgba(0,0,0,0.35)',
+      flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: 16,
+    }, [
+      h('div', { fontSize: 11, fontWeight: 500, letterSpacing: 2.2, color: C.sage }, 'THE WEDDING OF'),
+      h('div', { marginTop: 14 }, [name(groom)]),
+      h('div', { fontFamily: 'Marcellus', fontSize: 24, color: C.clay, marginTop: 2 }, '&'),
+      h('div', { marginTop: 2 }, [name(bride)]),
+      opts.date ? h('div', { fontSize: 12, fontWeight: 500, color: C.text, marginTop: 14, textAlign: 'center' }, opts.date) : null,
+      h('div', { marginTop: 22, backgroundColor: C.green, color: '#ffffff', fontSize: 11, fontWeight: 600, padding: '9px 16px', borderRadius: 999 }, 'Buka Undangan'),
+    ]),
   ])
 
-  let tree: Node
-  if (photo) {
-    tree = h('div', { width: OG_W, height: OG_H, position: 'relative', backgroundColor: g.secondary_color }, [
-      h('img', { position: 'absolute', left: 0, top: 0, width: OG_W, height: OG_H, objectFit: 'cover', objectPosition: '50% 22%' }, undefined, { src: photo.src, width: OG_W, height: OG_H }),
-      h('div', { position: 'absolute', left: 0, top: 0, width: OG_W, height: OG_H, backgroundImage: `linear-gradient(180deg, rgba(0,0,0,0.10) 0%, rgba(0,0,0,0.25) 40%, ${g.secondary_color}F2 100%)` }),
-      h('div', { position: 'absolute', left: 0, right: 0, bottom: 96, justifyContent: 'center' }, [textBlock]),
-      footer,
-    ])
-  }
-  else {
-    const ih = 270
-    const iw = Math.round(ih * (illus?.ratio ?? 1))
-    tree = h('div', {
-      width: OG_W, height: OG_H, position: 'relative', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-      backgroundColor: g.background_color,
-      backgroundImage: `radial-gradient(circle at 50% 38%, ${g.surface_color} 0%, ${g.background_color} 62%)`,
-    }, [
-      // bingkai tipis
-      h('div', { position: 'absolute', left: 24, top: 24, right: 24, bottom: 24, border: `2px solid ${g.accent_color}55`, borderRadius: 28 }),
-      illus ? h('img', { width: Math.min(iw, 560), height: ih, objectFit: 'contain', marginTop: -44 }, undefined, { src: illus.src, width: Math.min(iw, 560), height: ih }) : null,
-      h('div', { marginTop: illus ? 4 : 0 }, [textBlock]),
-      footer,
-    ])
-  }
-
-  const svg = await satori(tree as any, { width: OG_W, height: OG_H, fonts })
+  const svg = await satori(tree as any, {
+    width: OG_W,
+    height: OG_H,
+    fonts: [
+      { name: 'Marcellus', data: marcellus, weight: 400, style: 'normal' },
+      { name: 'Jakarta', data: jakarta500, weight: 500, style: 'normal' },
+      { name: 'Jakarta', data: jakarta600, weight: 600, style: 'normal' },
+    ],
+  })
   return new Resvg(svg, { fitTo: { mode: 'width', value: OG_W }, font: { loadSystemFonts: false } }).render().asPng()
-}
-
-export function contentOf(raw: unknown): InvitationContent {
-  return contentWithDefaults(raw)
 }

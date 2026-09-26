@@ -27,7 +27,7 @@ const when = computed(() => {
 const origin = useSiteOrigin()
 const ogImage = computed(() => {
   const c = content.value
-  const v = shortHash(JSON.stringify([names.value, c.events[0]?.date, inv.value?.theme.slug, c.cover_photos[0]?.url, inv.value?.assets?.hero_image, c.gallery[0]?.url, inv.value?.style]))
+  const v = shortHash(JSON.stringify(['brand1', c.groom.nickname, c.bride.nickname, c.events[0]?.date]))
   return `${origin}/og/${slug}.png?v=${v}`
 })
 useSeoMeta({
