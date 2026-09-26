@@ -145,7 +145,8 @@ async function copy(text: string, key: string) {
 
 async function remove(g: GuestRow) {
   if (!confirm(`Hapus ${g.name} dari daftar tamu?`)) return
-  await supabase.from('guests').delete().eq('id', g.id)
+  const { data, error } = await supabase.from('guests').delete().eq('id', g.id).select('id')
+  if (error || !data?.length) msg.value = { type: 'err', text: error ? friendlyError(error) : 'Gagal menghapus: akun ini tidak punya akses.' }
   await refresh()
 }
 

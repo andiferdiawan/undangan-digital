@@ -5,6 +5,7 @@ const links = [
   { to: '/admin/pesanan', label: 'Pesanan' },
   { to: '/admin/reseller', label: 'Reseller' },
   { to: '/admin/pencairan', label: 'Pencairan' },
+  { to: '/admin/paket', label: 'Paket' },
   { to: '/admin/token', label: 'Token Manual' },
   { to: '/admin/tema', label: 'Tema' },
   { to: '/admin/tema/baru', label: 'Generate AI' },

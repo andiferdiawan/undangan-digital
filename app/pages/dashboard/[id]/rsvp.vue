@@ -27,12 +27,14 @@ const stats = computed(() => {
 const label = { hadir: 'Hadir', ragu: 'Ragu', tidak_hadir: 'Tidak hadir' } as const
 
 async function toggle(r: RsvpRow) {
-  await supabase.from('rsvps').update({ is_visible: !r.is_visible } as never).eq('id', r.id)
+  const { data, error } = await supabase.from('rsvps').update({ is_visible: !r.is_visible } as never).eq('id', r.id).select('id')
+  if (error || !data?.length) alert(error ? friendlyError(error) : 'Perubahan ditolak: akun ini tidak punya akses.')
   await refresh()
 }
 async function remove(r: RsvpRow) {
   if (!confirm('Hapus RSVP ini?')) return
-  await supabase.from('rsvps').delete().eq('id', r.id)
+  const { data, error } = await supabase.from('rsvps').delete().eq('id', r.id).select('id')
+  if (error || !data?.length) alert(error ? friendlyError(error) : 'Gagal menghapus: akun ini tidak punya akses.')
   await refresh()
 }
 function exportCsv() {

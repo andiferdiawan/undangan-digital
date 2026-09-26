@@ -38,13 +38,15 @@ let timer: ReturnType<typeof setTimeout> | undefined
 async function save() {
   clearTimeout(timer)
   saveState.value = 'saving'
-  const { error } = await supabase
+  const { data, error } = await supabase
     .from('invitations')
     .update({ content: content.value, style: style.value, assets: assets.value, is_published: published.value } as never)
     .eq('id', id)
-  if (error) {
+    .select('id')
+  if (error || !data?.length) {
+    // 0 baris = ditolak RLS tanpa error; jangan tampilkan "Tersimpan".
     saveState.value = 'error'
-    saveError.value = friendlyError(error)
+    saveError.value = error ? friendlyError(error) : 'Perubahan ditolak: akun ini tidak punya akses untuk mengubah undangan ini.'
   }
   else {
     saveState.value = 'saved'

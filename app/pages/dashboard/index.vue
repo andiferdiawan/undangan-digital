@@ -3,6 +3,7 @@ import { withDefaults as contentWithDefaults } from '#shared/theme/content'
 
 useSeoMeta({ title: 'Dashboard' })
 const supabase = useSupabaseClient()
+const user = useSupabaseUser()
 const { profile, refresh } = useProfile()
 await refresh()
 
@@ -10,6 +11,8 @@ const { data: list } = await useAsyncData('my-invitations', async () => {
   const { data } = await supabase
     .from('invitations')
     .select('id, slug, guest_limit, content, is_published, updated_at, theme:themes(name, code), guests(count), rsvps(count)')
+    // Admin bisa membaca semua undangan (RLS); dashboard pribadi hanya milik akun ini.
+    .eq('owner_id', (user.value as { sub?: string } | null)?.sub ?? '')
     .order('created_at', { ascending: false })
   return (data ?? []) as any[]
 })
