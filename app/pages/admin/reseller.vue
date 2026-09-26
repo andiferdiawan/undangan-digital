@@ -26,19 +26,27 @@ function edit(r: Row) {
 }
 const busy = ref(false)
 const err = ref('')
+const notice = ref('')
 async function save() {
   if (!editing.value) return
   err.value = ''
   busy.value = true
-  const { error } = await supabase.rpc('admin_review_reseller', {
-    p_reseller: editing.value.id, p_status: form.status,
-    p_commission_rate: form.custom ? form.rate : null, p_use_default_rate: !form.custom, p_note: form.note || null,
-  } as never)
-  busy.value = false
-  if (error) {
-    err.value = friendlyError(error)
+  const name = editing.value.business_name
+  try {
+    const res = await $fetch<{ ok: boolean, email: { sent: boolean, reason?: string } | null }>(`/api/admin/resellers/${editing.value.id}/review`, {
+      method: 'POST',
+      body: { status: form.status, commission_rate: form.custom ? form.rate : null, use_default_rate: !form.custom, note: form.note || null },
+    })
+    notice.value = res.email?.sent
+      ? `${name} disetujui. Email pemberitahuan terkirim.`
+      : res.email ? `${name} disetujui, tetapi email tidak terkirim: ${res.email.reason}` : ''
+  }
+  catch (e) {
+    busy.value = false
+    err.value = friendlyError({ message: (e as { data?: { statusMessage?: string } }).data?.statusMessage ?? (e as Error).message })
     return
   }
+  busy.value = false
   editing.value = null
   await refresh()
 }
@@ -49,6 +57,7 @@ const STATUS: Record<string, string> = { pending: 'bg-amber-50 text-amber-700', 
   <div>
     <AdminNav />
     <div class="mx-auto max-w-6xl px-4 py-6">
+      <p v-if="notice" class="mb-4 rounded-xl bg-green-50 px-4 py-3 text-sm text-green-800" role="status">{{ notice }}</p>
       <div class="flex flex-wrap items-center justify-between gap-3">
         <h1 class="font-display text-3xl text-brand">Reseller</h1>
         <div class="flex gap-1 text-xs font-semibold">

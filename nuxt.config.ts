@@ -48,6 +48,8 @@ export default defineNuxtConfig({
     // Payment gateway Tripay (server-only): NUXT_TRIPAY_MODE, NUXT_TRIPAY_API_KEY,
     // NUXT_TRIPAY_PRIVATE_KEY, NUXT_TRIPAY_MERCHANT_CODE
     tripay: { mode: 'sandbox', apiKey: '', privateKey: '', merchantCode: '' },
+    // Email bermerek via Resend (server-only): NUXT_EMAIL_RESEND_API_KEY, NUXT_EMAIL_FROM
+    email: { resendApiKey: '', from: 'Undangan Virtual <noreply@undanganvirtual.com>' },
     // Secret untuk RPC server_* di database (NUXT_SERVER_RPC_SECRET)
     serverRpcSecret: '',
     public: {
