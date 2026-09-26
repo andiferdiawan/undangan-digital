@@ -189,7 +189,7 @@ export const definition: ThemeDefinition = {
         ...title('Konfirmasi', 'Kehadiran'),
         div(`mt-4 ${card}`, [
           comp('rsvp_form', '', {
-            input_class: 'w-full rounded-xl border border-accent/40 bg-base px-4 py-2.5 text-base text-ink outline-none focus:border-primary',
+            input_class: 'w-full rounded-xl border border-accent/40 bg-base px-4 py-2.5 text-[16px] text-ink outline-none focus:border-primary',
             button_class: 'w-full rounded-full bg-primary py-3 font-bold text-[#f6e3b4] disabled:opacity-60',
           }),
         ]),

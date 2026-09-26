@@ -159,7 +159,7 @@ export const definition: ThemeDefinition = {
       children: [
         ...heading('Konfirmasi Kehadiran'),
         comp('rsvp_form', '', {
-          input_class: 'w-full border-0 border-b border-secondary/40 bg-transparent px-0 py-2.5 text-base text-ink outline-none focus:border-primary',
+          input_class: 'w-full border-0 border-b border-secondary/40 bg-transparent px-0 py-2.5 text-[16px] text-ink outline-none focus:border-primary',
           button_class: 'w-full bg-primary py-3.5 text-xs uppercase tracking-[0.3em] text-white disabled:opacity-60',
           label_class: 'grid gap-1 text-left text-[11px] uppercase tracking-[0.2em] text-secondary',
         }),

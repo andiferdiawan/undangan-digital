@@ -177,7 +177,7 @@ export const definition: ThemeDefinition = {
         ...title('RSVP', 'Konfirmasi Kehadiran'),
         div(`mt-4 text-left ${paper}`, [
           comp('rsvp_form', '', {
-            input_class: 'w-full rounded-[4px] border border-[#cdb792] bg-[#fffdf8] px-4 py-2.5 text-base text-ink outline-none focus:border-accent',
+            input_class: 'w-full rounded-[4px] border border-[#cdb792] bg-[#fffdf8] px-4 py-2.5 text-[16px] text-ink outline-none focus:border-accent',
             button_class: 'w-full rounded-full bg-primary py-3 text-xs font-bold uppercase tracking-[0.2em] text-[#fbf6ec] disabled:opacity-60',
           }),
         ]),

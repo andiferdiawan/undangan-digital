@@ -166,7 +166,7 @@ export const definition: ThemeDefinition = {
         ...title('Kehadiran', 'RSVP'),
         div('rounded-[28px] bg-surface p-5 text-left shadow-[0_10px_24px_rgba(107,90,65,0.10)]', [
           comp('rsvp_form', '', {
-            input_class: 'w-full rounded-xl border border-secondary/40 bg-base px-4 py-2.5 text-base text-ink outline-none focus:border-secondary',
+            input_class: 'w-full rounded-xl border border-secondary/40 bg-base px-4 py-2.5 text-[16px] text-ink outline-none focus:border-secondary',
             button_class: 'w-full rounded-full bg-secondary py-3 font-bold text-white disabled:opacity-60',
           }),
         ]),

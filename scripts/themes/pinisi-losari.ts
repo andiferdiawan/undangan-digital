@@ -74,9 +74,9 @@ export const definition: ThemeDefinition = {
         img('relative mx-auto my-5 h-5 w-44', '{{asset.divider}}'),
         div('relative w-full max-w-[280px] overflow-hidden rounded-2xl bg-white/10 ring-1 ring-[#c9973f]/60', [
           div('grid grid-cols-3 divide-x divide-[#c9973f]/40 py-4', [
-            div('', [p('text-[10px] uppercase tracking-widest text-white/60', 'Hari'), p('font-heading text-base', '{{event_day}}')]),
+            div('', [p('text-[10px] uppercase tracking-widest text-white/60', 'Hari'), p('font-heading text-[16px]', '{{event_day}}')]),
             div('', [p('text-[10px] uppercase tracking-widest text-white/60', 'Tanggal'), p('font-heading text-3xl leading-none text-[#e3b964]', '{{event_date_num}}')]),
-            div('', [p('text-[10px] uppercase tracking-widest text-white/60', '{{event_year}}'), p('font-heading text-base', '{{event_month}}')]),
+            div('', [p('text-[10px] uppercase tracking-widest text-white/60', '{{event_year}}'), p('font-heading text-[16px]', '{{event_month}}')]),
           ]),
         ]),
         p('relative mt-4 text-xs text-white/70', '{{event_hijri}}', { if: 'event_hijri' }),
@@ -96,7 +96,7 @@ export const definition: ThemeDefinition = {
       type: 'profile',
       class: 'bg-[#f3eadb] px-6 py-16 text-center',
       children: [
-        p('font-heading text-base text-primary', '{{greeting}}'),
+        p('font-heading text-[16px] text-primary', '{{greeting}}'),
         p('mt-3 text-muted', '{{opening_text}}'),
         div(`mt-10 ${card}`, [
           div('mx-auto grid h-40 w-40 place-items-center overflow-hidden rounded-full bg-primary shadow-[0_0_0_4px_#fff,0_0_0_6px_#c9973f]', [
@@ -135,7 +135,7 @@ export const definition: ThemeDefinition = {
             div('absolute -bottom-3 -left-3 h-6 w-6 rounded-full bg-primary'),
             div('absolute -bottom-3 -right-3 h-6 w-6 rounded-full bg-primary'),
             p('text-[10px] font-semibold uppercase tracking-widest text-muted', 'Tanggal'),
-            p('font-heading text-base text-primary', '{{item.date}}'),
+            p('font-heading text-[16px] text-primary', '{{item.date}}'),
           ]),
           div('px-5 pb-5 pt-4', [
             p('text-[10px] font-semibold uppercase tracking-widest text-muted', 'Tempat'),
@@ -186,7 +186,7 @@ export const definition: ThemeDefinition = {
         ...title('Konfirmasi', 'Kehadiran'),
         div(card, [
           comp('rsvp_form', '', {
-            input_class: 'w-full rounded-xl border border-primary/15 bg-base px-4 py-2.5 text-base text-ink outline-none focus:border-secondary',
+            input_class: 'w-full rounded-xl border border-primary/15 bg-base px-4 py-2.5 text-[16px] text-ink outline-none focus:border-secondary',
             button_class: 'w-full rounded-full bg-secondary py-3 font-semibold text-white disabled:opacity-60',
           }),
         ]),

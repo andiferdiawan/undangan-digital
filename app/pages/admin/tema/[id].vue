@@ -24,25 +24,13 @@ const css = ref(t.compiled_css)
 const errors = ref<string[]>([])
 const warnings = ref<string[]>([])
 
-// Musik bawaan tema → bucket theme-assets/{slug}/music-*.ext
-const musicUploading = ref(false)
-const musicError = ref('')
-async function onMusic(e: Event) {
-  const input = e.target as HTMLInputElement
-  const file = input.files?.[0]
-  input.value = ''
-  if (!file) return
-  musicError.value = ''
-  const type = audioType(file)
-  if (!type) return (musicError.value = 'Format audio harus MP3, M4A, AAC, atau OGG.')
-  if (file.size > AUDIO_MAX_MB * 1024 * 1024) return (musicError.value = `Maksimal ${AUDIO_MAX_MB} MB.`)
-  musicUploading.value = true
-  const ext = { 'audio/mpeg': 'mp3', 'audio/mp4': 'm4a', 'audio/aac': 'aac', 'audio/ogg': 'ogg' }[type] ?? 'mp3'
-  const path = `${t.slug}/music-${Date.now()}.${ext}`
-  const { error } = await supabase.storage.from('theme-assets').upload(path, file, { contentType: type, cacheControl: '31536000' })
-  musicUploading.value = false
-  if (error) return (musicError.value = error.message)
-  meta.music_url = supabase.storage.from('theme-assets').getPublicUrl(path).data.publicUrl
+// Musik bawaan tema dipilih dari Pustaka Media (satu file bisa dipakai banyak tema)
+const pickingMusic = ref(false)
+const musicName = ref('')
+function onPickMusic(item: { url: string, name: string }) {
+  meta.music_url = item.url
+  musicName.value = item.name
+  pickingMusic.value = false
 }
 
 const saving = ref(false)
@@ -96,25 +84,23 @@ async function save() {
         </div>
         <div class="grid gap-2 rounded-xl bg-brand-50 p-3">
           <p class="text-sm font-semibold text-brand-800">Musik bawaan tema</p>
+          <p v-if="musicName" class="text-xs font-semibold text-brand-700">♪ {{ musicName }}</p>
           <audio v-if="meta.music_url" :key="meta.music_url" :src="meta.music_url" controls preload="none" class="w-full" />
           <div class="flex flex-wrap gap-2">
-            <label class="btn-ghost btn-sm cursor-pointer" :class="{ 'pointer-events-none opacity-60': musicUploading }">
-              {{ musicUploading ? 'Mengunggah…' : meta.music_url ? 'Ganti audio' : 'Unggah audio' }}
-              <input type="file" accept="audio/mpeg,audio/mp4,audio/x-m4a,audio/aac,audio/ogg,.mp3,.m4a,.aac,.ogg" class="sr-only" @change="onMusic">
-            </label>
-            <button v-if="meta.music_url" type="button" class="btn-ghost btn-sm" @click="meta.music_url = ''">Hapus</button>
+            <button type="button" class="btn-ghost btn-sm" @click="pickingMusic = true">{{ meta.music_url ? 'Ganti dari Pustaka Media' : 'Pilih dari Pustaka Media' }}</button>
+            <button v-if="meta.music_url" type="button" class="btn-ghost btn-sm" @click="meta.music_url = ''; musicName = ''">Hapus</button>
           </div>
-          <p v-if="musicError" class="text-xs text-red-600">{{ musicError }}</p>
-          <p class="text-xs text-brand-500">Diputar di undangan yang belum mengunggah musik sendiri. Klik <b>Simpan Perubahan</b> setelah mengunggah. Gunakan lagu bebas royalti atau yang Anda miliki lisensinya.</p>
+          <p class="text-xs text-brand-500">Diputar di undangan yang belum mengunggah musik sendiri. Audio diambil dari <NuxtLink to="/admin/media" class="font-semibold underline">Pustaka Media</NuxtLink>, jadi satu lagu bisa dipakai di banyak tema. Klik <b>Simpan Perubahan</b> setelah memilih.</p>
         </div>
         <div class="rounded-xl bg-brand-50 p-3 text-xs text-brand-700">
           <p class="font-semibold">Aset tema</p>
-          <p class="mt-1">Unggah pengganti ke bucket <code>theme-assets/{{ data.theme.slug }}/</code>, lalu ubah path aset di JSON menjadi nama file relatif (mis. <code>"pattern": "pattern.webp"</code>).</p>
+          <p class="mt-1">Unggah gambar di <NuxtLink to="/admin/media" class="font-semibold underline">Pustaka Media</NuxtLink>, klik <b>Salin URL</b>, lalu tempel sebagai nilai aset di JSON (mis. <code>"pattern": "https://…"</code>). Gambar yang sama bisa dipakai di banyak tema.</p>
         </div>
         <p v-if="msg" class="text-sm" :class="msg.ok ? 'text-green-700' : 'text-red-600'">{{ msg.text }}</p>
         <button class="btn-primary" :disabled="saving">{{ saving ? 'Menyimpan…' : 'Simpan Perubahan' }}</button>
       </form>
       <ThemeWorkbench v-model:definition="definition" v-model:css="css" v-model:errors="errors" v-model:warnings="warnings" :slug="data.theme.slug" />
     </div>
+    <MediaPicker v-if="pickingMusic" kind="audio" :current="meta.music_url" @select="onPickMusic" @close="pickingMusic = false" />
   </div>
 </template>

@@ -66,7 +66,7 @@ export const definition: ThemeDefinition = {
         p('relative mt-2 font-heading text-xs tracking-[0.2em] text-accent', '{{event_date}}'),
         div('relative mx-auto mt-5 w-full max-w-[290px] rounded-xl border border-accent/60 bg-[#fffaf0] px-4 py-3', [
           p('text-[11px] text-muted', 'Tabe\', Kepada Yth. Bapak/Ibu/Saudara/i'),
-          comp('guest_name', 'font-heading text-base text-primary', { fallback: 'Tamu Undangan' }),
+          comp('guest_name', 'font-heading text-[16px] text-primary', { fallback: 'Tamu Undangan' }),
         ]),
         comp('open_button', 'relative mt-6 inline-flex rounded-full bg-secondary px-8 py-3 font-heading text-xs font-bold tracking-[0.2em] text-[#f5ecd8] shadow-[0_0_0_2px_#e0a93a]', { label: 'BUKA UNDANGAN' }),
         img('pointer-events-none absolute bottom-0 left-0 h-24 w-full object-cover object-bottom opacity-60', '{{asset.tongkonan}}'),
@@ -186,7 +186,7 @@ export const definition: ThemeDefinition = {
               img('mt-1 h-9 w-9', '{{asset.barre}}'),
               div('rounded-xl border-l-4 border-accent bg-surface p-4', [
                 p('text-[11px] font-bold uppercase tracking-widest text-secondary', '{{item.date}}'),
-                el('h3', 'font-heading text-base text-primary', '{{item.title}}'),
+                el('h3', 'font-heading text-[16px] text-primary', '{{item.title}}'),
                 p('mt-1 text-[13px] text-muted', '{{item.text}}'),
               ]),
             ], { repeat: 'story' }),
@@ -214,11 +214,11 @@ export const definition: ThemeDefinition = {
         ...title('Konfirmasi', 'Kehadiran'),
         div(card, [
           comp('rsvp_form', '', {
-            input_class: 'w-full rounded-lg border border-primary/20 bg-base px-4 py-2.5 text-base text-ink outline-none focus:border-secondary',
+            input_class: 'w-full rounded-lg border border-primary/20 bg-base px-4 py-2.5 text-[16px] text-ink outline-none focus:border-secondary',
             button_class: 'w-full rounded-full bg-secondary py-3 font-heading text-xs font-bold tracking-[0.2em] text-[#f5ecd8] disabled:opacity-60',
           }),
         ]),
-        el('h3', 'mb-4 mt-10 font-heading text-base tracking-wide text-primary', 'Doa & Ucapan'),
+        el('h3', 'mb-4 mt-10 font-heading text-[16px] tracking-wide text-primary', 'Doa & Ucapan'),
         comp('wishes', 'text-left', { item_class: 'rounded-xl border-l-4 border-secondary bg-surface p-4' }),
       ],
     },

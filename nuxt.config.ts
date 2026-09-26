@@ -63,5 +63,7 @@ export default defineNuxtConfig({
     // Preset Vercel/Netlify/Cloudflare terdeteksi otomatis saat build di platform masing-masing.
     // Generator tema AI butuh waktu 1–3 menit, jadi batas durasi fungsi dinaikkan (Vercel).
     vercel: { functions: { maxDuration: 300 } },
+    // Gambar pratinjau (satori) memuat file wasm saat runtime; pastikan ikut dibundel
+    externals: { traceInclude: ['node_modules/harfbuzzjs/hb.wasm', 'node_modules/harfbuzzjs/hb-subset.wasm'] },
   },
 })

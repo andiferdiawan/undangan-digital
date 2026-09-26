@@ -59,7 +59,7 @@ export const definition: ThemeDefinition = {
           p('relative font-heading text-[13px] tracking-[0.25em] text-accent', '{{event_date}}'),
           div('relative mt-8', [
             p('text-[12px] italic text-muted', 'Kepada Yth.'),
-            comp('guest_name', 'font-heading text-base tracking-wider text-ink', { fallback: 'Tamu Undangan' }),
+            comp('guest_name', 'font-heading text-[16px] tracking-wider text-ink', { fallback: 'Tamu Undangan' }),
           ]),
           comp('open_button', 'relative mt-7 inline-flex border border-primary bg-primary/10 px-8 py-3 font-heading text-[11px] uppercase tracking-[0.3em] text-primary', { label: 'Buka Undangan' }),
         ]),
@@ -180,7 +180,7 @@ export const definition: ThemeDefinition = {
         ...title('Kehadiran', 'RSVP'),
         div(`relative text-left ${panel}`, [
           comp('rsvp_form', '', {
-            input_class: 'w-full border border-primary/40 bg-base px-4 py-3 text-base text-ink outline-none focus:border-primary',
+            input_class: 'w-full border border-primary/40 bg-base px-4 py-3 text-[16px] text-ink outline-none focus:border-primary',
             label_class: 'font-heading text-[11px] uppercase tracking-[0.2em] text-muted',
             button_class: 'w-full bg-primary py-3 font-heading text-[12px] uppercase tracking-[0.25em] text-[#0e1714] disabled:opacity-60',
           }),

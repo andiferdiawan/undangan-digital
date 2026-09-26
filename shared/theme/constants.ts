@@ -131,6 +131,8 @@ export function classProblem(v: string): string | null {
   if (!/^[a-zA-Z0-9\-:/[\]\.%#_!\s(),'&>*+~=@]*$/.test(v)) return 'Kelas mengandung karakter terlarang'
   if (/url\(|image-set\(|expression|@import|javascript:/i.test(v)) return 'Kelas tidak boleh memuat url()/import'
   if (/(^|\s)(sm|md|lg|xl|2xl):/.test(v)) return 'Breakpoint (sm:/md:/lg:) tidak diizinkan, desain khusus mobile'
+  // Warna latar bernama `base` membuat text-base ambigu (ukuran vs warna)
+  if (/(^|[\s:])text-base($|\s)/.test(v)) return 'text-base ambigu (bisa berarti warna latar); pakai text-[16px] untuk ukuran atau text-ink untuk warna'
   return null
 }
 

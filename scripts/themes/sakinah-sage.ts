@@ -208,7 +208,7 @@ export const definition: ThemeDefinition = {
         ...title('RSVP', 'Konfirmasi Kehadiran'),
         div('rounded-3xl bg-surface p-5 shadow-[0_10px_26px_rgba(47,74,58,0.07)]', [
           comp('rsvp_form', '', {
-            input_class: 'w-full rounded-xl bg-base px-3.5 py-2.5 text-base text-ink outline-none ring-1 ring-transparent focus:ring-secondary',
+            input_class: 'w-full rounded-xl bg-base px-3.5 py-2.5 text-[16px] text-ink outline-none ring-1 ring-transparent focus:ring-secondary',
             button_class: 'w-full rounded-full bg-primary py-3 font-semibold text-white disabled:opacity-60',
             label_class: 'grid gap-1.5 text-left text-[12.5px] font-semibold text-primary',
           }),

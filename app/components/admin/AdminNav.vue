@@ -8,6 +8,7 @@ const links = [
   { to: '/admin/token', label: 'Token Manual' },
   { to: '/admin/tema', label: 'Tema' },
   { to: '/admin/tema/baru', label: 'Generate AI' },
+  { to: '/admin/media', label: 'Media' },
   { to: '/admin/pengaturan', label: 'Pengaturan' },
 ]
 const isActive = (to: string) => to === '/admin' ? route.path === '/admin' : route.path === to || (to === '/admin/tema' && /^\/admin\/tema\/(?!baru)/.test(route.path))

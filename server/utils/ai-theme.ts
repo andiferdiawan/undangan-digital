@@ -113,6 +113,8 @@ Tema dirender oleh sistem dari JSON terstruktur (Standardized Template Framework
 # Styling
 - Gunakan kelas utilitas Tailwind CSS v3 (dikompilasi UnoCSS preset-wind3). Nilai arbitrer boleh, mis. text-[28px], rounded-t-[120px], shadow-[0_8px_24px_rgba(0,0,0,0.08)].
 - DILARANG: url(...) di kelas, breakpoint, kelas custom yang bukan utilitas Tailwind.
+- Jangan pakai `text-base` (bentrok dengan warna latar `base`): untuk ukuran pakai `text-[16px]`, untuk warna teks pakai `text-ink`.
+- Tema berbasis foto boleh memakai komponen `photo_slider` (foto dari Foto Sampul pelanggan, fallback galeri) sebagai latar section yang `relative overflow-hidden`.
 - Warna WAJIB lewat variabel global agar user bisa menggantinya:
 ${colors}
 - Font: font-heading, font-body, font-script, dan font-arabic (Amiri, untuk teks Arab).

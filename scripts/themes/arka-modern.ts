@@ -201,7 +201,7 @@ export const definition: ThemeDefinition = {
         ...label('05', 'RSVP', 'Kamu datang, kan?'),
         div('mt-8 rounded-[28px] bg-surface p-5', [
           comp('rsvp_form', '', {
-            input_class: 'w-full rounded-2xl border border-primary/15 bg-base px-4 py-3 text-base text-ink outline-none focus:border-accent',
+            input_class: 'w-full rounded-2xl border border-primary/15 bg-base px-4 py-3 text-[16px] text-ink outline-none focus:border-accent',
             label_class: 'text-[11px] font-bold uppercase tracking-widest text-muted',
             button_class: 'w-full rounded-full bg-primary py-3 text-xs font-bold uppercase tracking-widest text-white disabled:opacity-60',
           }),

@@ -14,6 +14,8 @@ useSeoMeta({
   description: desc,
   ogTitle: () => `Tema Undangan ${theme.value?.name} · ${BRAND.name}`,
   ogDescription: desc,
+  ogImage: () => `${useSiteOrigin()}/og/tema/${theme.value?.slug}.png?v=${shortHash(theme.value?.updated_at ?? theme.value?.slug ?? '')}`,
+  twitterCard: 'summary_large_image',
 })
 const origin = useSiteOrigin()
 useJsonLd('theme', () => !theme.value ? null : ({
