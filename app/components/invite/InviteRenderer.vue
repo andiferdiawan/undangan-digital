@@ -216,6 +216,16 @@ const bgUrl = (bg?: string) => {
 @keyframes uv-zoom { from { opacity: 0; transform: scale(0.86); filter: blur(6px); } }
 @keyframes uv-left { from { opacity: 0; transform: translateX(-40px); } }
 @keyframes uv-right { from { opacity: 0; transform: translateX(40px); } }
+/* Garis cerita mengikuti scroll. Tanpa JS/motion: garis utuh, penanda disembunyikan. */
+.invite-root .uv-scroll-draw { clip-path: inset(0 0 calc(100% - var(--uv-p, 1) * 100%) 0); }
+.invite-root .uv-scroll-follow {
+  position: absolute; z-index: 0; pointer-events: none; opacity: 0; transition: opacity 0.3s;
+  top: calc(var(--uv-p, 0) * 100%);
+  left: calc(50% + var(--uv-amp, 30) * 1% * sin(var(--uv-p, 0) * var(--uv-waves, 0.5) * 6.2832rad));
+  translate: -50% -50%;
+}
+.invite-root.uv-motion .uv-live .uv-scroll-follow { opacity: 1; }
+.invite-root:not(.uv-motion) .uv-scroll-line { --uv-p: 1; }
 @keyframes uv-pop { from { opacity: 0; transform: scale(0.5) rotate(-6deg); } }
 @keyframes uv-wiggle { 0% { transform: rotate(-3deg); } 33% { transform: rotate(2deg) translateY(-1px); } 66% { transform: rotate(-1deg) translateX(1px); } }
 @keyframes uv-float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }

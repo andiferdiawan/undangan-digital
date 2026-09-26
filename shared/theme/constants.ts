@@ -73,7 +73,7 @@ export const ALLOWED_FONTS = [
   'Raleway', 'Quicksand', 'DM Sans', 'Outfit',
   'Great Vibes', 'Alex Brush', 'Parisienne', 'Pinyon Script', 'Allura', 'Dancing Script',
   'Sacramento', 'Tangerine', 'Mea Culpa', 'Ephesis',
-  'Caveat', 'Caveat Brush', 'Gochi Hand', 'Permanent Marker',
+  'Caveat', 'Caveat Brush', 'Gochi Hand', 'Permanent Marker', 'Fredoka',
 ] as const
 
 /**

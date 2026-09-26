@@ -7,6 +7,9 @@ import type { Ref } from 'vue'
  * - uv-tilt (+ uv-depth-1..3 di dalamnya)                 : kartu 3D mengikuti giroskop/mouse,
  *                                                          bergoyang pelan bila tidak ada input
  * - uv-float3d / uv-spin3d / uv-wiggle / uv-float        : ornamen berulang (CSS murni)
+ * - uv-scroll-line                                        : wadah yang diberi --uv-p (0..1) sesuai posisi
+ *   scroll; di dalamnya uv-scroll-draw (garis tergambar sampai titik baca) dan
+ *   uv-scroll-follow (penanda yang menempel di ujung garis gelombang)
  * Semua dimatikan bila pengguna memilih "kurangi gerakan".
  */
 export function useInviteMotion(root: Ref<HTMLElement | null>, enabled: () => boolean) {
@@ -18,6 +21,9 @@ export function useInviteMotion(root: Ref<HTMLElement | null>, enabled: () => bo
   let mo: MutationObserver | null = null
   let raf = 0
   let hasTilt = false
+  let lines: HTMLElement[] = []
+  let scroller: HTMLElement | null = null
+  let scrollRaf = 0
   let lastInput = 0
   let base: { b: number, g: number } | null = null
   const target = { x: 0, y: 0 }
@@ -28,6 +34,9 @@ export function useInviteMotion(root: Ref<HTMLElement | null>, enabled: () => bo
     const el = root.value
     if (!el || !io) return
     el.querySelectorAll('[class*="uv-reveal"]:not(.uv-in)').forEach(n => io!.observe(n))
+    const prevLines = lines.length
+    lines = [...el.querySelectorAll<HTMLElement>('.uv-scroll-line')]
+    if (lines.length !== prevLines) onScroll()
     const had = hasTilt
     hasTilt = !!el.querySelector('.uv-tilt')
     if (hasTilt && !had) loop()
@@ -50,6 +59,23 @@ export function useInviteMotion(root: Ref<HTMLElement | null>, enabled: () => bo
       }
       loop()
     })
+  }
+
+  /** Garis cerita: ujungnya mengikuti titik baca (62% tinggi layar/bingkai). */
+  function updateLines() {
+    scrollRaf = 0
+    if (!lines.length) return
+    const v = scroller ? scroller.getBoundingClientRect() : { top: 0, height: window.innerHeight }
+    const anchor = v.top + v.height * 0.62
+    for (const el of lines) {
+      const r = el.getBoundingClientRect()
+      const p = r.height > 0 ? Math.min(1, Math.max(0, (anchor - r.top) / r.height)) : 0
+      el.style.setProperty('--uv-p', p.toFixed(4))
+      el.classList.toggle('uv-live', p > 0.002 && p < 0.998)
+    }
+  }
+  function onScroll() {
+    if (!scrollRaf) scrollRaf = requestAnimationFrame(updateLines)
   }
 
   function onPointer(e: PointerEvent) {
@@ -88,6 +114,12 @@ export function useInviteMotion(root: Ref<HTMLElement | null>, enabled: () => bo
       }
     }, { threshold: 0.12, rootMargin: '0px 0px -6% 0px' })
     active.value = true
+    // Wadah scroll terdekat (bingkai HP di katalog/editor), atau jendela untuk halaman penuh
+    for (let n = root.value.parentElement; n && n !== document.body; n = n.parentElement) {
+      if (/(auto|scroll)/.test(getComputedStyle(n).overflowY)) { scroller = n; break }
+    }
+    document.addEventListener('scroll', onScroll, { passive: true, capture: true })
+    window.addEventListener('resize', onScroll, { passive: true })
     nextTick(scan)
     mo = new MutationObserver(() => scan())
     mo.observe(root.value, { childList: true, subtree: true })
@@ -101,7 +133,11 @@ export function useInviteMotion(root: Ref<HTMLElement | null>, enabled: () => bo
     io?.disconnect()
     mo?.disconnect()
     cancelAnimationFrame(raf)
+    cancelAnimationFrame(scrollRaf)
     hasTilt = false
+    lines = []
+    document.removeEventListener('scroll', onScroll, { capture: true })
+    window.removeEventListener('resize', onScroll)
     window.removeEventListener('pointermove', onPointer)
     window.removeEventListener('deviceorientation', onOrient)
   })
