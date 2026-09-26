@@ -11,12 +11,13 @@ export default defineEventHandler(async (event) => {
   if (row.status !== 'unpaid' || !row.payment_reference) return { status: row.status }
 
   const detail = await tripayTransactionDetail(tripayConfig(event), row.payment_reference)
-  const order = await serverRpc<{ status: string }>(event, 'server_process_payment', {
+  const order = await serverRpc<{ id: string, status: string }>(event, 'server_process_payment', {
     p_merchant_ref: row.merchant_ref,
     p_reference: row.payment_reference,
     p_status: detail.status,
     p_total_amount: detail.amount,
     p_paid_at: detail.paid_at ? new Date(detail.paid_at * 1000).toISOString() : null,
   })
+  if (order.status === 'paid') await notifyPaidOrder(event, order.id)
   return { status: order.status }
 })
