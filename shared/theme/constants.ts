@@ -73,6 +73,7 @@ export const ALLOWED_FONTS = [
   'Raleway', 'Quicksand', 'DM Sans', 'Outfit',
   'Great Vibes', 'Alex Brush', 'Parisienne', 'Pinyon Script', 'Allura', 'Dancing Script',
   'Sacramento', 'Tangerine', 'Mea Culpa', 'Ephesis',
+  'Caveat', 'Caveat Brush', 'Gochi Hand', 'Permanent Marker',
 ] as const
 
 /**
@@ -94,6 +95,10 @@ export const PLACEHOLDERS = {
   event_date: 'Tanggal acara utama, mis. "Sabtu, 12 Desember 2026"',
   event_day: 'Hari acara utama',
   event_date_num: 'Tanggal (angka) acara utama',
+  event_day_minus_two: 'Tanggal (angka) 2 hari sebelum acara (strip kalender)',
+  event_day_minus_one: 'Tanggal (angka) 1 hari sebelum acara',
+  event_day_plus_one: 'Tanggal (angka) 1 hari setelah acara',
+  event_day_plus_two: 'Tanggal (angka) 2 hari setelah acara',
   event_month: 'Bulan acara utama',
   event_year: 'Tahun acara utama',
   event_hijri: 'Tanggal Hijriah acara utama',

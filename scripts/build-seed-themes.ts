@@ -17,8 +17,9 @@ import * as senja from './themes/rustic-senja'
 import * as arunika from './themes/rustic-arunika'
 import * as lontara from './themes/lontara-bugis'
 import * as aurelia from './themes/aurelia-luxe'
+import * as doodle from './themes/doodle-cinta'
 
-const themes = [sakinah, minimalis, floral, arka, noir, rustic, bugis, makassar, toraja, senja, arunika, lontara, aurelia]
+const themes = [sakinah, minimalis, floral, arka, noir, rustic, bugis, makassar, toraja, senja, arunika, lontara, aurelia, doodle]
 const q = (s: string) => `'${s.replace(/'/g, "''")}'`
 const rows: string[] = []
 let failed = false

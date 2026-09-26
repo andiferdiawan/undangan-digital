@@ -6,7 +6,7 @@ import type { Ref } from 'vue'
  *   (-mask = foto tersingkap dari bawah seperti tirai)
  * - uv-tilt (+ uv-depth-1..3 di dalamnya)                 : kartu 3D mengikuti giroskop/mouse,
  *                                                          bergoyang pelan bila tidak ada input
- * - uv-float3d / uv-spin3d                                : ornamen 3D berulang (CSS murni)
+ * - uv-float3d / uv-spin3d / uv-wiggle / uv-float        : ornamen berulang (CSS murni)
  * Semua dimatikan bila pengguna memilih "kurangi gerakan".
  */
 export function useInviteMotion(root: Ref<HTMLElement | null>, enabled: () => boolean) {

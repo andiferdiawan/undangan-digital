@@ -59,10 +59,11 @@ useJsonLd('theme', () => !theme.value ? null : ({
       <PhoneFrame :key="frameKey">
         <InviteRenderer :definition="theme.definition" :css="theme.compiled_css" :theme-slug="theme.slug" :theme-music="theme.music_url" guest-name="Bapak Fulan & Keluarga" mode="frame" preview />
       </PhoneFrame>
-      <p class="mt-3 text-center text-xs text-brand-500">
-        Data di atas contoh.
-        <button class="underline" @click="frameKey++">Ulangi dari sampul</button>
-      </p>
+      <div class="mt-3 flex items-center justify-center gap-3">
+        <NuxtLink :to="`/pratinjau/${theme.slug}`" class="btn-primary btn-sm">⛶ Lihat Layar Penuh</NuxtLink>
+        <button class="btn-ghost btn-sm" @click="frameKey++">↺ Ulangi dari sampul</button>
+      </div>
+      <p class="mt-2 text-center text-xs text-brand-500">Data & foto di atas hanya contoh.</p>
     </div>
 
     <div class="md:order-1 md:pt-10">
@@ -84,7 +85,10 @@ useJsonLd('theme', () => !theme.value ? null : ({
         <li>✓ Musik latar: {{ theme.music_url ? 'sudah termasuk, bisa diganti lagu pilihan Anda' : 'unggah lagu pilihan Anda' }}</li>
       </ul>
 
-      <button class="btn-accent mt-8 w-full md:w-auto" @click="ordering = true">Pesan Tema Ini</button>
+      <div class="mt-8 flex flex-wrap gap-2">
+        <button class="btn-accent w-full md:w-auto" @click="ordering = true">Pesan Tema Ini</button>
+        <NuxtLink :to="`/pratinjau/${theme.slug}`" class="btn-ghost w-full md:w-auto">Lihat seperti tamu (layar penuh)</NuxtLink>
+      </div>
     </div>
 
     <OrderSheet :theme="ordering ? theme : null" :packages="data?.packages ?? []" @close="ordering = false" />

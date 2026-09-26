@@ -1,0 +1,2 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 90"><style>.c{stroke-dasharray:420;stroke-dashoffset:420;animation:d 1.4s cubic-bezier(.6,0,.3,1) .6s forwards}@keyframes d{to{stroke-dashoffset:0}}@media (prefers-reduced-motion:reduce){*{animation:none!important;stroke-dashoffset:0!important;opacity:1!important}}</style>
+<path class="c" d="M30 14C60 2 112 8 114 42c2 30-40 44-72 40C12 78 2 56 10 36 18 16 50 8 78 12c20 3 34 12 36 22" fill="none" stroke="#8b1414" stroke-linecap="round" stroke-linejoin="round" stroke-width="3"/></svg>

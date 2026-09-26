@@ -9,7 +9,7 @@ export const BRAND = {
 }
 
 /** Halaman privat/transaksional yang tidak perlu diindeks mesin pencari. */
-export const NOINDEX_PREFIXES = ['/dashboard', '/admin', '/masuk', '/daftar', '/confirm', '/reset-password', '/checkout', '/pesanan', '/r/', '/reseller/dashboard']
+export const NOINDEX_PREFIXES = ['/dashboard', '/admin', '/masuk', '/daftar', '/confirm', '/reset-password', '/checkout', '/pesanan', '/r/', '/reseller/dashboard', '/pratinjau/']
 
 /** Origin kanonik situs (NUXT_PUBLIC_SITE_URL), jatuh ke origin permintaan saat kosong. */
 export function useSiteOrigin() {

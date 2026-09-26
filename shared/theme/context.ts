@@ -25,6 +25,13 @@ export function dateParts(iso: string): DateParts | null {
   return { day, num: String(+m[3]!), month, year: m[1]!, full: `${day}, ${+m[3]!} ${month} ${m[1]}`, hijri }
 }
 
+/** Tanggal di sekitar hari H (untuk strip kalender): H-2, H-1, H+1, H+2. */
+function nearbyDays(iso: string) {
+  const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(iso || '')
+  const at = (delta: number) => m ? String(new Date(Date.UTC(+m[1]!, +m[2]! - 1, +m[3]! + delta, 12)).getUTCDate()) : ''
+  return { event_day_minus_two: at(-2), event_day_minus_one: at(-1), event_day_plus_one: at(1), event_day_plus_two: at(2) }
+}
+
 export function eventStart(ev: { date: string, time_start: string, timezone: keyof typeof TZ_OFFSET }): Date | null {
   if (!/^\d{4}-\d{2}-\d{2}$/.test(ev.date)) return null
   const time = /^\d{2}:\d{2}$/.test(ev.time_start) ? ev.time_start : '00:00'
@@ -108,6 +115,7 @@ export function buildContext(
     event_date: p?.full ?? '',
     event_day: p?.day ?? '',
     event_date_num: p?.num ?? '',
+    ...nearbyDays(main?.date ?? ''),
     event_month: p?.month ?? '',
     event_year: p?.year ?? '',
     event_hijri: p?.hijri ?? '',

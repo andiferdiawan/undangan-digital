@@ -187,6 +187,9 @@ const bgUrl = (bg?: string) => {
 .invite-root .uv-in.uv-reveal-left { animation: uv-left 0.9s cubic-bezier(0.2, 0.7, 0.2, 1) backwards; }
 .invite-root .uv-in.uv-reveal-right { animation: uv-right 0.9s cubic-bezier(0.2, 0.7, 0.2, 1) backwards; }
 .invite-root .uv-in.uv-reveal-flip { animation: uv-flip 1.1s cubic-bezier(0.2, 0.7, 0.2, 1) backwards; }
+.invite-root .uv-in.uv-reveal-pop { animation: uv-pop 0.8s cubic-bezier(0.3, 1.6, 0.5, 1) backwards; }
+.invite-root .uv-wiggle { animation: uv-wiggle 1.2s steps(1) infinite; }
+.invite-root .uv-float { animation: uv-float 4.5s ease-in-out infinite; }
 .invite-root .uv-in.uv-reveal-mask { animation: uv-mask 1.4s cubic-bezier(0.7, 0, 0.2, 1) backwards; }
 .invite-root .uv-in.uv-d1 { animation-delay: 0.12s; }
 .invite-root .uv-in.uv-d2 { animation-delay: 0.24s; }
@@ -213,6 +216,9 @@ const bgUrl = (bg?: string) => {
 @keyframes uv-zoom { from { opacity: 0; transform: scale(0.86); filter: blur(6px); } }
 @keyframes uv-left { from { opacity: 0; transform: translateX(-40px); } }
 @keyframes uv-right { from { opacity: 0; transform: translateX(40px); } }
+@keyframes uv-pop { from { opacity: 0; transform: scale(0.5) rotate(-6deg); } }
+@keyframes uv-wiggle { 0% { transform: rotate(-3deg); } 33% { transform: rotate(2deg) translateY(-1px); } 66% { transform: rotate(-1deg) translateX(1px); } }
+@keyframes uv-float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
 @keyframes uv-mask { from { clip-path: inset(100% 0 0 0); transform: scale(1.12); } }
 @keyframes uv-flip { from { opacity: 0; transform: perspective(900px) rotateX(55deg) translateY(30px); } }
 @keyframes uv-float3d {
@@ -222,7 +228,7 @@ const bgUrl = (bg?: string) => {
 @keyframes uv-spin3d { from { transform: perspective(700px) rotateY(0deg); } to { transform: perspective(700px) rotateY(360deg); } }
 @keyframes uv-shine { 0%, 55% { transform: translateX(-120%); } 85%, 100% { transform: translateX(120%); } }
 @media (prefers-reduced-motion: reduce) {
-  .invite-root .uv-float3d, .invite-root .uv-spin3d, .invite-root .uv-shine::after { animation: none; }
+  .invite-root .uv-float3d, .invite-root .uv-spin3d, .invite-root .uv-wiggle, .invite-root .uv-float, .invite-root .uv-shine::after { animation: none; }
   .invite-root .uv-tilt { transform: none; }
 }
 </style>
