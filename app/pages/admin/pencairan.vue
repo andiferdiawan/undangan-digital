@@ -34,10 +34,15 @@ function open(p: Payout, action: 'paid' | 'rejected') {
 }
 async function submit() {
   if (!acting.value) return
-  const { error } = await supabase.rpc('admin_process_payout', {
-    p_payout: acting.value.p.id, p_action: acting.value.action, p_reference: form.reference || null, p_note: form.note || null,
-  } as never)
-  if (error) {
+  try {
+    // Lewat server agar reseller & admin menerima email hasil pemrosesan
+    await $fetch(`/api/admin/payouts/${acting.value.p.id}/process`, {
+      method: 'POST',
+      body: { action: acting.value.action, reference: form.reference || null, note: form.note || null },
+    })
+  }
+  catch (e) {
+    const error = apiError(e)
     err.value = error.message.includes('REFERENCE_REQUIRED') ? 'Isi nomor/bukti referensi transfer.' : friendlyError(error)
     return
   }

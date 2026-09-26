@@ -97,20 +97,27 @@ const payoutMsg = ref<{ ok: boolean, text: string } | null>(null)
 async function requestPayout() {
   payoutMsg.value = null
   payoutBusy.value = true
-  const { error } = await supabase.rpc('request_payout', { p_amount: Math.floor(payoutAmount.value ?? 0) } as never)
-  payoutBusy.value = false
-  if (error) {
-    payoutMsg.value = { ok: false, text: error.hint || friendlyError(error) }
+  try {
+    await $fetch('/api/reseller/payouts', { method: 'POST', body: { amount: Math.floor(payoutAmount.value ?? 0) } })
+  }
+  catch (e) {
+    const err = apiError(e)
+    payoutMsg.value = { ok: false, text: err.hint || friendlyError(err) }
     return
   }
-  payoutMsg.value = { ok: true, text: 'Pengajuan pencairan tercatat.' }
+  finally {
+    payoutBusy.value = false
+  }
+  payoutMsg.value = { ok: true, text: 'Pengajuan pencairan tercatat. Konfirmasi dikirim ke email Anda.' }
   payoutAmount.value = null
   await Promise.all([refreshSummary(), refreshPayouts()])
 }
 async function cancelPayout(p: PayoutRow) {
   if (!confirm(`Batalkan pengajuan ${rupiah(p.amount)}?`)) return
-  const { error } = await supabase.rpc('cancel_payout', { p_payout: p.id } as never)
-  if (error) alert(friendlyError(error))
+  try {
+    await $fetch(`/api/reseller/payouts/${p.id}/cancel`, { method: 'POST' })
+  }
+  catch (e) { alert(friendlyError(apiError(e))) }
   await Promise.all([refreshSummary(), refreshPayouts()])
 }
 

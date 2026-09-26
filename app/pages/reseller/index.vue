@@ -49,15 +49,21 @@ async function submit() {
         return
       }
     }
-    const { error: err } = await supabase.rpc('apply_reseller', {
-      p_business_name: form.business_name,
-      p_whatsapp: phone62(form.whatsapp),
-      p_bank_name: form.bank_name,
-      p_account_number: form.account_number.replace(/\D/g, ''),
-      p_account_holder: form.account_holder,
-      p_code: form.code || null,
-    } as never)
-    if (err) throw err
+    // Lewat server agar calon reseller & admin menerima email pemberitahuan
+    try {
+      await $fetch('/api/reseller/apply', {
+        method: 'POST',
+        body: {
+          business_name: form.business_name,
+          whatsapp: phone62(form.whatsapp),
+          bank_name: form.bank_name,
+          account_number: form.account_number.replace(/\D/g, ''),
+          account_holder: form.account_holder,
+          code: form.code || null,
+        },
+      })
+    }
+    catch (e) { throw apiError(e) }
     done.value = true
     await refresh()
   }

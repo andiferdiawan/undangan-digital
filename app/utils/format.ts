@@ -42,6 +42,12 @@ export function friendlyError(err: { message?: string, hint?: string } | null | 
   return m || 'Terjadi kesalahan, coba lagi.'
 }
 
+/** Error dari $fetch ke API server → { message, hint } untuk friendlyError. */
+export function apiError(e: unknown): { message: string, hint?: string } {
+  const d = (e as { data?: { statusMessage?: string, data?: { hint?: string | null } } }).data
+  return { message: d?.statusMessage ?? (e as Error)?.message ?? '', hint: d?.data?.hint ?? undefined }
+}
+
 export function slugify(s: string) {
   return s.toLowerCase().normalize('NFKD').replace(/[̀-ͯ]/g, '')
     .replace(/&/g, '-').replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 50)
