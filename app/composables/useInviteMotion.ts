@@ -2,7 +2,8 @@ import type { Ref } from 'vue'
 
 /**
  * Motion undangan yang dipakai tema lewat kelas penanda (tanpa JS dari tema):
- * - uv-reveal / uv-reveal-zoom / -left / -right / -flip : animasi saat elemen masuk layar
+ * - uv-reveal / uv-reveal-zoom / -left / -right / -flip / -mask : animasi saat elemen masuk layar
+ *   (-mask = foto tersingkap dari bawah seperti tirai)
  * - uv-tilt (+ uv-depth-1..3 di dalamnya)                 : kartu 3D mengikuti giroskop/mouse,
  *                                                          bergoyang pelan bila tidak ada input
  * - uv-float3d / uv-spin3d                                : ornamen 3D berulang (CSS murni)

@@ -187,6 +187,7 @@ const bgUrl = (bg?: string) => {
 .invite-root .uv-in.uv-reveal-left { animation: uv-left 0.9s cubic-bezier(0.2, 0.7, 0.2, 1) backwards; }
 .invite-root .uv-in.uv-reveal-right { animation: uv-right 0.9s cubic-bezier(0.2, 0.7, 0.2, 1) backwards; }
 .invite-root .uv-in.uv-reveal-flip { animation: uv-flip 1.1s cubic-bezier(0.2, 0.7, 0.2, 1) backwards; }
+.invite-root .uv-in.uv-reveal-mask { animation: uv-mask 1.4s cubic-bezier(0.7, 0, 0.2, 1) backwards; }
 .invite-root .uv-in.uv-d1 { animation-delay: 0.12s; }
 .invite-root .uv-in.uv-d2 { animation-delay: 0.24s; }
 .invite-root .uv-in.uv-d3 { animation-delay: 0.36s; }
@@ -212,6 +213,7 @@ const bgUrl = (bg?: string) => {
 @keyframes uv-zoom { from { opacity: 0; transform: scale(0.86); filter: blur(6px); } }
 @keyframes uv-left { from { opacity: 0; transform: translateX(-40px); } }
 @keyframes uv-right { from { opacity: 0; transform: translateX(40px); } }
+@keyframes uv-mask { from { clip-path: inset(100% 0 0 0); transform: scale(1.12); } }
 @keyframes uv-flip { from { opacity: 0; transform: perspective(900px) rotateX(55deg) translateY(30px); } }
 @keyframes uv-float3d {
   0%, 100% { transform: perspective(700px) translateY(0) rotateY(-14deg) rotateX(4deg); }
