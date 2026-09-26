@@ -91,6 +91,12 @@ const openInstr = ref(0)
           <p class="text-xs text-brand-500">Kode bayar / nomor VA</p>
           <p class="mt-1 font-mono text-2xl font-bold tracking-wider text-brand">{{ order.pay_code }}</p>
           <button class="mt-2 text-xs font-semibold text-clay-600" @click="copy(order.pay_code!, 'code')">{{ copied === 'code' ? '✓ Disalin' : 'Salin kode' }}</button>
+          <div class="mt-3 border-t border-brand-100 pt-3">
+            <p class="text-xs text-brand-500">Jumlah yang harus dibayar</p>
+            <p class="mt-1 font-mono text-2xl font-bold text-brand">{{ rupiah(order.total_amount ?? order.amount) }}</p>
+            <button class="mt-2 text-xs font-semibold text-clay-600" @click="copy(String(order.total_amount ?? order.amount), 'amount')">{{ copied === 'amount' ? '✓ Disalin' : 'Salin nominal' }}</button>
+            <p class="mt-2 text-[11px] leading-snug text-brand-600">Jika aplikasi bank meminta nominal, masukkan <b>tepat</b> angka di atas (tanpa titik). Nominal berbeda akan ditolak bank.</p>
+          </div>
         </div>
         <p v-if="order.expires_at" class="text-xs text-brand-500">Bayar sebelum {{ tanggal(order.expires_at, true) }}</p>
         <a v-if="order.checkout_url" :href="order.checkout_url" class="btn-accent w-full">Buka Halaman Pembayaran</a>
