@@ -1,0 +1,14 @@
+{
+  "name": "Undangan Virtual",
+  "short_name": "Undangan Virtual",
+  "description": "Undangan pernikahan digital syar'i & modern. Satu Link, Sejuta Doa Restu.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#fbf7f0",
+  "theme_color": "#2f4a3a",
+  "icons": [
+    { "src": "/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

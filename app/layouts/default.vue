@@ -13,9 +13,7 @@ watch(() => route.fullPath, () => (menuOpen.value = false))
     <header class="sticky top-0 z-40 border-b border-brand-100/70 bg-cream/90 backdrop-blur">
       <div class="mx-auto flex h-16 max-w-6xl items-center justify-between px-4">
         <NuxtLink to="/" class="flex items-center gap-2" :aria-label="`${config.public.siteName} — beranda`">
-          <span class="grid h-9 w-9 place-items-center rounded-xl bg-brand text-white">
-            <svg viewBox="0 0 100 100" class="h-5 w-5" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-width="7"><rect x="22" y="22" width="56" height="56" /><rect x="22" y="22" width="56" height="56" transform="rotate(45 50 50)" /></g></svg>
-          </span>
+          <img src="/logo-mark.svg" alt="" width="40" height="40" class="h-10 w-10">
           <span class="font-display text-xl text-brand">{{ config.public.siteName }}</span>
         </NuxtLink>
 
