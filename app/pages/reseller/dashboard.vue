@@ -2,7 +2,7 @@
 useSeoMeta({ title: 'Dashboard Reseller', robots: 'noindex' })
 
 interface Summary {
-  reseller: { id: string, code: string, business_name: string, whatsapp: string, bank_name: string, bank_account_number: string, bank_account_holder: string, status: string }
+  reseller: { id: string, code: string, business_name: string, whatsapp: string, bank_name: string | null, bank_account_number: string | null, bank_account_holder: string | null, status: string }
   effective_rate: number
   balance: number
   pending_payout: number
@@ -119,8 +119,8 @@ const bank = reactive({ business_name: '', whatsapp: '', bank_name: '', bank_acc
 watch(summary, (s) => {
   if (!s) return
   Object.assign(bank, {
-    business_name: s.reseller.business_name, whatsapp: s.reseller.whatsapp, bank_name: s.reseller.bank_name,
-    bank_account_number: s.reseller.bank_account_number, bank_account_holder: s.reseller.bank_account_holder,
+    business_name: s.reseller.business_name, whatsapp: s.reseller.whatsapp, bank_name: s.reseller.bank_name ?? '',
+    bank_account_number: s.reseller.bank_account_number ?? '', bank_account_holder: s.reseller.bank_account_holder ?? '',
   })
 }, { immediate: true })
 const bankMsg = ref('')
@@ -250,7 +250,8 @@ const STATUS: Record<string, [string, string]> = {
           <!-- Pencairan -->
           <form class="card grid gap-3 p-4" @submit.prevent="requestPayout">
             <h2 class="font-semibold text-brand-900">Cairkan saldo</h2>
-            <p class="text-xs text-brand-500">Pencairan diproses tanggal {{ summary.payout_days.join(' & ') }} setiap bulan ke {{ summary.reseller.bank_name }} {{ summary.reseller.bank_account_number }} a.n. {{ summary.reseller.bank_account_holder }}. Minimal {{ rupiah(summary.min_payout) }}.</p>
+            <p class="text-xs text-brand-500">Pencairan diproses tanggal {{ summary.payout_days.join(' & ') }} setiap bulan<template v-if="summary.reseller.bank_account_number"> ke {{ summary.reseller.bank_name }} {{ summary.reseller.bank_account_number }} a.n. {{ summary.reseller.bank_account_holder }}</template>. Minimal {{ rupiah(summary.min_payout) }}.</p>
+            <p v-if="!summary.reseller.bank_account_number" class="mt-1 rounded-lg bg-amber-50 px-3 py-2 text-xs text-amber-800">Data rekening belum diisi. Lengkapi di bagian "Profil & rekening" di bawah sebelum mengajukan pencairan.</p>
             <input v-model.number="payoutAmount" type="number" inputmode="numeric" :min="summary.min_payout" :max="summary.balance" step="1000" class="input" placeholder="Nominal">
             <button type="button" class="justify-self-start text-xs font-semibold text-clay-600" @click="payoutAmount = summary.balance">Cairkan semua ({{ rupiah(summary.balance) }})</button>
             <p v-if="payoutMsg" class="text-sm" :class="payoutMsg.ok ? 'text-green-700' : 'text-red-600'">{{ payoutMsg.text }}</p>
