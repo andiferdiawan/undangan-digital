@@ -18,6 +18,7 @@ const published = ref(inv.value?.is_published ?? true)
 const theme = computed(() => inv.value!.theme)
 const globals = computed(() => ({ ...theme.value.definition.globals, ...style.value }))
 const themeAssetKeys = computed(() => Object.keys(theme.value.definition.assets ?? {}))
+const usesSlider = computed(() => JSON.stringify(theme.value.definition.sections).includes('"photo_slider"'))
 
 const COLOR_LABEL: Record<ColorKey, string> = {
   primary_color: 'Warna utama',
@@ -108,6 +109,10 @@ const url = computed(() => inviteUrl(inv.value!.slug))
     <div class="mx-auto grid max-w-6xl gap-6 px-4 py-5 lg:grid-cols-[1fr_420px]">
       <!-- ================= FORM ================= -->
       <div class="grid content-start gap-3" :class="view === 'preview' && 'hidden lg:grid'">
+        <EditorCard v-if="usesSlider" v-model:open="open.slides" title="Foto Sampul (Slider)" :hint="content.cover_photos.length ? `${content.cover_photos.length} foto` : 'Belum ada foto · tema ini menampilkan foto di depan'">
+          <CoverPhotosField v-model="content.cover_photos" :invitation-id="id" />
+        </EditorCard>
+
         <EditorCard v-model:open="open.cover" title="Sampul & Pembuka" hint="Salam dan kalimat pembuka">
           <label class="label">Salam pembuka
             <input v-model="content.opening.greeting" class="input">

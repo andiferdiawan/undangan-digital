@@ -6,6 +6,8 @@ export interface InviteRuntime {
   slug: string | null
   /** Mode pratinjau (katalog/dashboard): RSVP tidak benar-benar terkirim. */
   preview: boolean
+  /** page | frame | thumb — thumb = cuplikan katalog (tanpa animasi). */
+  mode: 'page' | 'frame' | 'thumb'
   coverOpen: Ref<boolean>
   openCover: () => void
   wishesVersion: Ref<number>

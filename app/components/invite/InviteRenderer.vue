@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { ThemeDefinition } from '#shared/theme/schema'
-import { withDefaults as contentWithDefaults } from '#shared/theme/content'
+import { withDefaults as contentWithDefaults, type InvitationContent } from '#shared/theme/content'
 import { buildContext, interpolate, resolveAssets, safeUrl } from '#shared/theme/context'
 import { globalsToCssVars, googleFontsHref, mergeGlobals } from '#shared/theme/style'
 import InviteNode from './InviteNode'
@@ -38,8 +38,22 @@ const cssVars = computed(() => globalsToCssVars(globals.value))
 const assets = computed(() =>
   resolveAssets(props.definition.assets ?? {}, props.assetOverride ?? {}, props.themeSlug, storageBase),
 )
+// Pratinjau katalog (tanpa konten user): pakai data contoh tema (foto model) bila ada.
+// Data contoh tidak pernah dipakai di undangan pelanggan karena konten selalu dikirim.
+const effectiveContent = computed<InvitationContent>(() => {
+  const c = contentWithDefaults(props.content)
+  const demo = props.content === undefined ? props.definition.demo : undefined
+  if (!demo) return c
+  return {
+    ...c,
+    cover_photos: demo.cover_photos?.map(url => ({ url })) ?? c.cover_photos,
+    gallery: demo.gallery?.map(url => ({ url, caption: '' })) ?? c.gallery,
+    groom: { ...c.groom, photo: demo.groom_photo ?? c.groom.photo },
+    bride: { ...c.bride, photo: demo.bride_photo ?? c.bride.photo },
+  }
+})
 const ctx = computed(() =>
-  buildContext(contentWithDefaults(props.content), { guestName: props.guestName, assets: assets.value }),
+  buildContext(effectiveContent.value, { guestName: props.guestName, assets: assets.value }),
 )
 
 // Section RSVP & ucapan disembunyikan bila user menonaktifkan RSVP
@@ -86,6 +100,7 @@ provide(INVITE_KEY, {
   ctx,
   slug: props.slug,
   preview: props.preview,
+  mode: props.mode,
   coverOpen,
   openCover,
   wishesVersion,

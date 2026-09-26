@@ -30,6 +30,8 @@ export interface InvitationContent {
   events: EventItem[]
   story: { date: string, title: string, text: string }[]
   gallery: { url: string, caption: string }[]
+  /** Foto untuk slider sampul (tema dengan photo_slider). */
+  cover_photos: { url: string }[]
   gifts: { bank: string, number: string, holder: string }[]
   rsvp: { enabled: boolean }
   /** Musik latar: url kosong = pakai musik bawaan tema (bila ada). */
@@ -89,6 +91,7 @@ export const DEFAULT_CONTENT: InvitationContent = {
     { date: 'Desember 2026', title: 'Akad Nikah', text: 'Insya Allah kami mengikat janji suci di hadapan Allah.' },
   ],
   gallery: [],
+  cover_photos: [],
   gifts: [
     { bank: 'Bank Syariah Indonesia', number: '1234567890', holder: 'Ahmad Fauzan' },
   ],

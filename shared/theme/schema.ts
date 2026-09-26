@@ -84,6 +84,16 @@ export const themeDefinitionSchema = z.object({
   /** Aset terisolasi per tema: kunci -> path. Dipakai via {{asset.kunci}} atau `bg`. */
   assets: z.record(z.string().regex(/^[a-z][a-z0-9_]{0,40}$/), assetPath).default({}),
   sections: z.array(sectionSchema).min(4).max(LIMITS.maxSections),
+  /**
+   * Data contoh KHUSUS pratinjau katalog (tidak pernah tampil di undangan pelanggan):
+   * foto model untuk slider, galeri, dan profil mempelai.
+   */
+  demo: z.object({
+    cover_photos: z.array(assetPath).max(8).optional(),
+    gallery: z.array(assetPath).max(12).optional(),
+    groom_photo: assetPath.optional(),
+    bride_photo: assetPath.optional(),
+  }).strict().optional(),
 }).strict()
 export type ThemeDefinition = z.infer<typeof themeDefinitionSchema>
 

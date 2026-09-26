@@ -14,7 +14,7 @@ export interface ValidationResult {
   classes: string[]
 }
 
-const CLASS_PROPS = new Set(['item_class', 'number_class', 'label_class', 'input_class', 'button_class', 'name_class', 'text_class'])
+const CLASS_PROPS = new Set(['item_class', 'number_class', 'label_class', 'input_class', 'button_class', 'name_class', 'text_class', 'image_class', 'dot_class'])
 const LIST_KEYS = new Set<string>(REPEAT_SOURCES)
 
 /**
@@ -122,6 +122,8 @@ export function validateTheme(input: unknown): ValidationResult {
       }
       if (node.component === 'map_button' && !node.props?.href)
         errors.push(`${where}: map_button wajib punya props.href`)
+      if (node.component === 'photo_slider' && node.props?.interval && !/^\d{3,5}$/.test(node.props.interval))
+        errors.push(`${where}: photo_slider.interval harus angka milidetik, mis. 5000`)
       if (node.component === 'copy_button' && !node.props?.value)
         errors.push(`${where}: copy_button wajib punya props.value`)
     }

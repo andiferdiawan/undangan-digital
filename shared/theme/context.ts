@@ -58,6 +58,8 @@ export interface RenderContext {
   assets: Record<string, string>
   countdownTarget: string | null
   calendar: { title: string, start: string, end: string, location: string } | null
+  /** Foto slider: Foto Sampul, atau galeri bila kosong. */
+  slides: string[]
 }
 
 /**
@@ -151,6 +153,10 @@ export function buildContext(
           location: [main?.venue, main?.address].filter(Boolean).join(', '),
         }
       : null,
+    slides: (() => {
+      const cover = (c.cover_photos ?? []).map(x => safeUrl(x.url)).filter(Boolean)
+      return cover.length ? cover : lists.gallery.map(g => g.url ?? '').filter(Boolean)
+    })(),
   }
 }
 
