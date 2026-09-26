@@ -4,3 +4,15 @@ body { font-family: "Plus Jakarta Sans", system-ui, sans-serif; color: #243a2d; 
   html { scroll-behavior: auto; }
   *, *::before, *::after { animation: none !important; transition: none !important; }
 }
+
+/* Halaman informasi (markdown dari admin) */
+.prose-page { color: #3b5744; font-size: 15px; line-height: 1.75; }
+.prose-page h2 { font-family: Marcellus, serif; font-size: 1.45rem; color: #2f4a3a; margin: 1.8em 0 .5em; }
+.prose-page h3 { font-weight: 700; font-size: 1.05rem; color: #2f4a3a; margin: 1.4em 0 .4em; }
+.prose-page p { margin: .8em 0; }
+.prose-page ul, .prose-page ol { margin: .6em 0 .9em; padding-left: 1.4em; }
+.prose-page ul { list-style: disc; }
+.prose-page ol { list-style: decimal; }
+.prose-page li { margin: .3em 0; }
+.prose-page strong { color: #2f4a3a; }
+.prose-page a { color: #b8623f; font-weight: 600; text-decoration: underline; text-underline-offset: 2px; }

@@ -8,10 +8,13 @@ export default defineEventHandler(async (event) => {
     .order('updated_at', { ascending: false })
 
   const themes = (data ?? []) as { slug: string, updated_at: string }[]
+  const { data: pageRows } = await publicDb(event).from('pages').select('slug, updated_at').eq('is_published', true).order('sort')
+  const pages = (pageRows ?? []) as { slug: string, updated_at: string }[]
   const latest = themes[0]?.updated_at
   const urls: { loc: string, lastmod?: string, priority: string, freq: string }[] = [
     { loc: `${origin}/`, lastmod: latest, priority: '1.0', freq: 'daily' },
     { loc: `${origin}/reseller`, priority: '0.6', freq: 'monthly' },
+    ...pages.map(p => ({ loc: `${origin}/${encodeURIComponent(p.slug)}`, lastmod: p.updated_at, priority: '0.4', freq: 'monthly' })),
     ...themes.map(t => ({ loc: `${origin}/tema/${encodeURIComponent(t.slug)}`, lastmod: t.updated_at, priority: '0.8', freq: 'weekly' })),
   ]
   const esc = (s: string) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
