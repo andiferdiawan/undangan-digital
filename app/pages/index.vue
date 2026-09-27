@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { CatalogTheme } from '~/composables/useCatalog'
+import type { FeatureIconName } from '~/components/ui/FeatureIcon.vue'
 
 useSeoMeta({
   title: 'Undangan Pernikahan Digital Syar\'i & Modern',
@@ -12,21 +13,38 @@ const { data } = await useCatalog()
 const route = useRoute()
 const router = useRouter()
 
+// Jenis acara (induk) → kategori gaya → tema. Tema tanpa kategori dianggap Pernikahan.
+const DEFAULT_GROUP = 'pernikahan'
+const group = computed({
+  get: () => (route.query.jenis as string) || DEFAULT_GROUP,
+  set: v => router.replace({ query: { ...route.query, jenis: v === DEFAULT_GROUP ? undefined : v, kategori: undefined }, hash: '#katalog' }),
+})
 const category = computed({
   get: () => (route.query.kategori as string) || '',
   set: v => router.replace({ query: { ...route.query, kategori: v || undefined }, hash: '#katalog' }),
 })
 const search = ref('')
 
+const groupOf = (categoryId: number | null) =>
+  data.value?.categories.find(c => c.id === categoryId)?.group_slug ?? DEFAULT_GROUP
+const activeGroup = computed(() => data.value?.groups.find(g => g.slug === group.value) ?? data.value?.groups[0])
+const groupCats = computed(() => (data.value?.categories ?? []).filter(c => (c.group_slug ?? DEFAULT_GROUP) === group.value))
+const groupCounts = computed(() => {
+  const m = new Map<string, number>()
+  for (const t of data.value?.themes ?? []) m.set(groupOf(t.category_id), (m.get(groupOf(t.category_id)) ?? 0) + 1)
+  return m
+})
+const inGroup = computed(() => (data.value?.themes ?? []).filter(t => groupOf(t.category_id) === group.value))
+
 const filtered = computed(() => {
-  const list = data.value?.themes ?? []
-  const cat = data.value?.categories.find(c => c.slug === category.value)
+  const cat = groupCats.value.find(c => c.slug === category.value)
   const q = search.value.trim().toLowerCase()
-  return list.filter(t =>
+  return inGroup.value.filter(t =>
     (!cat || t.category_id === cat.id)
     && (!q || `${t.name} ${t.code} ${t.description ?? ''}`.toLowerCase().includes(q)),
   )
 })
+const { whatsapp } = await useReferral()
 const catName = (id: number | null) => data.value?.categories.find(c => c.id === id)?.name ?? ''
 const counts = computed(() => {
   const m = new Map<number, number>()
@@ -162,12 +180,29 @@ useJsonLd('site', () => ({
         </label>
       </div>
 
-      <div class="-mx-4 mt-5 flex gap-2 overflow-x-auto px-4 pb-2 [scrollbar-width:none]">
+      <!-- Jenis acara (induk kategori) -->
+      <div class="-mx-4 mt-6 flex gap-2 overflow-x-auto px-4 pb-2 [scrollbar-width:none]" role="tablist" aria-label="Jenis acara">
+        <button
+          v-for="g in data?.groups" :key="g.slug"
+          role="tab" :aria-selected="group === g.slug"
+          class="flex shrink-0 items-center gap-2.5 rounded-2xl bg-white py-2 pl-2 pr-4 text-left ring-1 transition"
+          :class="group === g.slug ? 'ring-2 ring-brand shadow-sm' : 'ring-brand-100 hover:ring-brand-300'"
+          @click="group = g.slug"
+        >
+          <FeatureIcon :name="g.icon as FeatureIconName" size="sm" />
+          <span>
+            <span class="block whitespace-nowrap text-sm font-semibold" :class="group === g.slug ? 'text-brand-900' : 'text-brand-700'">{{ g.name }}</span>
+            <span class="block text-[11px] text-brand-500">{{ groupCounts.get(g.slug) ? `${groupCounts.get(g.slug)} tema` : 'Segera hadir' }}</span>
+          </span>
+        </button>
+      </div>
+
+      <div v-if="groupCats.length && inGroup.length" class="-mx-4 mt-3 flex gap-2 overflow-x-auto px-4 pb-2 [scrollbar-width:none]">
         <button class="chip shrink-0 px-4 py-2 text-sm ring-1 transition" :class="!category ? 'bg-brand text-white ring-brand' : 'bg-white text-brand-700 ring-brand-100'" @click="category = ''">
           Semua
         </button>
         <button
-          v-for="c in data?.categories" :key="c.id"
+          v-for="c in groupCats" :key="c.id"
           class="chip shrink-0 px-4 py-2 text-sm ring-1 transition"
           :class="category === c.slug ? 'bg-brand text-white ring-brand' : 'bg-white text-brand-700 ring-brand-100'"
           @click="category = c.slug"
@@ -194,6 +229,12 @@ useJsonLd('site', () => ({
             </div>
           </div>
         </article>
+      </div>
+      <div v-else-if="!inGroup.length && activeGroup" class="card mt-6 grid place-items-center gap-3 p-10 text-center">
+        <FeatureIcon :name="activeGroup.icon as FeatureIconName" size="lg" />
+        <h3 class="font-display text-2xl text-brand">Tema {{ activeGroup.name }} segera hadir</h3>
+        <p class="max-w-md text-sm text-brand-600">{{ activeGroup.description }}. Kami sedang menyiapkan desainnya. Butuh sekarang? Kami bisa buatkan desain khusus untuk acara Anda.</p>
+        <a :href="waLink(whatsapp, `Assalamu'alaikum, saya ingin memesan undangan digital untuk ${activeGroup.name}.`)" target="_blank" rel="noopener" class="btn-primary">Pesan Desain Khusus via WhatsApp</a>
       </div>
       <p v-else class="card mt-6 p-10 text-center text-sm text-brand-600">Tema tidak ditemukan. Coba kategori atau kata kunci lain.</p>
     </section>

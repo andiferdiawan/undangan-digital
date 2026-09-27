@@ -1,6 +1,7 @@
 import type { ThemeDefinition } from '../theme/schema'
 
-export interface Category { id: number, slug: string, name: string, sort: number }
+export interface Category { id: number, slug: string, name: string, sort: number, group_slug: string }
+export interface EventGroup { slug: string, name: string, icon: string, description: string | null, sort: number, is_active: boolean }
 export interface Package { id: number, code: string, name: string, guest_limit: number, price: number, is_active: boolean, sort: number }
 
 export interface ThemeRow {

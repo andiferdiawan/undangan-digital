@@ -4,7 +4,8 @@
  * Warna: hijau tua (utama), hijau muda (bidang), terakota (aksen), putih (detail).
  */
 export type FeatureIconName = 'invite' | 'music' | 'rsvp' | 'map' | 'gift' | 'countdown' | 'theme' | 'payment' | 'token' | 'share' | 'link' | 'receipt' | 'wallet' | 'pending'
-defineProps<{ name: FeatureIconName, size?: 'md' | 'lg' }>()
+  | 'wedding' | 'aqiqah' | 'khitan' | 'birthday' | 'office' | 'event'
+defineProps<{ name: FeatureIconName, size?: 'sm' | 'md' | 'lg' }>()
 
 const D = '#3b5744' // hijau tua
 const L = '#b9d3b3' // hijau muda
@@ -13,8 +14,8 @@ const W = '#ffffff'
 </script>
 
 <template>
-  <span class="grid shrink-0 place-items-center rounded-2xl bg-[#eef3ec]" :class="size === 'lg' ? 'h-20 w-20' : 'h-16 w-16'" aria-hidden="true">
-    <svg viewBox="0 0 48 48" :class="size === 'lg' ? 'h-13 w-13' : 'h-11 w-11'" fill="none">
+  <span class="grid shrink-0 place-items-center bg-[#eef3ec]" :class="size === 'lg' ? 'h-20 w-20 rounded-2xl' : size === 'sm' ? 'h-10 w-10 rounded-xl' : 'h-16 w-16 rounded-2xl'" aria-hidden="true">
+    <svg viewBox="0 0 48 48" :class="size === 'lg' ? 'h-13 w-13' : size === 'sm' ? 'h-7 w-7' : 'h-11 w-11'" fill="none">
       <!-- Undangan: amplop terbuka dengan kartu & hati -->
       <template v-if="name === 'invite'">
         <rect x="11" y="6" width="26" height="24" rx="3" :fill="L" />
@@ -148,6 +149,60 @@ const W = '#ffffff'
         <path d="M20 14h8l-4 5z" :fill="A" />
         <rect x="10" y="4" width="28" height="5" rx="2.5" :fill="D" />
         <rect x="10" y="39" width="28" height="5" rx="2.5" :fill="D" />
+      </template>
+      <!-- Jenis acara · Pernikahan: dua cincin bertaut + berlian -->
+      <template v-else-if="name === 'wedding'">
+        <circle cx="30" cy="29" r="11" :stroke="L" stroke-width="5" />
+        <circle cx="18" cy="29" r="11" :stroke="D" stroke-width="5" />
+        <path d="M27.2 19.6a11 11 0 0 1 2.8-1.6" :stroke="L" stroke-width="5" stroke-linecap="round" />
+        <path d="M30 5l6 6-6 7-6-7z" :fill="A" />
+        <path d="M24 11h12" :stroke="W" stroke-width="1.5" />
+      </template>
+
+      <!-- Jenis acara · Aqiqah: bayi dibedong di atas bulan sabit + bintang -->
+      <template v-else-if="name === 'aqiqah'">
+        <path d="M31 6a19 19 0 1 0 12 31A16 16 0 1 1 31 6z" :fill="L" />
+        <rect x="9" y="22" width="26" height="14" rx="7" :fill="D" />
+        <path d="M22 24c3 3 3 7 0 10" :stroke="L" stroke-width="2" stroke-linecap="round" />
+        <circle cx="14" cy="29" r="6" :fill="W" />
+        <circle cx="12.5" cy="28.5" r="1" :fill="D" /><circle cx="15.5" cy="28.5" r="1" :fill="D" />
+        <path d="M38 8l1.6 3.4L43 13l-3.4 1.6L38 18l-1.6-3.4L33 13l3.4-1.6z" :fill="A" />
+      </template>
+
+      <!-- Jenis acara · Khitanan: peci/kopiah + bintang -->
+      <template v-else-if="name === 'khitan'">
+        <path d="M8 30v-5c0-7 7-11 16-11s16 4 16 11v5z" :fill="D" />
+        <rect x="6" y="29" width="36" height="8" rx="2" :fill="L" />
+        <path d="M14 18c3-1.5 6-2 10-2" :stroke="W" stroke-width="2" stroke-linecap="round" opacity=".6" />
+        <path d="M11 33h26" :stroke="D" stroke-width="1.6" stroke-dasharray="2 3" />
+        <path d="M38 4l1.8 3.8L44 9.6l-4.2 1.8L38 15l-1.8-3.6L32 9.6l4.2-1.8z" :fill="A" />
+      </template>
+
+      <!-- Jenis acara · Ulang tahun: kue bertingkat + lilin -->
+      <template v-else-if="name === 'birthday'">
+        <rect x="7" y="27" width="34" height="15" rx="3" :fill="D" />
+        <rect x="12" y="17" width="24" height="12" rx="3" :fill="L" />
+        <path d="M12 22c2 2 4 2 6 0s4-2 6 0 4 2 6 0 4-2 6 0" :stroke="W" stroke-width="2" stroke-linecap="round" />
+        <path d="M7 33c3 2.5 5 2.5 8.5 0s5.5-2.5 8.5 0 5.5 2.5 8.5 0 5.5-2.5 8.5 0" :stroke="L" stroke-width="2" stroke-linecap="round" />
+        <rect x="22.5" y="9" width="3" height="8" rx="1.5" :fill="A" />
+        <path d="M24 2c2 2.5 2.5 4 0 5.5-2.5-1.5-2-3 0-5.5z" :fill="A" />
+      </template>
+
+      <!-- Jenis acara · Kantor & bisnis: tas kerja -->
+      <template v-else-if="name === 'office'">
+        <path d="M17 14v-3a3 3 0 0 1 3-3h8a3 3 0 0 1 3 3v3" :stroke="L" stroke-width="4" />
+        <rect x="5" y="14" width="38" height="27" rx="5" :fill="D" />
+        <path d="M5 25h38" :stroke="L" stroke-width="2.5" />
+        <rect x="19" y="21" width="10" height="9" rx="2.5" :fill="A" />
+        <rect x="22.5" y="24" width="3" height="3" rx="1" :fill="W" />
+      </template>
+
+      <!-- Jenis acara · Acara umum: kalender + bintang -->
+      <template v-else-if="name === 'event'">
+        <rect x="6" y="9" width="36" height="33" rx="5" :fill="L" />
+        <path d="M6 14a5 5 0 0 1 5-5h26a5 5 0 0 1 5 5v5H6z" :fill="D" />
+        <rect x="14" y="5" width="4" height="8" rx="2" :fill="D" /><rect x="30" y="5" width="4" height="8" rx="2" :fill="D" />
+        <path d="M24 23l2.6 5.2 5.7.8-4.1 4 1 5.7L24 36l-5.2 2.7 1-5.7-4.1-4 5.7-.8z" :fill="A" />
       </template>
     </svg>
   </span>
