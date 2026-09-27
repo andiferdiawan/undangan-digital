@@ -47,7 +47,7 @@ function nameSize(name: string) {
   return Math.max(18, Math.min(30, Math.floor(190 / Math.max(1, name.length * 0.56))))
 }
 
-export async function renderBrandOg(opts: { groom: string, bride: string, date: string }): Promise<Buffer> {
+export async function renderBrandOg(opts: { groom: string, bride: string, date: string, child?: string }): Promise<Buffer> {
   const [marcellus, jakarta500, jakarta600] = await Promise.all([
     loadFont('Marcellus', 400),
     loadFont('Plus Jakarta Sans', 500),
@@ -84,10 +84,18 @@ export async function renderBrandOg(opts: { groom: string, bride: string, date: 
       backgroundColor: C.cream, border: `8px solid ${C.greenDark}`, boxShadow: '0 30px 60px rgba(0,0,0,0.35)',
       flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: 16,
     }, [
-      h('div', { fontSize: 11, fontWeight: 500, letterSpacing: 2.2, color: C.sage }, 'THE WEDDING OF'),
-      h('div', { marginTop: 14 }, [name(groom)]),
-      h('div', { fontFamily: 'Marcellus', fontSize: 24, color: C.clay, marginTop: 2 }, '&'),
-      h('div', { marginTop: 2 }, [name(bride)]),
+      ...(opts.child
+        // Aqiqah: satu nama anak
+        ? [
+            h('div', { fontSize: 11, fontWeight: 500, letterSpacing: 2.2, color: C.sage }, 'TASYAKURAN AQIQAH'),
+            h('div', { marginTop: 16 }, [name(opts.child.trim().slice(0, 28))]),
+          ]
+        : [
+            h('div', { fontSize: 11, fontWeight: 500, letterSpacing: 2.2, color: C.sage }, 'THE WEDDING OF'),
+            h('div', { marginTop: 14 }, [name(groom)]),
+            h('div', { fontFamily: 'Marcellus', fontSize: 24, color: C.clay, marginTop: 2 }, '&'),
+            h('div', { marginTop: 2 }, [name(bride)]),
+          ]),
       opts.date ? h('div', { fontSize: 12, fontWeight: 500, color: C.text, marginTop: 14, textAlign: 'center' }, opts.date) : null,
       h('div', { marginTop: 22, backgroundColor: C.green, color: '#ffffff', fontSize: 11, fontWeight: 600, padding: '9px 16px', borderRadius: 999 }, 'Buka Undangan'),
     ]),

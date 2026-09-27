@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { GuestRow } from '#shared/types/models'
-import { withDefaults as contentWithDefaults } from '#shared/theme/content'
+import { withDefaults as contentWithDefaults, inviteNames } from '#shared/theme/content'
 
 const route = useRoute()
 const id = String(route.params.id)
@@ -97,7 +97,8 @@ const shown = computed(() => {
   return (guests.value ?? []).filter(g => !s || g.name.toLowerCase().includes(s) || (g.group_name ?? '').toLowerCase().includes(s))
 })
 
-const content = computed(() => contentWithDefaults(inv.value?.content))
+const eventKind = computed(() => inv.value?.theme.definition.kind ?? 'wedding')
+const content = computed(() => contentWithDefaults(inv.value?.content, eventKind.value))
 const TEMPLATE_KEY = `wa-template-${id}`
 const template = ref(`Assalamu'alaikum Warahmatullahi Wabarakatuh
 
@@ -114,6 +115,11 @@ Merupakan suatu kebahagiaan bagi kami apabila Bapak/Ibu/Saudara/i berkenan hadir
 
 Wassalamu'alaikum Warahmatullahi Wabarakatuh`)
 onMounted(() => {
+  if (eventKind.value === 'aqiqah') {
+    template.value = template.value
+      .replace('acara pernikahan kami', 'tasyakuran aqiqah buah hati kami')
+      .replace('hadir dan memberikan doa restu', 'hadir dan mendoakan buah hati kami')
+  }
   try {
     const saved = localStorage.getItem(TEMPLATE_KEY)
     if (saved) template.value = saved
@@ -130,7 +136,7 @@ const linkFor = (g: GuestRow) => inviteUrl(inv.value!.slug, g.name)
 const messageFor = (g: GuestRow) => template.value
   .replaceAll('{nama}', g.name)
   .replaceAll('{link}', linkFor(g))
-  .replaceAll('{mempelai}', `${content.value.groom.nickname} & ${content.value.bride.nickname}`)
+  .replaceAll('{mempelai}', inviteNames(content.value, eventKind.value))
 const waFor = (g: GuestRow) => g.phone
   ? waLink(g.phone.replace(/^0/, '62'), messageFor(g))
   : `https://wa.me/?text=${encodeURIComponent(messageFor(g))}`

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { withDefaults as contentWithDefaults } from '#shared/theme/content'
+import { withDefaults as contentWithDefaults, inviteNames } from '#shared/theme/content'
 
 useSeoMeta({ title: 'Dashboard' })
 const supabase = useSupabaseClient()
@@ -10,7 +10,7 @@ await refresh()
 const { data: list } = await useAsyncData('my-invitations', async () => {
   const { data } = await supabase
     .from('invitations')
-    .select('id, slug, guest_limit, content, is_published, updated_at, theme:themes(name, code), guests(count), rsvps(count)')
+    .select('id, slug, guest_limit, content, is_published, updated_at, theme:themes(name, code, kind:definition->>kind), guests(count), rsvps(count)')
     // Admin bisa membaca semua undangan (RLS); dashboard pribadi hanya milik akun ini.
     .eq('owner_id', (user.value as { sub?: string } | null)?.sub ?? '')
     .order('created_at', { ascending: false })
@@ -51,11 +51,11 @@ async function logout() {
     <div v-if="list?.length" class="mt-4 grid gap-3">
       <NuxtLink v-for="inv in list" :key="inv.id" :to="`/dashboard/${inv.id}`" class="card flex items-center gap-4 p-4 transition hover:ring-brand-300">
         <div class="grid h-14 w-14 shrink-0 place-items-center rounded-2xl bg-brand-50 font-display text-lg text-brand">
-          {{ contentWithDefaults(inv.content).groom.nickname.charAt(0) }}&amp;{{ contentWithDefaults(inv.content).bride.nickname.charAt(0) }}
+          {{ inv.theme?.kind === 'aqiqah' ? contentWithDefaults(inv.content, 'aqiqah').child.nickname.charAt(0) : `${contentWithDefaults(inv.content).groom.nickname.charAt(0)}&${contentWithDefaults(inv.content).bride.nickname.charAt(0)}` }}
         </div>
         <div class="min-w-0 flex-1">
           <p class="truncate font-semibold text-brand-900">
-            {{ contentWithDefaults(inv.content).groom.nickname }} &amp; {{ contentWithDefaults(inv.content).bride.nickname }}
+            {{ inviteNames(contentWithDefaults(inv.content, inv.theme?.kind === 'aqiqah' ? 'aqiqah' : 'wedding'), inv.theme?.kind === 'aqiqah' ? 'aqiqah' : 'wedding') }}
           </p>
           <p class="truncate text-xs text-brand-500">/{{ inv.slug }} · {{ inv.theme?.name }}</p>
           <div class="mt-2 flex flex-wrap gap-1.5 text-[11px]">

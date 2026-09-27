@@ -113,6 +113,18 @@ export const PLACEHOLDERS = {
   quote_source: 'Sumber kutipan',
   closing_text: 'Kalimat penutup',
   closing_greeting: 'Salam penutup',
+  child_name: 'Aqiqah: nama lengkap anak',
+  child_nickname: 'Aqiqah: nama panggilan anak',
+  child_photo: 'Aqiqah: foto anak (URL, boleh kosong)',
+  child_gender: 'Aqiqah: "Putra" atau "Putri"',
+  child_birth: 'Aqiqah: tanggal lahir, mis. "Jumat, 20 November 2026"',
+  child_birth_time: 'Aqiqah: jam lahir, mis. "08.15 WITA"',
+  child_weight: 'Aqiqah: berat lahir, mis. "3,2 kg"',
+  child_length: 'Aqiqah: panjang lahir, mis. "49 cm"',
+  child_order: 'Aqiqah: urutan anak, mis. "Putra pertama"',
+  father_name: 'Nama ayah (aqiqah/khitanan)',
+  mother_name: 'Nama ibu (aqiqah/khitanan)',
+  parents_names: 'Nama ayah & ibu, mis. "Ahmad Fauzan & Aisyah Humaira"',
   guest_name: 'Nama tamu dari link (?to=)',
   hero_image: 'Gambar utama cover (asset atau foto user)',
 } as const
@@ -125,8 +137,16 @@ export const REPEAT_FIELDS: Record<RepeatSource, readonly string[]> = {
   gifts: ['bank', 'number', 'holder'],
 }
 
-/** Placeholder yang wajib muncul di setiap tema agar data user pasti tampil. */
-export const REQUIRED_PLACEHOLDERS: PlaceholderKey[] = ['bride_name', 'groom_name', 'event_date', 'location_map']
+/** Jenis acara yang didukung model konten. Menentukan data isian & placeholder wajib. */
+export const EVENT_KINDS = ['wedding', 'aqiqah'] as const
+export type EventKind = (typeof EVENT_KINDS)[number]
+
+/** Placeholder yang wajib muncul di setiap tema agar data user pasti tampil (per jenis acara). */
+export const REQUIRED_PLACEHOLDERS_BY_KIND: Record<EventKind, PlaceholderKey[]> = {
+  wedding: ['bride_name', 'groom_name', 'event_date', 'location_map'],
+  aqiqah: ['child_name', 'father_name', 'mother_name', 'event_date', 'location_map'],
+}
+export const REQUIRED_PLACEHOLDERS: PlaceholderKey[] = REQUIRED_PLACEHOLDERS_BY_KIND.wedding
 
 /**
  * Kelas utilitas yang aman: karakter terbatas, tanpa url()/image-set()/@import/expression

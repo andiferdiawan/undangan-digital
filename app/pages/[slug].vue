@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { PublicInvitation } from '#shared/types/models'
-import { withDefaults as contentWithDefaults } from '#shared/theme/content'
+import { withDefaults as contentWithDefaults, inviteNames, inviteTitle } from '#shared/theme/content'
 import { dateParts } from '#shared/theme/context'
 
 definePageMeta({ layout: false })
@@ -16,9 +16,10 @@ const { data: inv } = await useAsyncData(`inv-${slug}`, async () => {
 })
 if (!inv.value) throw createError({ statusCode: 404, statusMessage: 'Undangan tidak ditemukan', fatal: true })
 
-const content = computed(() => contentWithDefaults(inv.value?.content))
-const names = computed(() => `${content.value.groom.nickname} & ${content.value.bride.nickname}`)
-const title = computed(() => `Undangan Pernikahan ${names.value}`)
+const eventKind = computed(() => inv.value?.theme.definition.kind ?? 'wedding')
+const content = computed(() => contentWithDefaults(inv.value?.content, eventKind.value))
+const names = computed(() => inviteNames(content.value, eventKind.value))
+const title = computed(() => inviteTitle(content.value, eventKind.value))
 const when = computed(() => {
   const e = content.value.events[0]
   return [dateParts(e?.date ?? '')?.full, e?.venue].filter(Boolean).join(' · ')
@@ -27,7 +28,7 @@ const when = computed(() => {
 const origin = useSiteOrigin()
 const ogImage = computed(() => {
   const c = content.value
-  const v = shortHash(JSON.stringify(['brand1', c.groom.nickname, c.bride.nickname, c.events[0]?.date]))
+  const v = shortHash(JSON.stringify(['brand1', names.value, c.events[0]?.date]))
   return `${origin}/og/${slug}.png?v=${v}`
 })
 useSeoMeta({
@@ -39,7 +40,7 @@ useSeoMeta({
   ogImage,
   ogImageWidth: 1200,
   ogImageHeight: 630,
-  ogImageAlt: () => `Undangan pernikahan ${names.value}`,
+  ogImageAlt: () => title.value,
   twitterCard: 'summary_large_image',
   twitterImage: ogImage,
   robots: 'noindex, nofollow',

@@ -40,8 +40,9 @@ const assets = computed(() =>
 )
 // Pratinjau katalog (tanpa konten user): pakai data contoh tema (foto model) bila ada.
 // Data contoh tidak pernah dipakai di undangan pelanggan karena konten selalu dikirim.
+const kind = computed(() => props.definition.kind ?? 'wedding')
 const effectiveContent = computed<InvitationContent>(() => {
-  const c = contentWithDefaults(props.content)
+  const c = contentWithDefaults(props.content, kind.value)
   const demo = props.content === undefined ? props.definition.demo : undefined
   if (!demo) return c
   return {
@@ -50,15 +51,16 @@ const effectiveContent = computed<InvitationContent>(() => {
     gallery: demo.gallery?.map(url => ({ url, caption: '' })) ?? c.gallery,
     groom: { ...c.groom, photo: demo.groom_photo ?? c.groom.photo },
     bride: { ...c.bride, photo: demo.bride_photo ?? c.bride.photo },
+    child: { ...c.child, ...demo.child, photo: demo.child_photo ?? c.child.photo },
   }
 })
 const ctx = computed(() =>
-  buildContext(effectiveContent.value, { guestName: props.guestName, assets: assets.value }),
+  buildContext(effectiveContent.value, { guestName: props.guestName, assets: assets.value, kind: kind.value }),
 )
 
 // Section RSVP & ucapan disembunyikan bila user menonaktifkan RSVP
 const sections = computed(() => {
-  const rsvpOn = contentWithDefaults(props.content).rsvp.enabled
+  const rsvpOn = contentWithDefaults(props.content, kind.value).rsvp.enabled
   return props.definition.sections.filter(s => rsvpOn || (s.type !== 'rsvp' && s.type !== 'wishes'))
 })
 const cover = computed(() => (sections.value[0]?.type === 'cover' ? sections.value[0] : null))
@@ -70,7 +72,7 @@ const body = computed(() => {
 // ---------- Musik latar ----------
 const musicSrc = computed(() => {
   if (props.mode === 'thumb') return ''
-  const m = contentWithDefaults(props.content).music
+  const m = contentWithDefaults(props.content, kind.value).music
   if (!m.enabled) return ''
   return safeUrl(m.url) || safeUrl(props.themeMusic) || ''
 })

@@ -11,6 +11,19 @@ export interface Person {
   instagram: string
 }
 
+/** Data anak untuk undangan aqiqah (tidak dipakai tema pernikahan). */
+export interface Child {
+  name: string
+  nickname: string
+  gender: 'l' | 'p'
+  birth_date: string // YYYY-MM-DD
+  birth_time: string // bebas, mis. "08.15 WITA"
+  weight: string // mis. "3,2 kg"
+  length: string // mis. "49 cm"
+  order: string // mis. "Putra pertama"
+  photo: string
+}
+
 export interface EventItem {
   name: string
   date: string // YYYY-MM-DD
@@ -23,8 +36,10 @@ export interface EventItem {
 }
 
 export interface InvitationContent {
+  /** Pernikahan: mempelai pria/wanita. Aqiqah: ayah/ibu (hanya name, nickname, photo, instagram). */
   groom: Person
   bride: Person
+  child: Child
   opening: { greeting: string, text: string }
   quote: { arabic: string, text: string, source: string }
   events: EventItem[]
@@ -53,6 +68,17 @@ export const DEFAULT_CONTENT: InvitationContent = {
     parents: 'Putri dari Bapak Umar & Ibu Fatimah',
     photo: '',
     instagram: '',
+  },
+  child: {
+    name: 'Muhammad Al Fatih',
+    nickname: 'Fatih',
+    gender: 'l',
+    birth_date: '2026-11-20',
+    birth_time: '08.15 WIB',
+    weight: '3,2 kg',
+    length: '49 cm',
+    order: 'Putra pertama',
+    photo: '',
   },
   opening: {
     greeting: 'Assalamu\'alaikum Warahmatullahi Wabarakatuh',
@@ -103,12 +129,51 @@ export const DEFAULT_CONTENT: InvitationContent = {
   },
 }
 
+/** Contoh isi untuk undangan aqiqah: orang tua di groom/bride, anak di child. */
+export const AQIQAH_CONTENT: InvitationContent = {
+  ...DEFAULT_CONTENT,
+  groom: { name: 'Ahmad Fauzan', nickname: 'Ahmad', parents: '', photo: '', instagram: '' },
+  bride: { name: 'Aisyah Humaira', nickname: 'Aisyah', parents: '', photo: '', instagram: '' },
+  opening: {
+    greeting: 'Assalamu\'alaikum Warahmatullahi Wabarakatuh',
+    text: 'Dengan memohon rahmat dan ridha Allah Subhanahu wa Ta\'ala, kami bermaksud menyelenggarakan tasyakuran aqiqah buah hati kami:',
+  },
+  quote: {
+    arabic: 'كُلُّ غُلَامٍ رَهِينَةٌ بِعَقِيقَتِهِ، تُذْبَحُ عَنْهُ يَوْمَ سَابِعِهِ، وَيُحْلَقُ، وَيُسَمَّى',
+    text: 'Setiap anak tergadai dengan aqiqahnya; disembelihkan (hewan) untuknya pada hari ketujuh, dicukur rambutnya, dan diberi nama.',
+    source: 'HR. Abu Dawud, At-Tirmidzi, An-Nasa\'i',
+  },
+  events: [
+    {
+      name: 'Tasyakuran Aqiqah',
+      date: '2026-11-27',
+      time_start: '10:00',
+      time_end: '13:00',
+      timezone: 'WIB',
+      venue: 'Kediaman Keluarga',
+      address: 'Jl. Contoh No. 1, Kota Anda',
+      map_url: 'https://maps.google.com/?q=Monas+Jakarta',
+    },
+  ],
+  story: [],
+  gifts: [{ bank: 'Bank Syariah Indonesia', number: '1234567890', holder: 'Ahmad Fauzan' }],
+  closing: {
+    text: 'Merupakan suatu kehormatan dan kebahagiaan bagi kami apabila Bapak/Ibu/Saudara/i berkenan hadir dan mendoakan buah hati kami agar menjadi anak yang shalih/shalihah.',
+    greeting: 'Wassalamu\'alaikum Warahmatullahi Wabarakatuh',
+  },
+}
+
+export type ContentKind = 'wedding' | 'aqiqah'
+
 function isObject(v: unknown): v is Record<string, unknown> {
   return !!v && typeof v === 'object' && !Array.isArray(v)
 }
 
-/** Gabungkan konten tersimpan dengan default agar field baru selalu ada. Array tidak digabung. */
-export function withDefaults(saved: unknown): InvitationContent {
+/**
+ * Gabungkan konten tersimpan dengan default agar field baru selalu ada. Array tidak digabung.
+ * kind menentukan contoh isi (pernikahan atau aqiqah) untuk field yang belum diisi.
+ */
+export function withDefaults(saved: unknown, kind: ContentKind = 'wedding'): InvitationContent {
   const merge = (base: any, over: any): any => {
     if (!isObject(over)) return structuredClone(base)
     const out: any = {}
@@ -121,5 +186,13 @@ export function withDefaults(saved: unknown): InvitationContent {
     }
     return out
   }
-  return merge(DEFAULT_CONTENT, saved)
+  return merge(kind === 'aqiqah' ? AQIQAH_CONTENT : DEFAULT_CONTENT, saved)
+}
+
+/** Nama yang ditampilkan untuk undangan (judul, pratinjau link, dashboard). */
+export function inviteNames(c: InvitationContent, kind: ContentKind = 'wedding'): string {
+  return kind === 'aqiqah' ? c.child.nickname || c.child.name : `${c.groom.nickname} & ${c.bride.nickname}`
+}
+export function inviteTitle(c: InvitationContent, kind: ContentKind = 'wedding'): string {
+  return kind === 'aqiqah' ? `Undangan Aqiqah ${inviteNames(c, kind)}` : `Undangan Pernikahan ${inviteNames(c, kind)}`
 }

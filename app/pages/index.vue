@@ -181,7 +181,7 @@ useJsonLd('site', () => ({
       </div>
 
       <!-- Jenis acara (induk kategori) -->
-      <div class="-mx-4 mt-6 flex gap-2 overflow-x-auto px-4 pb-2 [scrollbar-width:none]" role="tablist" aria-label="Jenis acara">
+      <div class="-mx-4 mt-5 flex gap-2 overflow-x-auto px-4 py-1.5 pb-3 [scrollbar-width:none]" role="tablist" aria-label="Jenis acara">
         <button
           v-for="g in data?.groups" :key="g.slug"
           role="tab" :aria-selected="group === g.slug"

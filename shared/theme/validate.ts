@@ -1,5 +1,5 @@
 import {
-  classProblem, COMPONENTS, LIMITS, PLACEHOLDERS, REPEAT_FIELDS, REPEAT_SOURCES, REQUIRED_PLACEHOLDERS,
+  classProblem, COMPONENTS, LIMITS, PLACEHOLDERS, REPEAT_FIELDS, REPEAT_SOURCES, REQUIRED_PLACEHOLDERS_BY_KIND,
   REQUIRED_SECTIONS, type RepeatSource,
 } from './constants'
 import { placeholdersIn } from './context'
@@ -148,7 +148,7 @@ export function validateTheme(input: unknown): ValidationResult {
   for (const s of REQUIRED_SECTIONS)
     if (!sectionTypes.has(s)) errors.push(`Section wajib "${s}" tidak ada`)
   const alias: Partial<Record<string, string>> = { event_date: 'date', location_map: 'map_url' }
-  for (const p of REQUIRED_PLACEHOLDERS) {
+  for (const p of REQUIRED_PLACEHOLDERS_BY_KIND[def.kind ?? 'wedding']) {
     const viaRepeat = alias[p] && usedEventItems.has(alias[p]!)
     if (!used.has(p) && !viaRepeat)
       errors.push(`Placeholder wajib {{${p}}} tidak dipakai${alias[p] ? ` (atau {{item.${alias[p]}}} di dalam repeat events)` : ''}`)

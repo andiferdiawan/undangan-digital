@@ -15,22 +15,30 @@ export default defineEventHandler(async (event) => {
   const db = publicDb(event)
 
   let raw: unknown
+  let eventKind: 'wedding' | 'aqiqah' = 'wedding'
+  let demoChild: Record<string, string> | undefined
   if (kind === 'tema') {
-    const { data } = await db.from('themes').select('id').eq('slug', slug!).eq('status', 'published').maybeSingle()
+    const { data } = await db.from('themes').select('id, definition').eq('slug', slug!).eq('status', 'published').maybeSingle()
     if (!data) throw createError({ statusCode: 404, statusMessage: 'Tema tidak ditemukan' })
     raw = undefined // nama & tanggal contoh
+    const def = (data as { definition: { kind?: 'wedding' | 'aqiqah', demo?: { child?: Record<string, string> } } }).definition
+    eventKind = def?.kind ?? 'wedding'
+    demoChild = def?.demo?.child
   }
   else {
     const { data } = await db.rpc('get_public_invitation', { p_slug: slug } as never)
     if (!data) throw createError({ statusCode: 404, statusMessage: 'Undangan tidak ditemukan' })
     raw = (data as { content: unknown }).content
+    eventKind = (data as { theme?: { definition?: { kind?: 'wedding' | 'aqiqah' } } }).theme?.definition?.kind ?? 'wedding'
   }
 
-  const c = contentWithDefaults(raw)
+  const c = contentWithDefaults(raw, eventKind)
+  if (demoChild) Object.assign(c.child, demoChild)
   const png = await renderBrandOg({
     groom: c.groom.nickname,
     bride: c.bride.nickname,
     date: dateParts(c.events[0]?.date ?? '')?.full ?? '',
+    child: eventKind === 'aqiqah' ? (c.child.nickname || c.child.name) : undefined,
   })
 
   setHeader(event, 'content-type', 'image/png')

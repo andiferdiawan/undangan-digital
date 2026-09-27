@@ -1,6 +1,6 @@
 import { z } from 'zod'
 import {
-  ALLOWED_ATTRS, ALLOWED_FONTS, classProblem, ALLOWED_TAGS, COLOR_KEYS, COMPONENTS, LIMITS,
+  ALLOWED_ATTRS, ALLOWED_FONTS, classProblem, ALLOWED_TAGS, COLOR_KEYS, COMPONENTS, EVENT_KINDS, LIMITS,
   REPEAT_SOURCES, SECTION_TYPES, THEME_SCHEMA_VERSION,
 } from './constants'
 
@@ -78,6 +78,8 @@ export type ThemeSection = z.infer<typeof sectionSchema>
 
 export const themeDefinitionSchema = z.object({
   version: z.literal(THEME_SCHEMA_VERSION),
+  /** Jenis acara (default pernikahan). Menentukan isian editor & placeholder wajib. */
+  kind: z.enum(EVENT_KINDS).optional(),
   globals: globalsSchema,
   /** Kelas untuk pembungkus undangan (latar, font dasar). */
   root_class: classString.optional(),
@@ -93,6 +95,11 @@ export const themeDefinitionSchema = z.object({
     gallery: z.array(assetPath).max(12).optional(),
     groom_photo: assetPath.optional(),
     bride_photo: assetPath.optional(),
+    child_photo: assetPath.optional(),
+    /** Contoh data anak (mis. nama putri untuk tema aqiqah putri) */
+    child: z.object({
+      name: z.string().max(60), nickname: z.string().max(30), gender: z.enum(['l', 'p']), order: z.string().max(40),
+    }).partial().strict().optional(),
   }).strict().optional(),
 }).strict()
 export type ThemeDefinition = z.infer<typeof themeDefinitionSchema>

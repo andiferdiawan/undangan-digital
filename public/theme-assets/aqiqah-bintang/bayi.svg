@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 250"><style>.z{animation:z 3s ease-in-out infinite;transform-box:fill-box;transform-origin:center}.z2{animation-delay:1s}.b{animation:b 4s ease-in-out infinite;transform-origin:120px 120px}@keyframes z{0%{opacity:0;transform:translate(0,6px) scale(.6)}40%{opacity:1}100%{opacity:0;transform:translate(10px,-14px) scale(1.1)}}@keyframes b{0%,100%{transform:rotate(-2deg)}50%{transform:rotate(2deg)}}@media (prefers-reduced-motion:reduce){*{animation:none!important}}</style>
+<polygon points="210.0,28.0 213.2,35.6 221.4,36.3 215.1,41.7 217.1,49.7 210.0,45.4 202.9,49.7 204.9,41.7 198.6,36.3 206.8,35.6" fill="#f2c14e" stroke="#2c4a7a" stroke-width="2" stroke-linejoin="round"/><polygon points="26.0,52.0 28.1,57.1 33.6,57.5 29.4,61.1 30.7,66.5 26.0,63.6 21.3,66.5 22.6,61.1 18.4,57.5 23.9,57.1" fill="#f2c14e" stroke="#2c4a7a" stroke-width="2" stroke-linejoin="round"/><polygon points="186.0,10.0 187.6,13.8 191.7,14.1 188.6,16.8 189.5,20.9 186.0,18.7 182.5,20.9 183.4,16.8 180.3,14.1 184.4,13.8" fill="#fff" stroke="#2c4a7a" stroke-width="1.6" stroke-linejoin="round"/>
+<g class="b"><path d="M40 150a92 92 0 0 0 176-18 76 76 0 0 1-128-86A92 92 0 0 0 40 150z" fill="#f2c14e" stroke="#2c4a7a" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
+<rect x="78" y="96" width="112" height="44" rx="22" fill="#8fbde6" stroke="#2c4a7a" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
+<path d="M120 100c10 10 10 28 0 38M150 100c8 10 8 28 0 38" stroke="#e8f2fb" stroke-width="3" fill="none" stroke-linecap="round"/>
+<circle cx="112" cy="98" r="26" fill="#f9dcc8" stroke="#2c4a7a" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
+<path d="M92 92c-4-22 16-38 36-32 14 4 20 16 18 28z" fill="#8fbde6" stroke="#2c4a7a" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/><circle cx="118" cy="56" r="8" fill="#f2c14e" stroke="#2c4a7a" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/><path d="M92 92c16-6 38-6 54-4" stroke="#2c4a7a" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round" fill="none"/>
+<path d="M100 100q4 4 8 0M118 100q4 4 8 0" stroke="#2c4a7a" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round" fill="none"/>
+<ellipse cx="98" cy="108" rx="5" ry="3" fill="#f6b8b0"/><ellipse cx="128" cy="108" rx="5" ry="3" fill="#f6b8b0"/>
+<path d="M109 112q3 2 6 0" stroke="#2c4a7a" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round" fill="none"/>
+</g>
+<text class="z" x="150" y="70" font-family="Arial Rounded MT Bold,Arial,sans-serif" font-weight="700" font-size="16" fill="#2c4a7a">z</text>
+<text class="z z2" x="162" y="56" font-family="Arial Rounded MT Bold,Arial,sans-serif" font-weight="700" font-size="12" fill="#2c4a7a">z</text>
+</svg>
