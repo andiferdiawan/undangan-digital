@@ -52,6 +52,7 @@ const effectiveContent = computed<InvitationContent>(() => {
     groom: { ...c.groom, photo: demo.groom_photo ?? c.groom.photo },
     bride: { ...c.bride, photo: demo.bride_photo ?? c.bride.photo },
     child: { ...c.child, ...demo.child, photo: demo.child_photo ?? c.child.photo },
+    host: { ...c.host, ...demo.host },
   }
 })
 const ctx = computed(() =>
@@ -111,6 +112,7 @@ provide(INVITE_KEY, {
   coverOpen,
   openCover,
   wishesVersion,
+  kind: kind.value,
 })
 
 // CSS hasil kompilasi dibuat server dari kelas Tailwind yang sudah divalidasi

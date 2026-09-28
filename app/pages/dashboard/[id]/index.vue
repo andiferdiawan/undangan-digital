@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ALLOWED_FONTS, COLOR_KEYS, type ColorKey } from '#shared/theme/constants'
-import { withDefaults as contentWithDefaults, isChildKind, type EventItem, type InvitationContent } from '#shared/theme/content'
+import { withDefaults as contentWithDefaults, isChildKind, isHostKind, type EventItem, type InvitationContent } from '#shared/theme/content'
 
 const route = useRoute()
 const id = String(route.params.id)
@@ -17,6 +17,8 @@ const isBirthday = computed(() => eventKind.value === 'birthday')
 /** Ulang tahun & khitan: data lahir detail (jam, berat, panjang) tidak diperlukan */
 const noBirthDetail = computed(() => isKhitan.value || isBirthday.value)
 const isChild = computed(() => isChildKind(eventKind.value))
+/** Acara kantor & umum: data penyelenggara + susunan acara */
+const isHost = computed(() => isHostKind(eventKind.value))
 const content = ref<InvitationContent>(contentWithDefaults(inv.value?.content, eventKind.value))
 const style = ref<Record<string, string>>({ ...(inv.value?.style ?? {}) })
 const assets = ref<Record<string, string>>({ ...(inv.value?.assets ?? {}) })
@@ -73,7 +75,7 @@ if (import.meta.client) {
 }
 
 // ---------- Helper daftar ----------
-const newEvent = (): EventItem => ({ name: isChild.value ? 'Pengajian & Doa' : 'Resepsi', date: content.value.events[0]?.date ?? '', time_start: '11:00', time_end: '13:00', timezone: 'WIB', venue: '', address: '', map_url: '' })
+const newEvent = (): EventItem => ({ name: isChild.value ? 'Pengajian & Doa' : isHost.value ? 'Sesi Lanjutan' : 'Resepsi', date: content.value.events[0]?.date ?? '', time_start: '11:00', time_end: '13:00', timezone: 'WIB', venue: '', address: '', map_url: '' })
 function move<T>(list: T[], i: number, d: -1 | 1) {
   const j = i + d
   if (j < 0 || j >= list.length) return
@@ -132,7 +134,27 @@ const url = computed(() => inviteUrl(inv.value!.slug))
           <ImageField v-if="themeAssetKeys.includes('hero_image')" v-model="assets.hero_image" :invitation-id="id" label="Foto sampul / prewedding" hint="Mengganti latar bawaan tema. Kosongkan untuk memakai latar tema." />
         </EditorCard>
 
-        <template v-if="isChild">
+        <EditorCard v-if="isHost" v-model:open="open.host" title="Penyelenggara & Acara" :hint="content.host.title">
+          <label class="label">Judul acara
+            <input v-model="content.host.title" class="input" maxlength="80" :placeholder="eventKind === 'office' ? 'Grand Opening Kantor Cabang' : 'Halal Bihalal & Silaturahmi'">
+          </label>
+          <label class="label">Tema / subjudul (opsional)
+            <input v-model="content.host.tagline" class="input" maxlength="120" placeholder="Tumbuh Bersama, Melayani Lebih Dekat">
+          </label>
+          <label class="label">Penyelenggara
+            <input v-model="content.host.name" class="input" maxlength="80" :placeholder="eventKind === 'office' ? 'PT Nama Perusahaan' : 'Keluarga Besar / Panitia …'">
+          </label>
+          <ImageField v-model="content.host.logo" :invitation-id="id" label="Logo (opsional)" hint="PNG transparan paling bagus. Kosongkan bila tidak ada." />
+          <div class="grid grid-cols-2 gap-3">
+            <label class="label">Narahubung
+              <input v-model="content.host.contact_name" class="input" placeholder="Nama">
+            </label>
+            <label class="label">No. WhatsApp
+              <input v-model="content.host.contact_phone" type="tel" class="input" placeholder="0812…">
+            </label>
+          </div>
+        </EditorCard>
+        <template v-else-if="isChild">
           <EditorCard v-model:open="open.child" :title="isBirthday ? 'Yang Berulang Tahun' : isKhitan ? 'Data Anak yang Dikhitan' : 'Data Buah Hati'" :hint="content.child.name">
             <label class="label">{{ isBirthday ? 'Nama lengkap' : 'Nama lengkap anak' }}
               <input v-model="content.child.name" class="input">
@@ -212,7 +234,7 @@ const url = computed(() => inviteUrl(inv.value!.slug))
               </div>
             </div>
             <label class="label">Nama acara
-              <input v-model="ev.name" class="input" :placeholder="isBirthday ? 'Syukuran Ulang Tahun' : isKhitan ? 'Walimatul Khitan' : isAqiqah ? 'Tasyakuran Aqiqah' : 'Akad Nikah'">
+              <input v-model="ev.name" class="input" :placeholder="isHost ? (eventKind === 'office' ? 'Peresmian' : 'Pengajian') : isBirthday ? 'Syukuran Ulang Tahun' : isKhitan ? 'Walimatul Khitan' : isAqiqah ? 'Tasyakuran Aqiqah' : 'Akad Nikah'">
             </label>
             <div class="grid grid-cols-2 gap-3">
               <label class="label col-span-2">Tanggal
@@ -273,25 +295,25 @@ const url = computed(() => inviteUrl(inv.value!.slug))
           <p v-if="galleryError" class="text-xs text-red-600">{{ galleryError }}</p>
         </EditorCard>
 
-        <EditorCard v-model:open="open.story" :title="isBirthday ? 'Perjalanan & Kenangan' : isKhitan ? 'Cerita Si Kecil' : isAqiqah ? 'Cerita Kelahiran' : 'Kisah Cinta'" hint="Kosongkan untuk menyembunyikan">
+        <EditorCard v-model:open="open.story" :title="isHost ? 'Susunan Acara' : isBirthday ? 'Perjalanan & Kenangan' : isKhitan ? 'Cerita Si Kecil' : isAqiqah ? 'Cerita Kelahiran' : 'Kisah Cinta'" hint="Kosongkan untuk menyembunyikan">
           <div v-for="(st, i) in content.story" :key="i" class="grid gap-3 rounded-2xl bg-brand-50/60 p-3">
             <div class="flex items-center justify-between">
-              <p class="text-sm font-bold text-brand">Momen {{ i + 1 }}</p>
+              <p class="text-sm font-bold text-brand">{{ isHost ? 'Agenda' : 'Momen' }} {{ i + 1 }}</p>
               <button type="button" class="text-xs text-red-600" @click="content.story.splice(i, 1)">Hapus</button>
             </div>
             <div class="grid grid-cols-2 gap-3">
-              <label class="label">Waktu
-                <input v-model="st.date" class="input" placeholder="Maret 2026">
+              <label class="label">{{ isHost ? 'Jam' : 'Waktu' }}
+                <input v-model="st.date" class="input" :placeholder="isHost ? '09.00' : 'Maret 2026'">
               </label>
-              <label class="label">Judul
-                <input v-model="st.title" class="input" placeholder="Ta'aruf">
+              <label class="label">{{ isHost ? 'Agenda' : 'Judul' }}
+                <input v-model="st.title" class="input" :placeholder="isHost ? 'Pembukaan' : 'Ta\'aruf'">
               </label>
             </div>
-            <label class="label">Cerita
+            <label class="label">{{ isHost ? 'Keterangan' : 'Cerita' }}
               <textarea v-model="st.text" rows="2" class="input" />
             </label>
           </div>
-          <button type="button" class="btn-ghost btn-sm justify-self-start" @click="content.story.push({ date: '', title: '', text: '' })">+ Tambah momen</button>
+          <button type="button" class="btn-ghost btn-sm justify-self-start" @click="content.story.push({ date: '', title: '', text: '' })">{{ isHost ? '+ Tambah agenda' : '+ Tambah momen' }}</button>
         </EditorCard>
 
         <EditorCard v-model:open="open.gift" title="Amplop Digital" hint="Kosongkan untuk menyembunyikan">

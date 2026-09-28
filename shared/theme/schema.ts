@@ -101,6 +101,10 @@ export const themeDefinitionSchema = z.object({
       name: z.string().max(60), nickname: z.string().max(30), gender: z.enum(['l', 'p']), order: z.string().max(40),
       birth_date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
     }).partial().strict().optional(),
+    /** Contoh penyelenggara & judul acara (tema kantor/acara umum) */
+    host: z.object({
+      name: z.string().max(80), title: z.string().max(80), tagline: z.string().max(120),
+    }).partial().strict().optional(),
   }).strict().optional(),
 }).strict()
 export type ThemeDefinition = z.infer<typeof themeDefinitionSchema>

@@ -25,8 +25,12 @@ import * as khCeria from './themes/khitan-ceria'
 import * as khMihrab from './themes/khitan-mihrab'
 import * as utBalon from './themes/ultah-balon'
 import * as utEmas from './themes/ultah-emas'
+import * as ofPrima from './themes/kantor-prima'
+import * as ofAgenda from './themes/kantor-agenda'
+import * as acSilaturahmi from './themes/acara-silaturahmi'
+import * as acKumpul from './themes/acara-kumpul'
 
-const themes = [sakinah, minimalis, floral, arka, noir, rustic, bugis, makassar, toraja, senja, arunika, lontara, aurelia, doodle, alur, aqBintang, aqBunga, khCeria, khMihrab, utBalon, utEmas]
+const themes = [sakinah, minimalis, floral, arka, noir, rustic, bugis, makassar, toraja, senja, arunika, lontara, aurelia, doodle, alur, aqBintang, aqBunga, khCeria, khMihrab, utBalon, utEmas, ofPrima, ofAgenda, acSilaturahmi, acKumpul]
 const q = (s: string) => `'${s.replace(/'/g, "''")}'`
 const rows: string[] = []
 let failed = false

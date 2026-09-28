@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { withDefaults as contentWithDefaults, inviteNames, isChildKind, type ContentKind } from '#shared/theme/content'
+import { withDefaults as contentWithDefaults, inviteNames, isChildKind, isHostKind, type ContentKind } from '#shared/theme/content'
 
 useSeoMeta({ title: 'Dashboard' })
 const supabase = useSupabaseClient()
@@ -53,7 +53,7 @@ async function logout() {
     <div v-if="list?.length" class="mt-4 grid gap-3">
       <NuxtLink v-for="inv in list" :key="inv.id" :to="`/dashboard/${inv.id}`" class="card flex items-center gap-4 p-4 transition hover:ring-brand-300">
         <div class="grid h-14 w-14 shrink-0 place-items-center rounded-2xl bg-brand-50 font-display text-lg text-brand">
-          {{ isChildKind(inv.theme?.kind) ? contentWithDefaults(inv.content, kindOf(inv)).child.nickname.charAt(0) : `${contentWithDefaults(inv.content).groom.nickname.charAt(0)}&${contentWithDefaults(inv.content).bride.nickname.charAt(0)}` }}
+          {{ isHostKind(inv.theme?.kind) ? contentWithDefaults(inv.content, kindOf(inv)).host.title.charAt(0) : isChildKind(inv.theme?.kind) ? contentWithDefaults(inv.content, kindOf(inv)).child.nickname.charAt(0) : `${contentWithDefaults(inv.content).groom.nickname.charAt(0)}&${contentWithDefaults(inv.content).bride.nickname.charAt(0)}` }}
         </div>
         <div class="min-w-0 flex-1">
           <p class="truncate font-semibold text-brand-900">

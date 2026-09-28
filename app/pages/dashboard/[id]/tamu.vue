@@ -119,6 +119,8 @@ onMounted(() => {
     aqiqah: ['tasyakuran aqiqah buah hati kami', 'hadir dan mendoakan buah hati kami'],
     khitan: ['walimatul khitan putra kami', 'hadir dan mendoakan putra kami'],
     birthday: ['syukuran ulang tahun', 'hadir dan memberikan doa terbaik'],
+    office: ['acara', 'hadir'],
+    general: ['acara', 'hadir'],
   }[eventKind.value as string]
   if (phrase) {
     template.value = template.value

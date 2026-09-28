@@ -4,10 +4,36 @@ const rt = useInvite()
 const supabase = useSupabaseClient()
 
 type Wish = { name: string, attendance: string, message: string, created_at: string }
-const SAMPLE: Wish[] = [
-  { name: 'Fulan', attendance: 'hadir', message: 'Barakallahu lakuma wa baraka \'alaikuma wa jama\'a bainakuma fii khair.', created_at: new Date().toISOString() },
-  { name: 'Fulanah', attendance: 'hadir', message: 'Semoga menjadi keluarga yang sakinah, mawaddah, wa rahmah.', created_at: new Date().toISOString() },
-]
+const now = new Date().toISOString()
+const wish = (name: string, message: string): Wish => ({ name, attendance: 'hadir', message, created_at: now })
+/** Contoh ucapan di pratinjau, sesuai jenis acara tema */
+const SAMPLES: Record<string, Wish[]> = {
+  wedding: [
+    wish('Fulan', 'Barakallahu lakuma wa baraka \'alaikuma wa jama\'a bainakuma fii khair.'),
+    wish('Fulanah', 'Semoga menjadi keluarga yang sakinah, mawaddah, wa rahmah.'),
+  ],
+  aqiqah: [
+    wish('Fulan', 'Barakallahu laka fil mauhubi lak. Semoga menjadi anak yang shalih/shalihah.'),
+    wish('Fulanah', 'Selamat atas kelahiran buah hati, semoga sehat dan menjadi penyejuk mata.'),
+  ],
+  khitan: [
+    wish('Fulan', 'Selamat untuk jagoan kecil, semoga tumbuh menjadi anak yang shalih dan berbakti.'),
+    wish('Fulanah', 'Barakallahu fiik, semoga lekas pulih dan sehat selalu.'),
+  ],
+  birthday: [
+    wish('Fulan', 'Barakallahu fii umrik! Semoga usianya penuh berkah dan amal kebaikan.'),
+    wish('Fulanah', 'Selamat bertambah usia, semoga sehat, bahagia, dan semakin dekat kepada Allah.'),
+  ],
+  office: [
+    wish('Fulan', 'Selamat dan sukses! Semoga acara berjalan lancar dan membawa keberkahan.'),
+    wish('Fulanah', 'Terima kasih atas undangannya, insya Allah kami hadir.'),
+  ],
+  general: [
+    wish('Fulan', 'Insya Allah hadir. Semoga acaranya lancar dan penuh berkah.'),
+    wish('Fulanah', 'Terima kasih undangannya, senang bisa berkumpul kembali.'),
+  ],
+}
+const SAMPLE = SAMPLES[rt.kind] ?? SAMPLES.wedding!
 const wishes = ref<Wish[]>(rt.preview ? SAMPLE : [])
 
 async function load() {

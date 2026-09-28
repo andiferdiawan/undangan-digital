@@ -1,5 +1,5 @@
 import type { InvitationContent } from './content'
-import type { PlaceholderKey, RepeatSource } from './constants'
+import type { EventKind, PlaceholderKey, RepeatSource } from './constants'
 
 const DAYS = ['Ahad', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jum\'at', 'Sabtu']
 const MONTHS = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli',
@@ -40,6 +40,13 @@ function ageYears(birth: string, at?: string) {
   let y = +a[1]! - +b[1]!
   if (+a[2]! < +b[2]! || (+a[2]! === +b[2]! && +a[3]! < +b[3]!)) y--
   return y >= 0 ? `${y} tahun` : ''
+}
+
+/** Link WhatsApp dari nomor lokal (08…) atau internasional (62…/+62…). */
+export function waLinkFromPhone(phone: string): string {
+  let d = (phone || '').replace(/\D/g, '')
+  if (d.startsWith('0')) d = `62${d.slice(1)}`
+  return d.length >= 9 ? `https://wa.me/${d}` : ''
 }
 
 export function eventStart(ev: { date: string, time_start: string, timezone: keyof typeof TZ_OFFSET }): Date | null {
@@ -103,7 +110,7 @@ export function resolveAssets(
 
 export function buildContext(
   c: InvitationContent,
-  opts: { guestName?: string, assets: Record<string, string>, kind?: 'wedding' | 'aqiqah' | 'khitan' | 'birthday' },
+  opts: { guestName?: string, assets: Record<string, string>, kind?: EventKind },
 ): RenderContext {
   const main = c.events[0]
   const p = main ? dateParts(main.date) : null
@@ -154,6 +161,13 @@ export function buildContext(
     father_name: c.groom.name,
     mother_name: c.bride.name,
     parents_names: [c.groom.name, c.bride.name].filter(Boolean).join(' & '),
+    host_name: c.host.name,
+    event_title: c.host.title,
+    event_tagline: c.host.tagline,
+    host_logo: safeUrl(c.host.logo),
+    contact_name: c.host.contact_name,
+    contact_phone: c.host.contact_phone,
+    contact_link: waLinkFromPhone(c.host.contact_phone),
     guest_name: opts.guestName ?? '',
     hero_image: opts.assets.hero_image ?? '',
   }
@@ -179,7 +193,7 @@ export function buildContext(
     countdownTarget: start ? start.toISOString() : null,
     calendar: start
       ? {
-          title: opts.kind === 'aqiqah' ? `Aqiqah ${values.child_nickname}` : opts.kind === 'khitan' ? `Khitanan ${values.child_nickname}` : opts.kind === 'birthday' ? `Ulang Tahun ${values.child_nickname}` : `Pernikahan ${values.couple_names}`,
+          title: opts.kind === 'aqiqah' ? `Aqiqah ${values.child_nickname}` : opts.kind === 'khitan' ? `Khitanan ${values.child_nickname}` : opts.kind === 'birthday' ? `Ulang Tahun ${values.child_nickname}` : opts.kind === 'office' || opts.kind === 'general' ? values.event_title : `Pernikahan ${values.couple_names}`,
           start: fmt(start),
           end: fmt(end ?? new Date(start.getTime() + 2 * 3600e3)),
           location: [main?.venue, main?.address].filter(Boolean).join(', '),

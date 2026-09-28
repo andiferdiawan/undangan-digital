@@ -1,5 +1,6 @@
 import type { InjectionKey, Ref } from 'vue'
 import type { RenderContext } from '#shared/theme/context'
+import type { EventKind } from '#shared/theme/constants'
 
 export interface InviteRuntime {
   ctx: Ref<RenderContext>
@@ -11,6 +12,8 @@ export interface InviteRuntime {
   coverOpen: Ref<boolean>
   openCover: () => void
   wishesVersion: Ref<number>
+  /** Jenis acara tema (untuk contoh ucapan di pratinjau) */
+  kind: EventKind
 }
 
 export const INVITE_KEY: InjectionKey<InviteRuntime> = Symbol('invite')

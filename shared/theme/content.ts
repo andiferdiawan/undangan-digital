@@ -24,6 +24,16 @@ export interface Child {
   photo: string
 }
 
+/** Penyelenggara untuk acara kantor & acara umum (tidak dipakai tema pernikahan/anak). */
+export interface Host {
+  name: string // penyelenggara, mis. "PT Sinar Nusantara Abadi"
+  title: string // judul acara, mis. "Grand Opening Kantor Cabang Makassar"
+  tagline: string // tema/subjudul acara
+  logo: string // URL logo (boleh kosong)
+  contact_name: string
+  contact_phone: string
+}
+
 export interface EventItem {
   name: string
   date: string // YYYY-MM-DD
@@ -40,9 +50,11 @@ export interface InvitationContent {
   groom: Person
   bride: Person
   child: Child
+  host: Host
   opening: { greeting: string, text: string }
   quote: { arabic: string, text: string, source: string }
   events: EventItem[]
+  /** Pernikahan/anak: cerita. Kantor/acara umum: susunan acara (date = jam, mis. "09.00"). */
   story: { date: string, title: string, text: string }[]
   gallery: { url: string, caption: string }[]
   /** Foto untuk slider sampul (tema dengan photo_slider). */
@@ -79,6 +91,14 @@ export const DEFAULT_CONTENT: InvitationContent = {
     length: '49 cm',
     order: 'Putra pertama',
     photo: '',
+  },
+  host: {
+    name: 'PT Sinar Nusantara Abadi',
+    title: 'Grand Opening Kantor Cabang Makassar',
+    tagline: 'Tumbuh Bersama, Melayani Lebih Dekat',
+    logo: '',
+    contact_name: 'Rina (Sekretariat)',
+    contact_phone: '081234567890',
   },
   opening: {
     greeting: 'Assalamu\'alaikum Warahmatullahi Wabarakatuh',
@@ -249,13 +269,102 @@ export const BIRTHDAY_CONTENT: InvitationContent = {
   },
 }
 
-export type ContentKind = 'wedding' | 'aqiqah' | 'khitan' | 'birthday'
+/** Contoh isi untuk acara kantor & bisnis (peresmian, seminar, rapat kerja, anniversary). */
+export const OFFICE_CONTENT: InvitationContent = {
+  ...DEFAULT_CONTENT,
+  opening: {
+    greeting: 'Assalamu\'alaikum Warahmatullahi Wabarakatuh',
+    text: 'Dengan hormat, dengan memohon ridha Allah Subhanahu wa Ta\'ala, kami mengundang Bapak/Ibu/Saudara/i untuk berkenan hadir pada acara:',
+  },
+  quote: {
+    arabic: 'فَاِذَا قُضِيَتِ الصَّلٰوةُ فَانْتَشِرُوْا فِى الْاَرْضِ وَابْتَغُوْا مِنْ فَضْلِ اللّٰهِ وَاذْكُرُوا اللّٰهَ كَثِيْرًا لَّعَلَّكُمْ تُفْلِحُوْنَ',
+    text: 'Apabila shalat telah dilaksanakan, maka bertebaranlah kamu di bumi; carilah karunia Allah dan ingatlah Allah banyak-banyak agar kamu beruntung.',
+    source: 'QS. Al-Jumu\'ah : 10',
+  },
+  events: [
+    {
+      name: 'Pembukaan Resmi',
+      date: '2026-11-16',
+      time_start: '09:00',
+      time_end: '12:00',
+      timezone: 'WITA',
+      venue: 'Kantor Cabang Makassar',
+      address: 'Jl. Contoh No. 1, Kota Anda',
+      map_url: 'https://maps.google.com/?q=Monas+Jakarta',
+    },
+  ],
+  story: [
+    { date: '08.30', title: 'Registrasi Tamu', text: 'Penyambutan dan coffee morning' },
+    { date: '09.00', title: 'Pembukaan & Tilawah', text: 'Pembacaan ayat suci Al-Qur\'an dan doa' },
+    { date: '09.30', title: 'Sambutan', text: 'Sambutan pimpinan dan tamu kehormatan' },
+    { date: '10.00', title: 'Acara Inti', text: 'Sesi utama dan diskusi' },
+    { date: '10.45', title: 'Ramah Tamah', text: 'Makan siang dan foto bersama' },
+  ],
+  gallery: [],
+  gifts: [],
+  closing: {
+    text: 'Merupakan suatu kehormatan bagi kami atas kehadiran Bapak/Ibu/Saudara/i. Atas perhatian dan kehadirannya, kami ucapkan terima kasih.',
+    greeting: 'Wassalamu\'alaikum Warahmatullahi Wabarakatuh',
+  },
+}
+
+/** Contoh isi untuk acara umum (pengajian, halal bihalal, reuni, syukuran, gathering). */
+export const GENERAL_CONTENT: InvitationContent = {
+  ...OFFICE_CONTENT,
+  host: {
+    name: 'Keluarga Besar H. Abdullah',
+    title: 'Halal Bihalal & Silaturahmi',
+    tagline: 'Merajut Ukhuwah, Menyambung Silaturahmi',
+    logo: '',
+    contact_name: 'Ahmad',
+    contact_phone: '081234567890',
+  },
+  opening: {
+    greeting: 'Assalamu\'alaikum Warahmatullahi Wabarakatuh',
+    text: 'Dengan memohon rahmat dan ridha Allah Subhanahu wa Ta\'ala, kami mengundang Bapak/Ibu/Saudara/i untuk hadir pada acara:',
+  },
+  quote: {
+    arabic: 'مَنْ أَحَبَّ أَنْ يُبْسَطَ لَهُ فِي رِزْقِهِ، وَيُنْسَأَ لَهُ فِي أَثَرِهِ، فَلْيَصِلْ رَحِمَهُ',
+    text: 'Barang siapa yang ingin dilapangkan rezekinya dan dipanjangkan umurnya, hendaklah ia menyambung tali silaturahmi.',
+    source: 'HR. Al-Bukhari & Muslim',
+  },
+  events: [
+    {
+      name: 'Halal Bihalal',
+      date: '2027-03-21',
+      time_start: '09:00',
+      time_end: '13:00',
+      timezone: 'WIB',
+      venue: 'Kediaman Keluarga',
+      address: 'Jl. Contoh No. 1, Kota Anda',
+      map_url: 'https://maps.google.com/?q=Monas+Jakarta',
+    },
+  ],
+  story: [
+    { date: '09.00', title: 'Pembukaan & Tilawah', text: 'Pembacaan ayat suci Al-Qur\'an' },
+    { date: '09.30', title: 'Tausiyah', text: 'Siraman rohani tentang ukhuwah' },
+    { date: '10.30', title: 'Saling Memaafkan', text: 'Bersalam-salaman dan ramah tamah' },
+    { date: '11.30', title: 'Makan Bersama', text: 'Foto bersama dan hidangan' },
+  ],
+  closing: {
+    text: 'Kehadiran Bapak/Ibu/Saudara/i adalah kebahagiaan bagi kami. Semoga silaturahmi ini membawa keberkahan bagi kita semua.',
+    greeting: 'Wassalamu\'alaikum Warahmatullahi Wabarakatuh',
+  },
+}
+
+export type ContentKind = 'wedding' | 'aqiqah' | 'khitan' | 'birthday' | 'office' | 'general'
 /** Label jenis acara untuk judul undangan */
-export const KIND_LABEL: Record<ContentKind, string> = { wedding: 'Pernikahan', aqiqah: 'Aqiqah', khitan: 'Khitanan', birthday: 'Ulang Tahun' }
+export const KIND_LABEL: Record<ContentKind, string> = {
+  wedding: 'Pernikahan', aqiqah: 'Aqiqah', khitan: 'Khitanan', birthday: 'Ulang Tahun', office: 'Acara Kantor', general: 'Acara',
+}
 /** Jenis acara yang berpusat pada satu orang (data child + ayah/ibu) */
 export const isChildKind = (kind?: string | null): kind is 'aqiqah' | 'khitan' | 'birthday' =>
   kind === 'aqiqah' || kind === 'khitan' || kind === 'birthday'
-const SAMPLE: Record<ContentKind, InvitationContent> = { wedding: DEFAULT_CONTENT, aqiqah: AQIQAH_CONTENT, khitan: KHITAN_CONTENT, birthday: BIRTHDAY_CONTENT }
+/** Jenis acara yang berpusat pada penyelenggara & judul acara (data host + susunan acara) */
+export const isHostKind = (kind?: string | null): kind is 'office' | 'general' => kind === 'office' || kind === 'general'
+const SAMPLE: Record<ContentKind, InvitationContent> = {
+  wedding: DEFAULT_CONTENT, aqiqah: AQIQAH_CONTENT, khitan: KHITAN_CONTENT, birthday: BIRTHDAY_CONTENT, office: OFFICE_CONTENT, general: GENERAL_CONTENT,
+}
 
 function isObject(v: unknown): v is Record<string, unknown> {
   return !!v && typeof v === 'object' && !Array.isArray(v)
@@ -263,7 +372,7 @@ function isObject(v: unknown): v is Record<string, unknown> {
 
 /**
  * Gabungkan konten tersimpan dengan default agar field baru selalu ada. Array tidak digabung.
- * kind menentukan contoh isi (pernikahan, aqiqah, khitanan, ulang tahun) untuk field yang belum diisi.
+ * kind menentukan contoh isi (pernikahan, aqiqah, khitanan, ulang tahun, kantor, acara umum) untuk field yang belum diisi.
  */
 export function withDefaults(saved: unknown, kind: ContentKind = 'wedding'): InvitationContent {
   const merge = (base: any, over: any): any => {
@@ -283,8 +392,10 @@ export function withDefaults(saved: unknown, kind: ContentKind = 'wedding'): Inv
 
 /** Nama yang ditampilkan untuk undangan (judul, pratinjau link, dashboard). */
 export function inviteNames(c: InvitationContent, kind: ContentKind = 'wedding'): string {
+  if (isHostKind(kind)) return c.host.title || c.host.name
   return isChildKind(kind) ? c.child.nickname || c.child.name : `${c.groom.nickname} & ${c.bride.nickname}`
 }
 export function inviteTitle(c: InvitationContent, kind: ContentKind = 'wedding'): string {
+  if (isHostKind(kind)) return `Undangan ${inviteNames(c, kind)}`
   return `Undangan ${KIND_LABEL[kind] ?? 'Pernikahan'} ${inviteNames(c, kind)}`
 }

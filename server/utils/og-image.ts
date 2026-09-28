@@ -88,7 +88,7 @@ export async function renderBrandOg(opts: { groom: string, bride: string, date: 
         // Aqiqah: satu nama anak
         ? [
             h('div', { fontSize: 11, fontWeight: 500, letterSpacing: 2.2, color: C.sage }, opts.childLabel ?? 'TASYAKURAN AQIQAH'),
-            h('div', { marginTop: 16 }, [name(opts.child.trim().slice(0, 28))]),
+            h('div', { marginTop: 16 }, [name(opts.child.trim().slice(0, 48))]),
           ]
         : [
             h('div', { fontSize: 11, fontWeight: 500, letterSpacing: 2.2, color: C.sage }, 'THE WEDDING OF'),
