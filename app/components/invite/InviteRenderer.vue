@@ -135,7 +135,7 @@ const bgUrl = (bg?: string) => {
   <div class="invite-wrap">
     <div
       ref="rootEl"
-      class="invite-root relative isolate overflow-x-hidden bg-base font-body text-ink"
+      class="invite-root relative isolate overflow-x-clip bg-base font-body text-ink"
       :class="[`invite-${mode}`, { 'uv-motion': motion.active.value }]"
       :style="cssVars"
     >
@@ -232,6 +232,18 @@ const bgUrl = (bg?: string) => {
 }
 .invite-root.uv-motion .uv-live .uv-scroll-follow { opacity: 1; }
 .invite-root:not(.uv-motion) .uv-scroll-line { --uv-p: 1; }
+/* Zoom sumbu Z mengikuti scroll: --uv-d = jarak elemen dari tengah layar (-1 atas … 1 bawah).
+   Dari bawah: jauh & pudar → tengah: tajam → ke atas: melewati penonton (membesar & memudar). */
+.invite-root .uv-z {
+  transform: perspective(1100px) translate3d(0, calc(var(--uv-d, 0) * 36px), calc(var(--uv-d, 0) * -560px)) rotateX(calc(var(--uv-d, 0) * 12deg));
+  opacity: var(--uv-o, 1);
+}
+.invite-root .uv-z-left { transform: perspective(1100px) translate3d(calc(var(--uv-d, 0) * -60px), 0, calc(var(--uv-d, 0) * -560px)) rotateY(calc(var(--uv-d, 0) * 28deg)); opacity: var(--uv-o, 1); }
+.invite-root .uv-z-right { transform: perspective(1100px) translate3d(calc(var(--uv-d, 0) * 60px), 0, calc(var(--uv-d, 0) * -560px)) rotateY(calc(var(--uv-d, 0) * -28deg)); opacity: var(--uv-o, 1); }
+.invite-root.uv-motion .uv-z, .invite-root.uv-motion .uv-z-left, .invite-root.uv-motion .uv-z-right { will-change: transform, opacity; }
+/* Adegan zoom: wadah tinggi dengan isi sticky; --uv-s = progres 0..1 sepanjang wadah */
+.invite-root:not(.uv-motion) .uv-scene { --uv-s: 1; height: auto !important; }
+.invite-root:not(.uv-motion) .uv-scene-stage { position: relative !important; height: auto !important; min-height: 70vh; padding-top: 4rem; padding-bottom: 4rem; }
 @keyframes uv-pop { from { opacity: 0; transform: scale(0.5) rotate(-6deg); } }
 @keyframes uv-wiggle { 0% { transform: rotate(-3deg); } 33% { transform: rotate(2deg) translateY(-1px); } 66% { transform: rotate(-1deg) translateX(1px); } }
 @keyframes uv-float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }

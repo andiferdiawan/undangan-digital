@@ -7,6 +7,8 @@ import type { Ref } from 'vue'
  * - uv-tilt (+ uv-depth-1..3 di dalamnya)                 : kartu 3D mengikuti giroskop/mouse,
  *                                                          bergoyang pelan bila tidak ada input
  * - uv-float3d / uv-spin3d / uv-wiggle / uv-float        : ornamen berulang (CSS murni)
+ * - uv-z / uv-z-left / uv-z-right                         : zoom sumbu Z mengikuti scroll (--uv-d, --uv-o)
+ * - uv-scene                                              : wadah adegan (isi sticky) yang diberi --uv-s (0..1)
  * - uv-scroll-line                                        : wadah yang diberi --uv-p (0..1) sesuai posisi
  *   scroll; di dalamnya uv-scroll-draw (garis tergambar sampai titik baca) dan
  *   uv-scroll-follow (penanda yang menempel di ujung garis gelombang)
@@ -22,6 +24,8 @@ export function useInviteMotion(root: Ref<HTMLElement | null>, enabled: () => bo
   let raf = 0
   let hasTilt = false
   let lines: HTMLElement[] = []
+  let zooms: HTMLElement[] = []
+  let scenes: HTMLElement[] = []
   let scroller: HTMLElement | null = null
   let scrollRaf = 0
   let lastInput = 0
@@ -34,9 +38,11 @@ export function useInviteMotion(root: Ref<HTMLElement | null>, enabled: () => bo
     const el = root.value
     if (!el || !io) return
     el.querySelectorAll('[class*="uv-reveal"]:not(.uv-in)').forEach(n => io!.observe(n))
-    const prevLines = lines.length
+    const prev = lines.length + zooms.length + scenes.length
     lines = [...el.querySelectorAll<HTMLElement>('.uv-scroll-line')]
-    if (lines.length !== prevLines) onScroll()
+    zooms = [...el.querySelectorAll<HTMLElement>('.uv-z, .uv-z-left, .uv-z-right')]
+    scenes = [...el.querySelectorAll<HTMLElement>('.uv-scene')]
+    if (lines.length + zooms.length + scenes.length !== prev) onScroll()
     const had = hasTilt
     hasTilt = !!el.querySelector('.uv-tilt')
     if (hasTilt && !had) loop()
@@ -61,11 +67,36 @@ export function useInviteMotion(root: Ref<HTMLElement | null>, enabled: () => bo
     })
   }
 
+  function layoutTop(el: HTMLElement) {
+    let y = 0
+    for (let n: HTMLElement | null = el; n; n = n.offsetParent as HTMLElement | null) y += n.offsetTop
+    return y
+  }
+
   /** Garis cerita: ujungnya mengikuti titik baca (62% tinggi layar/bingkai). */
   function updateLines() {
     scrollRaf = 0
-    if (!lines.length) return
+    if (!lines.length && !zooms.length && !scenes.length) return
     const v = scroller ? scroller.getBoundingClientRect() : { top: 0, height: window.innerHeight }
+    const mid = v.top + v.height / 2
+    // Posisi diukur dari layout (offsetTop), bukan rect yang sudah ter-transform, agar tidak bergetar
+    const rootEl = root.value
+    const rootTop = rootEl ? rootEl.getBoundingClientRect().top : 0
+    const baseOff = rootEl ? layoutTop(rootEl) : 0
+    for (const el of zooms) {
+      const top = rootTop + layoutTop(el) - baseOff
+      const d = Math.max(-1.2, Math.min(1.2, (top + el.offsetHeight / 2 - mid) / v.height))
+      // pudar saat jauh di bawah (datang) dan saat lewat ke atas (melewati penonton)
+      const o = Math.max(0, Math.min(1, 1 - Math.max(0, d - 0.3) * 1.7 - Math.max(0, -d - 0.32) * 2))
+      el.style.setProperty('--uv-d', d.toFixed(4))
+      el.style.setProperty('--uv-o', o.toFixed(3))
+    }
+    for (const el of scenes) {
+      const r = el.getBoundingClientRect()
+      const run = r.height - v.height
+      const s = run > 0 ? Math.max(0, Math.min(1, (v.top - r.top) / run)) : 1
+      el.style.setProperty('--uv-s', s.toFixed(4))
+    }
     const anchor = v.top + v.height * 0.62
     for (const el of lines) {
       const r = el.getBoundingClientRect()
@@ -73,6 +104,14 @@ export function useInviteMotion(root: Ref<HTMLElement | null>, enabled: () => bo
       el.style.setProperty('--uv-p', p.toFixed(4))
       el.classList.toggle('uv-live', p > 0.002 && p < 0.998)
     }
+  }
+  /** Tinggi layar yang sebenarnya (bingkai HP atau jendela) untuk adegan zoom: --uv-vh */
+  function setVh() {
+    root.value?.style.setProperty('--uv-vh', `${scroller ? scroller.clientHeight : window.innerHeight}px`)
+  }
+  function onResize() {
+    setVh()
+    onScroll()
   }
   function onScroll() {
     if (!scrollRaf) scrollRaf = requestAnimationFrame(updateLines)
@@ -118,8 +157,9 @@ export function useInviteMotion(root: Ref<HTMLElement | null>, enabled: () => bo
     for (let n = root.value.parentElement; n && n !== document.body; n = n.parentElement) {
       if (/(auto|scroll)/.test(getComputedStyle(n).overflowY)) { scroller = n; break }
     }
+    setVh()
     document.addEventListener('scroll', onScroll, { passive: true, capture: true })
-    window.addEventListener('resize', onScroll, { passive: true })
+    window.addEventListener('resize', onResize, { passive: true })
     nextTick(scan)
     mo = new MutationObserver(() => scan())
     mo.observe(root.value, { childList: true, subtree: true })
@@ -136,8 +176,10 @@ export function useInviteMotion(root: Ref<HTMLElement | null>, enabled: () => bo
     cancelAnimationFrame(scrollRaf)
     hasTilt = false
     lines = []
+    zooms = []
+    scenes = []
     document.removeEventListener('scroll', onScroll, { capture: true })
-    window.removeEventListener('resize', onScroll)
+    window.removeEventListener('resize', onResize)
     window.removeEventListener('pointermove', onPointer)
     window.removeEventListener('deviceorientation', onOrient)
   })
