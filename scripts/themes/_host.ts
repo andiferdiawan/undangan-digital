@@ -234,22 +234,30 @@ export function hostDefinition(o: HostOpts): ThemeDefinition {
       },
       {
         type: 'gift',
-        class: `bg-[${o.pale}] px-6`,
+        class: `bg-[${o.pale}] px-6 py-16 text-center`,
         children: [
-          div('py-16 text-center', [
-            ...title('Kontribusi', 'Dukungan Acara'),
-            p('uv-reveal mt-3 text-[13.5px] text-muted', 'Bagi yang ingin berpartisipasi, dapat melalui:'),
-            div('mt-6 grid gap-5', [
-              div('uv-reveal-pop', [
-                div(`uv-tilt ${card} text-left`, [
-                  p('uv-depth-1 font-heading text-[13px] font-bold uppercase tracking-wider text-accent', '{{item.bank}}'),
-                  p('uv-depth-2 mt-2 font-heading text-[23px] font-bold tracking-wider text-primary', '{{item.number}}'),
-                  p('uv-depth-1 text-[13px] text-muted', 'a.n. {{item.holder}}'),
-                  div('uv-depth-2 mt-3', [comp('copy_button', '', { value: '{{item.number}}', label: 'Salin Nomor', button_class: `rounded-full border-2 border-[${o.main}] px-4 py-1.5 font-heading text-[13px] font-bold text-primary` })]),
-                ]),
-              ], { repeat: 'gifts' }),
-            ]),
+          div('uv-reveal-pop mx-auto w-16', [img('uv-float3d w-full', '{{asset.hias_a}}', '')]),
+          ...title('Dukung Kegiatan', '{{donation_title}}'),
+          p('uv-reveal mx-auto mt-3 max-w-[320px] text-[13.5px] text-muted', '{{donation_text}}'),
+          div(`uv-reveal-pop uv-d1 mx-auto mt-5 inline-flex flex-col rounded-2xl ${o.playful ? `border-2 border-[${o.ink}]` : ''} bg-white px-5 py-2.5 shadow-[0_10px_24px_-18px_${o.ink}]`, [
+            p('text-[11px] font-semibold uppercase tracking-wider text-muted', 'Target Dana'),
+            p('font-heading text-[20px] font-bold text-primary', '{{donation_target}}'),
+          ], { if: 'donation_target' }),
+          div(`uv-reveal-flip uv-d2 mx-auto mt-6 w-full max-w-[260px] ${card} p-4`, [
+            p('font-heading text-[13px] font-bold uppercase tracking-wider text-accent', 'Scan QRIS'),
+            img('mx-auto mt-2 aspect-square w-full rounded-xl object-contain', '{{donation_qris}}', 'QRIS donasi'),
+          ], { if: 'donation_qris' }),
+          div('mt-6 grid gap-5', [
+            div('uv-reveal-pop', [
+              div(`uv-tilt ${card} text-left`, [
+                p('uv-depth-1 font-heading text-[13px] font-bold uppercase tracking-wider text-accent', '{{item.bank}}'),
+                p('uv-depth-2 mt-2 font-heading text-[23px] font-bold tracking-wider text-primary', '{{item.number}}'),
+                p('uv-depth-1 text-[13px] text-muted', 'a.n. {{item.holder}}'),
+                div('uv-depth-2 mt-3', [comp('copy_button', '', { value: '{{item.number}}', label: 'Salin Nomor', button_class: `rounded-full border-2 border-[${o.main}] px-4 py-1.5 font-heading text-[13px] font-bold text-primary` })]),
+              ]),
+            ], { repeat: 'gifts' }),
           ], { if: 'gifts' }),
+          p('uv-reveal mt-6 text-[12.5px] italic text-muted', 'Jazakumullahu khairan atas kepedulian Anda.'),
         ],
       },
       {

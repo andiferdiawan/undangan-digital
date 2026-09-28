@@ -168,6 +168,10 @@ export function buildContext(
     contact_name: c.host.contact_name,
     contact_phone: c.host.contact_phone,
     contact_link: waLinkFromPhone(c.host.contact_phone),
+    donation_title: c.donation.title,
+    donation_text: c.donation.text,
+    donation_target: c.donation.target,
+    donation_qris: safeUrl(c.donation.qris),
     guest_name: opts.guestName ?? '',
     hero_image: opts.assets.hero_image ?? '',
   }

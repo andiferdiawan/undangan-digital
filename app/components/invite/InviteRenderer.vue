@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { ThemeDefinition } from '#shared/theme/schema'
-import { withDefaults as contentWithDefaults, type InvitationContent } from '#shared/theme/content'
+import { withDefaults as contentWithDefaults, isHostKind, type InvitationContent } from '#shared/theme/content'
 import { buildContext, interpolate, resolveAssets, safeUrl } from '#shared/theme/context'
 import { globalsToCssVars, googleFontsHref, mergeGlobals } from '#shared/theme/style'
 import InviteNode from './InviteNode'
@@ -58,10 +58,13 @@ const ctx = computed(() =>
   buildContext(effectiveContent.value, { guestName: props.guestName, assets: assets.value, kind: kind.value }),
 )
 
-// Section RSVP & ucapan disembunyikan bila user menonaktifkan RSVP
+// Section RSVP & ucapan disembunyikan bila user menonaktifkan RSVP.
+// Acara kantor/umum: section gift = donasi kegiatan, tampil hanya bila diaktifkan (pratinjau katalog selalu tampil).
 const sections = computed(() => {
-  const rsvpOn = contentWithDefaults(props.content, kind.value).rsvp.enabled
-  return props.definition.sections.filter(s => rsvpOn || (s.type !== 'rsvp' && s.type !== 'wishes'))
+  const c = contentWithDefaults(props.content, kind.value)
+  const donationOn = !isHostKind(kind.value) || props.content === undefined || c.donation.enabled
+  return props.definition.sections.filter(s =>
+    (c.rsvp.enabled || (s.type !== 'rsvp' && s.type !== 'wishes')) && (donationOn || s.type !== 'gift'))
 })
 const cover = computed(() => (sections.value[0]?.type === 'cover' ? sections.value[0] : null))
 const body = computed(() => {

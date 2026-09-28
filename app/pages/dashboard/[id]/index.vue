@@ -316,8 +316,27 @@ const url = computed(() => inviteUrl(inv.value!.slug))
           <button type="button" class="btn-ghost btn-sm justify-self-start" @click="content.story.push({ date: '', title: '', text: '' })">{{ isHost ? '+ Tambah agenda' : '+ Tambah momen' }}</button>
         </EditorCard>
 
-        <EditorCard v-model:open="open.gift" title="Amplop Digital" hint="Kosongkan untuk menyembunyikan">
-          <div v-for="(g, i) in content.gifts" :key="i" class="grid gap-3 rounded-2xl bg-brand-50/60 p-3">
+        <EditorCard v-model:open="open.gift" :title="isHost ? 'Donasi Kegiatan' : 'Amplop Digital'" :hint="isHost ? (content.donation.enabled ? 'Aktif' : 'Nonaktif · aktifkan bila menerima donasi') : 'Kosongkan untuk menyembunyikan'">
+          <template v-if="isHost">
+            <label class="flex items-center justify-between gap-3 text-sm font-medium text-brand-800">
+              Tampilkan section donasi di undangan
+              <input v-model="content.donation.enabled" type="checkbox" class="h-5 w-5 accent-[#2f4a3a]">
+            </label>
+            <template v-if="content.donation.enabled">
+              <label class="label">Judul
+                <input v-model="content.donation.title" class="input" maxlength="60" placeholder="Donasi Kegiatan">
+              </label>
+              <label class="label">Ajakan / keterangan
+                <textarea v-model="content.donation.text" rows="3" class="input" placeholder="Dana akan digunakan untuk …" />
+              </label>
+              <label class="label">Target dana (opsional)
+                <input v-model="content.donation.target" class="input" maxlength="40" placeholder="Rp 10.000.000">
+              </label>
+              <ImageField v-model="content.donation.qris" :invitation-id="id" label="Gambar QRIS (opsional)" hint="Unggah QRIS agar tamu bisa scan untuk berdonasi." />
+              <p class="text-xs font-semibold text-brand-700">Rekening donasi</p>
+            </template>
+          </template>
+          <div v-for="(g, i) in (!isHost || content.donation.enabled ? content.gifts : [])" :key="i" class="grid gap-3 rounded-2xl bg-brand-50/60 p-3">
             <div class="flex items-center justify-between">
               <p class="text-sm font-bold text-brand">Rekening {{ i + 1 }}</p>
               <button type="button" class="text-xs text-red-600" @click="content.gifts.splice(i, 1)">Hapus</button>
@@ -332,7 +351,7 @@ const url = computed(() => inviteUrl(inv.value!.slug))
               <input v-model="g.holder" class="input">
             </label>
           </div>
-          <button type="button" class="btn-ghost btn-sm justify-self-start" @click="content.gifts.push({ bank: '', number: '', holder: '' })">+ Tambah rekening</button>
+          <button v-if="!isHost || content.donation.enabled" type="button" class="btn-ghost btn-sm justify-self-start" @click="content.gifts.push({ bank: '', number: '', holder: '' })">+ Tambah rekening</button>
         </EditorCard>
 
         <EditorCard v-model:open="open.rsvp" title="RSVP & Ucapan">

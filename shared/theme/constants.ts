@@ -134,6 +134,10 @@ export const PLACEHOLDERS = {
   contact_name: 'Kantor/acara umum: nama narahubung',
   contact_phone: 'Kantor/acara umum: nomor narahubung',
   contact_link: 'Kantor/acara umum: link WhatsApp narahubung',
+  donation_title: 'Kantor/acara umum: judul section donasi, mis. "Donasi Kegiatan"',
+  donation_text: 'Kantor/acara umum: ajakan donasi',
+  donation_target: 'Kantor/acara umum: target dana (teks bebas, boleh kosong)',
+  donation_qris: 'Kantor/acara umum: gambar QRIS donasi (URL, boleh kosong)',
   guest_name: 'Nama tamu dari link (?to=)',
   hero_image: 'Gambar utama cover (asset atau foto user)',
 } as const

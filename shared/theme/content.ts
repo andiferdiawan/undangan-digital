@@ -61,6 +61,8 @@ export interface InvitationContent {
   cover_photos: { url: string }[]
   gifts: { bank: string, number: string, holder: string }[]
   rsvp: { enabled: boolean }
+  /** Acara kantor/umum: section donasi kegiatan (rekening memakai daftar gifts). Nonaktif secara bawaan. */
+  donation: { enabled: boolean, title: string, text: string, target: string, qris: string }
   /** Musik latar: url kosong = pakai musik bawaan tema (bila ada). */
   music: { enabled: boolean, url: string, title: string }
   closing: { text: string, greeting: string }
@@ -142,6 +144,13 @@ export const DEFAULT_CONTENT: InvitationContent = {
     { bank: 'Bank Syariah Indonesia', number: '1234567890', holder: 'Ahmad Fauzan' },
   ],
   rsvp: { enabled: true },
+  donation: {
+    enabled: false,
+    title: 'Donasi Kegiatan',
+    text: 'Dukung terselenggaranya kegiatan ini. Setiap kontribusi Anda sangat berarti bagi kami.',
+    target: '',
+    qris: '',
+  },
   music: { enabled: true, url: '', title: '' },
   closing: {
     text: 'Merupakan suatu kehormatan dan kebahagiaan bagi kami apabila Bapak/Ibu/Saudara/i berkenan hadir dan memberikan doa restu.',
@@ -301,7 +310,8 @@ export const OFFICE_CONTENT: InvitationContent = {
     { date: '10.45', title: 'Ramah Tamah', text: 'Makan siang dan foto bersama' },
   ],
   gallery: [],
-  gifts: [],
+  // Rekening contoh untuk section donasi (hanya tampil bila donasi diaktifkan)
+  gifts: [{ bank: 'Bank Syariah Indonesia', number: '1234567890', holder: 'Panitia Kegiatan' }],
   closing: {
     text: 'Merupakan suatu kehormatan bagi kami atas kehadiran Bapak/Ibu/Saudara/i. Atas perhatian dan kehadirannya, kami ucapkan terima kasih.',
     greeting: 'Wassalamu\'alaikum Warahmatullahi Wabarakatuh',
