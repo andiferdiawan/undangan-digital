@@ -12,7 +12,7 @@ const Body = z.object({
 export default defineEventHandler(async (event) => {
   const { client } = await requireAdmin(event)
   const id = getRouterParam(event, 'id')
-  const body = Body.parse(await readBody(event))
+  const body = await readValidatedBody(event, Body.parse)
 
   const patch: Record<string, unknown> = { ...body }
   delete patch.definition

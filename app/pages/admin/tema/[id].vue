@@ -33,12 +33,17 @@ function onPickMusic(item: { url: string, name: string }) {
   pickingMusic.value = false
 }
 
+const DESC_MAX = 300
 const saving = ref(false)
 const msg = ref<{ ok: boolean, text: string } | null>(null)
 async function save() {
   msg.value = null
   if (errors.value.length) {
     msg.value = { ok: false, text: 'Perbaiki error validasi terlebih dahulu.' }
+    return
+  }
+  if (meta.description.trim().length > DESC_MAX) {
+    msg.value = { ok: false, text: `Deskripsi maksimal ${DESC_MAX} karakter (sekarang ${meta.description.trim().length}).` }
     return
   }
   saving.value = true
@@ -66,7 +71,8 @@ async function save() {
           <input v-model="meta.name" class="input" required>
         </label>
         <label class="label">Deskripsi
-          <textarea v-model="meta.description" rows="2" class="input" />
+          <textarea v-model="meta.description" rows="3" class="input" :maxlength="DESC_MAX" />
+          <span class="text-xs font-normal" :class="meta.description.trim().length > DESC_MAX ? 'text-red-600' : 'text-brand-500'">{{ meta.description.trim().length }}/{{ DESC_MAX }} karakter</span>
         </label>
         <div class="grid grid-cols-2 gap-3">
           <label class="label">Kategori

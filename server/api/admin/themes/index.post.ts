@@ -15,7 +15,7 @@ const Body = z.object({
 
 export default defineEventHandler(async (event) => {
   const { client, uid } = await requireAdmin(event)
-  const body = Body.parse(await readBody(event))
+  const body = await readValidatedBody(event, Body.parse)
 
   const compiled = await compileTheme(body.definition)
   if (!compiled.ok) throw createError({ statusCode: 422, statusMessage: 'Tema tidak lolos validasi', data: { errors: compiled.errors } })

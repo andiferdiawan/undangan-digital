@@ -73,7 +73,7 @@ export const meta = {
   slug: 'piringan-rindu',
   name: 'Piringan Rindu',
   category: 'elegan',
-  description: 'Vintage premium bertema piringan hitam dengan tiga warna (hijau botol, krem, kuningan) dan konsep 3D: saat di-scroll piringan keluar dari sampulnya, meja putar miring dan lengan jarum turun, tiap bagian tampil sebagai "track" yang datang dari kejauhan, sampul foto di peti rekaman rebah satu per satu, dan di akhir piringan kembali masuk sampul.',
+  description: 'Vintage premium bertema piringan hitam, tiga warna (hijau botol, krem, kuningan) dengan efek 3D saat di-scroll: piringan keluar dari sampul dan berputar di meja putar, kartu datang dari kejauhan, sampul foto rebah satu per satu, lalu piringan kembali ke sampulnya.',
 }
 
 export const definition: ThemeDefinition = {

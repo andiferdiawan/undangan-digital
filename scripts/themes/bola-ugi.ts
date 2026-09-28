@@ -93,7 +93,7 @@ export const meta = {
   slug: 'bola-ugi',
   name: 'Bola Ugi',
   category: 'adat',
-  description: 'Adat Bugis yang lapang dan elegan dengan tiga warna (gading, hijau zamrud, emas) dan konsep 3D: saat di-scroll daun jendela berkisi walasuji pada rumah panggung Bugis terbuka lalu kamera masuk menembus jendela, kartu datang dari kejauhan, foto tampil dalam bingkai jendela, dan di akhir jendela menutup kembali.',
+  description: 'Adat Bugis yang lapang dan elegan, tiga warna (gading, hijau zamrud, emas) dengan efek 3D saat di-scroll: jendela berkisi walasuji di rumah panggung terbuka lalu kamera masuk menembusnya, foto tampil dalam bingkai jendela, dan jendela menutup di akhir.',
 }
 
 export const definition: ThemeDefinition = {
