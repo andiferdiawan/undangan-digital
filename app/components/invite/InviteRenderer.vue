@@ -125,6 +125,8 @@ useHead(() => ({
   bodyAttrs: props.mode === 'page' && !coverOpen.value ? { style: 'overflow:hidden' } : {},
 }))
 
+// Sampul layar penuh selalu menutupi layar: gaya inline agar tidak tertimpa kelas tema (mis. `relative`)
+const coverPageStyle = { position: 'fixed', inset: '0', zIndex: 50, overflowY: 'auto' } as const
 const bgUrl = (bg?: string) => {
   const url = bg ? safeUrl(interpolate(bg, ctx.value)) : ''
   return url ? { backgroundImage: `url("${encodeURI(url).replace(/"/g, '%22')}")` } : undefined
@@ -147,7 +149,7 @@ const bgUrl = (bg?: string) => {
             v-if="cover && (!coverOpen || mode === 'thumb')"
             data-section="cover"
             :class="[cover.class, mode === 'page' ? 'fixed inset-0 z-50 mx-auto max-w-[480px]' : mode === 'frame' ? 'relative min-h-[736px]' : 'relative min-h-[606px]']"
-            :style="bgUrl(cover.bg)"
+            :style="[bgUrl(cover.bg), mode === 'page' ? coverPageStyle : undefined]"
           >
             <InviteNode v-for="(n, i) in cover.children" :key="i" :node="n" :headings="mode === 'page' ? 'h1' : 'none'" />
           </section>
