@@ -1,7 +1,7 @@
 {
   "name": "Undangan Virtual",
   "short_name": "Undangan Virtual",
-  "description": "Undangan pernikahan digital syar'i & modern. Satu Link, Sejuta Doa Restu.",
+  "description": "Undangan digital syar'i & modern untuk pernikahan, aqiqah, ulang tahun, dan semua acara. Satu Link, Sejuta Doa Restu.",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#fbf7f0",

@@ -3,9 +3,9 @@ export const BRAND = {
   name: 'Undangan Virtual',
   tagline: 'Satu Link, Sejuta Doa Restu',
   description:
-    'Buat undangan pernikahan digital syar\'i dan modern dalam hitungan menit. Pilih tema, isi dari ponsel, lalu kirim link personal ke setiap tamu, lengkap dengan RSVP, musik latar, peta lokasi, dan amplop digital.',
+    'Buat undangan digital untuk pernikahan, aqiqah, khitanan, ulang tahun, acara kantor, dan kegiatan sekolah. Tema syar\'i & modern, isi dari ponsel, kirim link personal ke tamu.',
   keywords:
-    'undangan digital, undangan pernikahan digital, undangan online, undangan website, undangan syar\'i, undangan nikah islami, undangan virtual, e-invitation pernikahan',
+    'undangan digital, undangan online, undangan website, undangan digital syar\'i, undangan pernikahan digital, undangan aqiqah digital, undangan khitanan online, undangan ulang tahun digital, undangan acara kantor, undangan pengajian, undangan reuni, undangan kegiatan sekolah, undangan virtual',
 }
 
 /** Halaman privat/transaksional yang tidak perlu diindeks mesin pencari. */

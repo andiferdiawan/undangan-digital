@@ -1,7 +1,7 @@
 <script setup lang="ts">
 useSeoMeta({
   title: 'Program Reseller Undangan Digital',
-  description: 'Jadi reseller Undangan Virtual: jual undangan pernikahan digital tanpa modal dan tanpa desain, dapatkan bagi hasil dari setiap penjualan, pencairan dua kali sebulan.',
+  description: 'Jadi reseller Undangan Virtual: jual undangan digital (pernikahan, aqiqah, ulang tahun, acara kantor, dan lainnya) tanpa modal dan tanpa desain, dapatkan bagi hasil dari setiap penjualan, pencairan dua kali sebulan.',
 })
 
 const supabase = useSupabaseClient()

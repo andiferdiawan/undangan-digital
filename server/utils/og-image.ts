@@ -3,7 +3,7 @@ import { Resvg } from '@resvg/resvg-js'
 
 /**
  * Gambar pratinjau link (Open Graph) 1200×630 bergaya iklan brand Undangan Virtual:
- * logo, tagline, dan fitur tetap sama; hanya nama mempelai & tanggal di layar ponsel
+ * logo, tagline, dan fitur tetap sama; hanya nama (mempelai/anak/acara) & tanggal di layar ponsel
  * yang dinamis mengikuti undangan.
  */
 export const OG_W = 1200
@@ -70,7 +70,7 @@ export async function renderBrandOg(opts: { groom: string, bride: string, date: 
         h('div', { color: C.clay }, 'Sejuta Doa Restu'),
       ]),
       h('div', { flexDirection: 'column', fontSize: 23, fontWeight: 500, color: C.text, marginTop: 22, lineHeight: 1.45 }, [
-        h('div', {}, 'Undangan pernikahan digital syar\'i & modern.'),
+        h('div', {}, 'Undangan digital syar\'i & modern untuk semua acara.'),
         h('div', {}, 'Isi sendiri dari ponsel, kirim ke setiap tamu.'),
       ]),
       h('div', { marginTop: 34, gap: 10 }, [tag('Syar\'i'), tag('Musik latar'), tag('RSVP'), tag('Amplop digital')]),

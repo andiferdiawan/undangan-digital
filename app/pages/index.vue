@@ -3,8 +3,8 @@ import type { CatalogTheme } from '~/composables/useCatalog'
 import type { FeatureIconName } from '~/components/ui/FeatureIcon.vue'
 
 useSeoMeta({
-  title: 'Undangan Pernikahan Digital Syar\'i & Modern',
-  ogTitle: `${BRAND.name} — Undangan Pernikahan Digital Syar'i & Modern`,
+  title: 'Undangan Digital Online Syar\'i & Modern untuk Semua Acara',
+  ogTitle: `${BRAND.name} — Undangan Digital Syar'i & Modern untuk Semua Acara`,
   description: BRAND.description,
   ogDescription: BRAND.description,
 })
@@ -65,19 +65,27 @@ const features = [
   { i: 'invite' as const, t: 'Link personal per tamu', d: 'Nama tamu tampil di sampul undangan, dan Anda bisa melihat siapa yang sudah membuka.' },
   { i: 'music' as const, t: 'Musik latar', d: 'Unggah lagu atau nasyid pilihan Anda, diputar otomatis saat undangan dibuka.' },
   { i: 'rsvp' as const, t: 'RSVP & buku ucapan', d: 'Tamu konfirmasi kehadiran dan mengirim doa, rekapnya langsung di dashboard.' },
-  { i: 'map' as const, t: 'Peta & kalender', d: 'Tombol Google Maps dan simpan ke kalender untuk akad maupun resepsi.' },
-  { i: 'gift' as const, t: 'Amplop digital', d: 'Nomor rekening dengan tombol salin, tanpa perlu dikirim terpisah.' },
-  { i: 'countdown' as const, t: 'Hitung mundur & galeri', d: 'Countdown menuju hari bahagia dan galeri foto prewedding.' },
+  { i: 'map' as const, t: 'Peta & kalender', d: 'Tombol Google Maps dan simpan ke kalender untuk setiap sesi acara, dari akad hingga rundown kegiatan.' },
+  { i: 'gift' as const, t: 'Amplop digital & donasi', d: 'Nomor rekening dan QRIS dengan tombol salin, untuk kado pernikahan maupun donasi kegiatan.' },
+  { i: 'countdown' as const, t: 'Hitung mundur & galeri', d: 'Countdown menuju hari acara dan galeri foto kenangan yang bisa diisi sendiri.' },
 ]
 
-const faqs = [
-  { q: 'Apa itu Undangan Virtual?', a: 'Undangan Virtual adalah layanan undangan pernikahan digital berbentuk website. Anda memilih tema, mengisi data mempelai dan acara, lalu membagikan link undangan ke tamu lewat WhatsApp atau media sosial.' },
-  { q: 'Apakah tersedia tema undangan syar\'i?', a: 'Ya. Tersedia tema syar\'i dengan ornamen islami, ayat Al-Qur\'an, salam pembuka dan penutup islami, serta ilustrasi tanpa wajah. Tersedia juga tema minimalis, floral, dan modern.' },
+const minPrice = computed(() => {
+  const prices = (data.value?.packages ?? []).map(p => p.price).filter(p => p > 0)
+  return prices.length ? Math.min(...prices) : 0
+})
+const faqs = computed(() => [
+  { q: 'Apa itu Undangan Virtual?', a: 'Undangan Virtual adalah layanan undangan digital berbentuk website untuk berbagai acara: pernikahan, aqiqah, khitanan, ulang tahun, acara kantor, hingga kegiatan sekolah dan kampus. Anda memilih tema, mengisi data acara dari ponsel, lalu membagikan link undangan ke tamu lewat WhatsApp atau media sosial.' },
+  { q: 'Undangan digital bisa dipakai untuk acara apa saja?', a: 'Tersedia tema untuk pernikahan dan lamaran, aqiqah dan tasyakuran, khitanan, ulang tahun anak maupun milad dewasa, acara kantor (peresmian, seminar, rapat kerja), serta acara umum seperti pengajian, halal bihalal, reuni, dan kegiatan ekstrakurikuler Pramuka, PMR, atau seni.' },
+  { q: 'Bagaimana cara membuat undangan digital di Undangan Virtual?', a: 'Pilih tema di katalog, pilih paket kuota tamu, lalu bayar online. Setelah lunas Anda mendapat token aktivasi untuk membuat akun. Isi data acara di dashboard, lihat pratinjaunya langsung, lalu bagikan link personal ke setiap tamu.' },
+  ...(minPrice.value ? [{ q: 'Berapa harga undangan digital di Undangan Virtual?', a: `Harga mulai dari Rp ${minPrice.value.toLocaleString('id-ID')} per undangan, tergantung paket kuota tamu yang dipilih. Semua tema bisa dipakai di setiap paket, dan tidak ada biaya bulanan.` }] : []),
+  { q: 'Apakah tersedia tema undangan syar\'i?', a: 'Ya. Tersedia tema syar\'i dengan ornamen islami, ayat Al-Qur\'an atau hadits yang sesuai acara, salam pembuka dan penutup islami, serta ilustrasi tanpa wajah. Tersedia juga tema minimalis, floral, modern, adat, dan tema ceria untuk anak.' },
   { q: 'Bagaimana cara membayar?', a: 'Pembayaran dilakukan online melalui QRIS, virtual account bank, e-wallet, atau gerai ritel. Token aktivasi langsung muncul setelah pembayaran lunas.' },
   { q: 'Apakah nama tamu bisa ditulis di undangan?', a: 'Bisa. Setiap tamu mendapat link personal sehingga namanya tampil di sampul undangan. Jumlah link tamu mengikuti paket yang dipilih.' },
-  { q: 'Bisakah menambahkan musik di undangan?', a: 'Bisa. Anda dapat mengunggah lagu sendiri (MP3/M4A) yang akan diputar saat tamu membuka undangan, atau memakai musik bawaan tema.' },
+  { q: 'Bisakah menerima amplop digital atau donasi lewat undangan?', a: 'Bisa. Undangan pernikahan, aqiqah, khitanan, dan ulang tahun memiliki amplop digital berisi nomor rekening dengan tombol salin. Untuk acara kantor dan kegiatan umum tersedia section donasi kegiatan dengan target dana, QRIS, dan rekening yang bisa diaktifkan sendiri.' },
+  { q: 'Bisakah menambahkan musik di undangan?', a: 'Bisa. Anda dapat mengunggah lagu atau nasyid sendiri (MP3/M4A) yang diputar saat tamu membuka undangan, atau memakai musik bawaan tema.' },
   { q: 'Apakah undangan bisa diubah setelah dibagikan?', a: 'Bisa. Semua perubahan di dashboard langsung tampil di link yang sama, jadi tamu selalu melihat informasi terbaru.' },
-]
+])
 const openFaq = ref<number | null>(0)
 
 const origin = useSiteOrigin()
@@ -102,7 +110,7 @@ useJsonLd('site', () => ({
     },
     {
       '@type': 'Product',
-      'name': 'Undangan Pernikahan Digital',
+      'name': 'Undangan Digital Online',
       'description': BRAND.description,
       'brand': { '@id': `${origin}/#org` },
       'image': `${origin}/og-image.png`,
@@ -118,7 +126,7 @@ useJsonLd('site', () => ({
     },
     {
       '@type': 'FAQPage',
-      'mainEntity': faqs.map(f => ({ '@type': 'Question', 'name': f.q, 'acceptedAnswer': { '@type': 'Answer', 'text': f.a } })),
+      'mainEntity': faqs.value.map(f => ({ '@type': 'Question', 'name': f.q, 'acceptedAnswer': { '@type': 'Answer', 'text': f.a } })),
     },
   ],
 }))
@@ -132,10 +140,10 @@ useJsonLd('site', () => ({
         <div>
           <span class="chip bg-clay-100 text-clay-700">✦ {{ BRAND.tagline }}</span>
           <h1 class="mt-4 font-display text-4xl leading-tight text-brand md:text-5xl">
-            Undangan pernikahan digital yang indah, <span class="text-clay">mudah diisi sendiri</span>.
+            Undangan digital untuk setiap momen, <span class="text-clay">mudah diisi sendiri</span>.
           </h1>
           <p class="mt-4 max-w-md text-brand-600">
-            Tema syar'i, minimalis, floral, dan modern. Isi data mempelai dan acara dari ponsel, lalu bagikan link undangan personal ke setiap tamu, lengkap dengan musik, RSVP, dan buku ucapan.
+            Pernikahan, aqiqah, khitanan, ulang tahun, acara kantor, hingga kegiatan sekolah dan kampus. Pilih tema syar'i atau modern, isi dari ponsel, lalu bagikan link personal ke setiap tamu, lengkap dengan musik, RSVP, dan buku ucapan.
           </p>
           <div class="mt-6 flex flex-wrap gap-3">
             <a href="#katalog" class="btn-primary">Lihat Katalog Tema</a>
@@ -164,6 +172,26 @@ useJsonLd('site', () => ({
           <p class="mt-1 text-sm text-brand-600">{{ s.d }}</p>
         </li>
       </ol>
+    </section>
+
+    <!-- Jenis acara -->
+    <section v-if="data?.groups.length" class="mx-auto max-w-6xl px-4 pt-16" aria-labelledby="jenis-acara">
+      <h2 id="jenis-acara" class="font-display text-3xl text-brand">Undangan Digital untuk Setiap Acara</h2>
+      <p class="mt-1 max-w-2xl text-sm text-brand-600">Satu platform untuk semua momen: dari pernikahan dan aqiqah, ulang tahun, hingga acara kantor dan kegiatan sekolah atau kampus.</p>
+      <div class="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+        <a
+          v-for="g in data.groups" :key="g.slug" :href="`/?jenis=${g.slug}#katalog`"
+          class="card flex items-start gap-3 p-4 transition hover:ring-brand-300"
+          @click.prevent="group = g.slug"
+        >
+          <FeatureIcon :name="g.icon as FeatureIconName" />
+          <span class="min-w-0">
+            <span class="block font-semibold text-brand-900">Undangan {{ g.name }}</span>
+            <span class="mt-0.5 block text-sm text-brand-600">{{ g.description }}</span>
+            <span class="mt-1 block text-xs font-semibold text-clay-700">{{ groupCounts.get(g.slug) ? `${groupCounts.get(g.slug)} tema →` : 'Segera hadir' }}</span>
+          </span>
+        </a>
+      </div>
     </section>
 
     <!-- Katalog -->
