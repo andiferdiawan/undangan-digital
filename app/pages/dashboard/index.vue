@@ -10,7 +10,7 @@ await refresh()
 const { data: list } = await useAsyncData('my-invitations', async () => {
   const { data } = await supabase
     .from('invitations')
-    .select('id, slug, guest_limit, content, is_published, updated_at, theme:themes(name, code, kind:definition->>kind), guests(count), rsvps(count)')
+    .select('id, slug, guest_limit, content, is_published, updated_at, theme:themes(name, code, kind:definition->>kind, demo:definition->demo), guests(count), rsvps(count)')
     // Admin bisa membaca semua undangan (RLS); dashboard pribadi hanya milik akun ini.
     .eq('owner_id', (user.value as { sub?: string } | null)?.sub ?? '')
     .order('created_at', { ascending: false })
@@ -53,11 +53,11 @@ async function logout() {
     <div v-if="list?.length" class="mt-4 grid gap-3">
       <NuxtLink v-for="inv in list" :key="inv.id" :to="`/dashboard/${inv.id}`" class="card flex items-center gap-4 p-4 transition hover:ring-brand-300">
         <div class="grid h-14 w-14 shrink-0 place-items-center rounded-2xl bg-brand-50 font-display text-lg text-brand">
-          {{ isHostKind(inv.theme?.kind) ? contentWithDefaults(inv.content, kindOf(inv)).host.title.charAt(0) : isChildKind(inv.theme?.kind) ? contentWithDefaults(inv.content, kindOf(inv)).child.nickname.charAt(0) : `${contentWithDefaults(inv.content).groom.nickname.charAt(0)}&${contentWithDefaults(inv.content).bride.nickname.charAt(0)}` }}
+          {{ isHostKind(inv.theme?.kind) ? contentWithDefaults(inv.content, kindOf(inv), inv.theme?.demo).host.title.charAt(0) : isChildKind(inv.theme?.kind) ? contentWithDefaults(inv.content, kindOf(inv), inv.theme?.demo).child.nickname.charAt(0) : `${contentWithDefaults(inv.content).groom.nickname.charAt(0)}&${contentWithDefaults(inv.content).bride.nickname.charAt(0)}` }}
         </div>
         <div class="min-w-0 flex-1">
           <p class="truncate font-semibold text-brand-900">
-            {{ inviteNames(contentWithDefaults(inv.content, kindOf(inv)), kindOf(inv)) }}
+            {{ inviteNames(contentWithDefaults(inv.content, kindOf(inv), inv.theme?.demo), kindOf(inv)) }}
           </p>
           <p class="truncate text-xs text-brand-500">/{{ inv.slug }} · {{ inv.theme?.name }}</p>
           <div class="mt-2 flex flex-wrap gap-1.5 text-[11px]">

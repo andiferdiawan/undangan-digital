@@ -1,4 +1,4 @@
-import { withDefaults as contentWithDefaults, isHostKind } from '#shared/theme/content'
+import { withDefaults as contentWithDefaults, isHostKind, type DemoText } from '#shared/theme/content'
 import { dateParts } from '#shared/theme/context'
 import type { EventKind } from '#shared/theme/constants'
 
@@ -17,27 +17,25 @@ export default defineEventHandler(async (event) => {
 
   let raw: unknown
   let eventKind: EventKind = 'wedding'
-  let demoChild: Record<string, string> | undefined
-  let demoHost: Record<string, string> | undefined
+  let demo: DemoText | undefined
   if (kind === 'tema') {
     const { data } = await db.from('themes').select('id, definition').eq('slug', slug!).eq('status', 'published').maybeSingle()
     if (!data) throw createError({ statusCode: 404, statusMessage: 'Tema tidak ditemukan' })
     raw = undefined // nama & tanggal contoh
-    const def = (data as { definition: { kind?: EventKind, demo?: { child?: Record<string, string>, host?: Record<string, string> } } }).definition
+    const def = (data as { definition: { kind?: EventKind, demo?: DemoText } }).definition
     eventKind = def?.kind ?? 'wedding'
-    demoChild = def?.demo?.child
-    demoHost = def?.demo?.host
+    demo = def?.demo
   }
   else {
     const { data } = await db.rpc('get_public_invitation', { p_slug: slug } as never)
     if (!data) throw createError({ statusCode: 404, statusMessage: 'Undangan tidak ditemukan' })
     raw = (data as { content: unknown }).content
-    eventKind = (data as { theme?: { definition?: { kind?: EventKind } } }).theme?.definition?.kind ?? 'wedding'
+    const def = (data as { theme?: { definition?: { kind?: EventKind, demo?: DemoText } } }).theme?.definition
+    eventKind = def?.kind ?? 'wedding'
+    demo = def?.demo
   }
 
-  const c = contentWithDefaults(raw, eventKind)
-  if (demoChild) Object.assign(c.child, demoChild)
-  if (demoHost) Object.assign(c.host, demoHost)
+  const c = contentWithDefaults(raw, eventKind, demo)
   const host = isHostKind(eventKind)
   const png = await renderBrandOg({
     groom: c.groom.nickname,

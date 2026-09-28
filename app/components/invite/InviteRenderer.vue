@@ -42,7 +42,7 @@ const assets = computed(() =>
 // Data contoh tidak pernah dipakai di undangan pelanggan karena konten selalu dikirim.
 const kind = computed(() => props.definition.kind ?? 'wedding')
 const effectiveContent = computed<InvitationContent>(() => {
-  const c = contentWithDefaults(props.content, kind.value)
+  const c = contentWithDefaults(props.content, kind.value, props.definition.demo)
   const demo = props.content === undefined ? props.definition.demo : undefined
   if (!demo) return c
   return {
@@ -51,8 +51,7 @@ const effectiveContent = computed<InvitationContent>(() => {
     gallery: demo.gallery?.map(url => ({ url, caption: '' })) ?? c.gallery,
     groom: { ...c.groom, photo: demo.groom_photo ?? c.groom.photo },
     bride: { ...c.bride, photo: demo.bride_photo ?? c.bride.photo },
-    child: { ...c.child, ...demo.child, photo: demo.child_photo ?? c.child.photo },
-    host: { ...c.host, ...demo.host },
+    child: { ...c.child, photo: demo.child_photo ?? c.child.photo },
   }
 })
 const ctx = computed(() =>

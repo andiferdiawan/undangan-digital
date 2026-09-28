@@ -372,9 +372,19 @@ function isObject(v: unknown): v is Record<string, unknown> {
 
 /**
  * Gabungkan konten tersimpan dengan default agar field baru selalu ada. Array tidak digabung.
- * kind menentukan contoh isi (pernikahan, aqiqah, khitanan, ulang tahun, kantor, acara umum) untuk field yang belum diisi.
+ * kind menentukan contoh isi (pernikahan, aqiqah, khitanan, ulang tahun, kantor, acara umum) untuk field yang belum diisi;
+ * demo (teks contoh tema) menimpa contoh tersebut agar isi awal sesuai tema.
  */
-export function withDefaults(saved: unknown, kind: ContentKind = 'wedding'): InvitationContent {
+/** Teks contoh dari tema (definition.demo) yang boleh jadi isi awal undangan pelanggan. Foto tidak termasuk. */
+export interface DemoText {
+  child?: Partial<Pick<Child, 'name' | 'nickname' | 'gender' | 'order' | 'birth_date'>>
+  host?: Partial<Pick<Host, 'name' | 'title' | 'tagline'>>
+  story?: InvitationContent['story']
+  event?: Partial<Pick<EventItem, 'name' | 'venue' | 'address'>>
+  quote?: Partial<InvitationContent['quote']>
+}
+
+export function withDefaults(saved: unknown, kind: ContentKind = 'wedding', demo?: DemoText | null): InvitationContent {
   const merge = (base: any, over: any): any => {
     if (!isObject(over)) return structuredClone(base)
     const out: any = {}
@@ -387,7 +397,18 @@ export function withDefaults(saved: unknown, kind: ContentKind = 'wedding'): Inv
     }
     return out
   }
-  return merge(SAMPLE[kind] ?? DEFAULT_CONTENT, saved)
+  let base = SAMPLE[kind] ?? DEFAULT_CONTENT
+  if (demo) {
+    base = {
+      ...base,
+      child: { ...base.child, ...demo.child },
+      host: { ...base.host, ...demo.host },
+      story: demo.story ?? base.story,
+      events: demo.event && base.events[0] ? [{ ...base.events[0], ...demo.event }, ...base.events.slice(1)] : base.events,
+      quote: { ...base.quote, ...demo.quote },
+    }
+  }
+  return merge(base, saved)
 }
 
 /** Nama yang ditampilkan untuk undangan (judul, pratinjau link, dashboard). */

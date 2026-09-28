@@ -19,7 +19,7 @@ const noBirthDetail = computed(() => isKhitan.value || isBirthday.value)
 const isChild = computed(() => isChildKind(eventKind.value))
 /** Acara kantor & umum: data penyelenggara + susunan acara */
 const isHost = computed(() => isHostKind(eventKind.value))
-const content = ref<InvitationContent>(contentWithDefaults(inv.value?.content, eventKind.value))
+const content = ref<InvitationContent>(contentWithDefaults(inv.value?.content, eventKind.value, inv.value?.theme.definition.demo))
 const style = ref<Record<string, string>>({ ...(inv.value?.style ?? {}) })
 const assets = ref<Record<string, string>>({ ...(inv.value?.assets ?? {}) })
 const published = ref(inv.value?.is_published ?? true)

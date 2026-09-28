@@ -17,7 +17,7 @@ const { data: inv } = await useAsyncData(`inv-${slug}`, async () => {
 if (!inv.value) throw createError({ statusCode: 404, statusMessage: 'Undangan tidak ditemukan', fatal: true })
 
 const eventKind = computed(() => inv.value?.theme.definition.kind ?? 'wedding')
-const content = computed(() => contentWithDefaults(inv.value?.content, eventKind.value))
+const content = computed(() => contentWithDefaults(inv.value?.content, eventKind.value, inv.value?.theme.definition.demo))
 const names = computed(() => inviteNames(content.value, eventKind.value))
 const title = computed(() => inviteTitle(content.value, eventKind.value))
 const when = computed(() => {

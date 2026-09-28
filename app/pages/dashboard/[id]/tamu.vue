@@ -98,7 +98,7 @@ const shown = computed(() => {
 })
 
 const eventKind = computed(() => inv.value?.theme.definition.kind ?? 'wedding')
-const content = computed(() => contentWithDefaults(inv.value?.content, eventKind.value))
+const content = computed(() => contentWithDefaults(inv.value?.content, eventKind.value, inv.value?.theme.definition.demo))
 const TEMPLATE_KEY = `wa-template-${id}`
 const template = ref(`Assalamu'alaikum Warahmatullahi Wabarakatuh
 

@@ -105,6 +105,10 @@ export const themeDefinitionSchema = z.object({
     host: z.object({
       name: z.string().max(80), title: z.string().max(80), tagline: z.string().max(120),
     }).partial().strict().optional(),
+    /** Contoh susunan acara / cerita, nama & tempat acara utama, dan kutipan yang sesuai tema */
+    story: z.array(z.object({ date: z.string().max(40), title: z.string().max(80), text: z.string().max(200) }).strict()).max(10).optional(),
+    event: z.object({ name: z.string().max(60), venue: z.string().max(80), address: z.string().max(160) }).partial().strict().optional(),
+    quote: z.object({ arabic: z.string().max(400), text: z.string().max(400), source: z.string().max(80) }).partial().strict().optional(),
   }).strict().optional(),
 }).strict()
 export type ThemeDefinition = z.infer<typeof themeDefinitionSchema>
