@@ -1,7 +1,6 @@
 <script setup lang="ts">
 const route = useRoute()
-const { data } = await useCatalog()
-const theme = computed(() => data.value?.themes.find(t => t.slug === route.params.slug))
+const [{ data }, { data: theme }] = await Promise.all([useCatalog(), useTheme(String(route.params.slug))])
 if (!theme.value) throw createError({ statusCode: 404, statusMessage: 'Tema tidak ditemukan', fatal: true })
 useSeoMeta({ title: () => `Checkout ${theme.value?.name}`, robots: 'noindex' })
 

@@ -18,7 +18,7 @@ watch(() => route.fullPath, () => (menuOpen.value = false))
         </NuxtLink>
 
         <nav class="hidden items-center gap-6 text-sm font-medium text-brand-700 md:flex">
-          <NuxtLink to="/#katalog" class="hover:text-brand">Katalog Tema</NuxtLink>
+          <NuxtLink to="/katalog" class="hover:text-brand">Katalog Tema</NuxtLink>
           <NuxtLink to="/#harga" class="hover:text-brand">Harga</NuxtLink>
           <NuxtLink to="/reseller" class="hover:text-brand">Reseller</NuxtLink>
           <NuxtLink to="/daftar" class="hover:text-brand">Punya Token?</NuxtLink>
@@ -32,7 +32,7 @@ watch(() => route.fullPath, () => (menuOpen.value = false))
         </button>
       </div>
       <nav v-if="menuOpen" class="grid gap-1 border-t border-brand-100 bg-cream px-4 py-3 text-sm font-medium text-brand-800 md:hidden">
-        <NuxtLink to="/#katalog" class="rounded-lg px-3 py-2.5 hover:bg-brand-50">Katalog Tema</NuxtLink>
+        <NuxtLink to="/katalog" class="rounded-lg px-3 py-2.5 hover:bg-brand-50">Katalog Tema</NuxtLink>
         <NuxtLink to="/#harga" class="rounded-lg px-3 py-2.5 hover:bg-brand-50">Harga</NuxtLink>
         <NuxtLink to="/reseller" class="rounded-lg px-3 py-2.5 hover:bg-brand-50">Program Reseller</NuxtLink>
         <NuxtLink to="/daftar" class="rounded-lg px-3 py-2.5 hover:bg-brand-50">Punya Token? Daftar</NuxtLink>
@@ -50,7 +50,7 @@ watch(() => route.fullPath, () => (menuOpen.value = false))
       <p class="font-display text-lg text-brand">{{ config.public.siteName }}</p>
       <p class="mt-1 italic text-clay-600">{{ BRAND.tagline }}</p>
       <nav class="mt-4 flex flex-wrap justify-center gap-x-5 gap-y-2 text-brand-600" aria-label="Tautan footer">
-        <NuxtLink to="/#katalog" class="hover:text-brand">Katalog Tema</NuxtLink>
+        <NuxtLink to="/katalog" class="hover:text-brand">Katalog Tema</NuxtLink>
         <NuxtLink to="/#harga" class="hover:text-brand">Harga</NuxtLink>
         <NuxtLink to="/#faq" class="hover:text-brand">FAQ</NuxtLink>
         <NuxtLink to="/reseller" class="hover:text-brand">Program Reseller</NuxtLink>

@@ -1,8 +1,7 @@
 <script setup lang="ts">
 import type { Package } from '#shared/types/models'
-import type { CatalogTheme } from '~/composables/useCatalog'
 
-const props = defineProps<{ theme: CatalogTheme | null, packages: Package[] }>()
+const props = defineProps<{ theme: { slug: string, name: string, code: string } | null, packages: Package[] }>()
 const emit = defineEmits<{ close: [] }>()
 const { reseller, whatsapp } = await useReferral()
 

@@ -3,8 +3,7 @@
 definePageMeta({ layout: false })
 
 const route = useRoute()
-const { data } = await useCatalog()
-const theme = computed(() => data.value?.themes.find(t => t.slug === route.params.slug))
+const { data: theme } = await useTheme(String(route.params.slug))
 if (!theme.value) throw createError({ statusCode: 404, statusMessage: 'Tema tidak ditemukan', fatal: true })
 
 useSeoMeta({

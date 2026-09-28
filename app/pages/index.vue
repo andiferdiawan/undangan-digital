@@ -9,24 +9,19 @@ useSeoMeta({
   ogDescription: BRAND.description,
 })
 
-const { data } = await useCatalog()
+// Tautan lama /?jenis=…&kategori=… → halaman katalog permanen
 const route = useRoute()
-const router = useRouter()
+if (typeof route.query.jenis === 'string' && /^[a-z0-9-]+$/.test(route.query.jenis)) {
+  const kat = typeof route.query.kategori === 'string' && /^[a-z0-9-]+$/.test(route.query.kategori) ? `/${route.query.kategori}` : ''
+  await navigateTo(`/katalog/${route.query.jenis}${kat}`, { redirectCode: 301 })
+}
 
-// Jenis acara (induk) → kategori gaya → tema. Tema tanpa kategori dianggap Pernikahan.
-const DEFAULT_GROUP = 'pernikahan'
-const group = computed({
-  get: () => (route.query.jenis as string) || DEFAULT_GROUP,
-  set: v => router.replace({ query: { ...route.query, jenis: v === DEFAULT_GROUP ? undefined : v, kategori: undefined }, hash: '#katalog' }),
-})
-const category = computed({
-  get: () => (route.query.kategori as string) || '',
-  set: v => router.replace({ query: { ...route.query, kategori: v || undefined }, hash: '#katalog' }),
-})
-const search = ref('')
-
-const groupOf = (categoryId: number | null) =>
-  data.value?.categories.find(c => c.id === categoryId)?.group_slug ?? DEFAULT_GROUP
+const { data } = await useCatalog()
+// Cuplikan katalog per jenis acara (maks. 8 tema); katalog lengkap berpaginasi ada di /katalog
+const HOME_LIMIT = 8
+const supabase = useSupabaseClient()
+const group = ref(DEFAULT_GROUP)
+const groupOf = (categoryId: number | null) => groupOfCategory(data.value?.categories ?? [], categoryId)
 const activeGroup = computed(() => data.value?.groups.find(g => g.slug === group.value) ?? data.value?.groups[0])
 const groupCats = computed(() => (data.value?.categories ?? []).filter(c => (c.group_slug ?? DEFAULT_GROUP) === group.value))
 const groupCounts = computed(() => {
@@ -35,15 +30,14 @@ const groupCounts = computed(() => {
   return m
 })
 const inGroup = computed(() => (data.value?.themes ?? []).filter(t => groupOf(t.category_id) === group.value))
-
-const filtered = computed(() => {
-  const cat = groupCats.value.find(c => c.slug === category.value)
-  const q = search.value.trim().toLowerCase()
-  return inGroup.value.filter(t =>
-    (!cat || t.category_id === cat.id)
-    && (!q || `${t.name} ${t.code} ${t.description ?? ''}`.toLowerCase().includes(q)),
-  )
-})
+const { data: preview, status: previewStatus } = await useAsyncData(
+  () => `home-${group.value}`,
+  () => fetchThemesByIds(supabase, inGroup.value.slice(0, HOME_LIMIT).map(t => t.id)),
+  { watch: [group] },
+)
+// Tema pertama untuk mockup ponsel di hero
+const { data: heroTheme } = await useAsyncData('home-hero', () =>
+  fetchThemesByIds(supabase, (data.value?.themes ?? []).slice(0, 1).map(t => t.id)).then(r => r[0] ?? null))
 const { whatsapp } = await useReferral()
 const catName = (id: number | null) => data.value?.categories.find(c => c.id === id)?.name ?? ''
 const counts = computed(() => {
@@ -51,6 +45,10 @@ const counts = computed(() => {
   for (const t of data.value?.themes ?? []) if (t.category_id) m.set(t.category_id, (m.get(t.category_id) ?? 0) + 1)
   return m
 })
+const homeSearch = ref('')
+function goSearch() {
+  navigateTo(homeSearch.value.trim() ? `/katalog?q=${encodeURIComponent(homeSearch.value.trim())}` : '/katalog')
+}
 
 const ordering = ref<CatalogTheme | null>(null)
 
@@ -146,14 +144,14 @@ useJsonLd('site', () => ({
             Pernikahan, aqiqah, khitanan, ulang tahun, acara kantor, hingga kegiatan sekolah dan kampus. Pilih tema syar'i atau modern, isi dari ponsel, lalu bagikan link personal ke setiap tamu, lengkap dengan musik, RSVP, dan buku ucapan.
           </p>
           <div class="mt-6 flex flex-wrap gap-3">
-            <a href="#katalog" class="btn-primary">Lihat Katalog Tema</a>
+            <NuxtLink to="/katalog" class="btn-primary">Lihat Katalog Tema</NuxtLink>
             <NuxtLink to="/daftar" class="btn-ghost">Saya punya token</NuxtLink>
           </div>
         </div>
-        <div v-if="data?.themes[0]" class="relative mx-auto w-64 md:w-72">
+        <div v-if="heroTheme" class="relative mx-auto w-64 md:w-72">
           <div class="absolute -inset-6 rounded-full bg-brand-100 blur-3xl" />
           <div class="relative overflow-hidden rounded-[36px] border-8 border-brand-900 shadow-2xl">
-            <ThemeThumb :definition="data.themes[0].definition" :css="data.themes[0].compiled_css" :slug="data.themes[0].slug" />
+            <ThemeThumb :definition="heroTheme.definition" :css="heroTheme.compiled_css" :slug="heroTheme.slug" />
           </div>
         </div>
       </div>
@@ -179,10 +177,9 @@ useJsonLd('site', () => ({
       <h2 id="jenis-acara" class="font-display text-3xl text-brand">Undangan Digital untuk Setiap Acara</h2>
       <p class="mt-1 max-w-2xl text-sm text-brand-600">Satu platform untuk semua momen: dari pernikahan dan aqiqah, ulang tahun, hingga acara kantor dan kegiatan sekolah atau kampus.</p>
       <div class="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-        <a
-          v-for="g in data.groups" :key="g.slug" :href="`/?jenis=${g.slug}#katalog`"
+        <NuxtLink
+          v-for="g in data.groups" :key="g.slug" :to="`/katalog/${g.slug}`"
           class="card flex items-start gap-3 p-4 transition hover:ring-brand-300"
-          @click.prevent="group = g.slug"
         >
           <FeatureIcon :name="g.icon as FeatureIconName" />
           <span class="min-w-0">
@@ -190,29 +187,29 @@ useJsonLd('site', () => ({
             <span class="mt-0.5 block text-sm text-brand-600">{{ g.description }}</span>
             <span class="mt-1 block text-xs font-semibold text-clay-700">{{ groupCounts.get(g.slug) ? `${groupCounts.get(g.slug)} tema →` : 'Segera hadir' }}</span>
           </span>
-        </a>
+        </NuxtLink>
       </div>
     </section>
 
-    <!-- Katalog -->
+    <!-- Katalog (cuplikan) -->
     <section id="katalog" class="mx-auto max-w-6xl scroll-mt-20 px-4 pt-16">
       <div class="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
         <div>
           <h2 class="font-display text-3xl text-brand">Katalog Tema Undangan</h2>
-          <p class="mt-1 text-sm text-brand-600">{{ filtered.length }} tema tersedia</p>
+          <p class="mt-1 text-sm text-brand-600">{{ data?.themes.length ?? 0 }} tema tersedia untuk {{ data?.groups.length ?? 0 }} jenis acara</p>
         </div>
-        <label class="relative md:w-72">
-          <span class="sr-only">Cari tema</span>
+        <form class="relative md:w-72" role="search" action="/katalog" @submit.prevent="goSearch">
+          <label class="sr-only" for="home-search">Cari tema</label>
           <svg viewBox="0 0 24 24" class="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-brand-400" aria-hidden="true"><path fill="currentColor" d="M10 2a8 8 0 0 1 6.3 12.9l5.4 5.4-1.4 1.4-5.4-5.4A8 8 0 1 1 10 2Zm0 2a6 6 0 1 0 0 12 6 6 0 0 0 0-12Z" /></svg>
-          <input v-model="search" type="search" class="input pl-10" placeholder="Cari nama atau ID tema…">
-        </label>
+          <input id="home-search" v-model="homeSearch" name="q" type="search" class="input pl-10" placeholder="Cari nama atau ID tema…">
+        </form>
       </div>
 
       <!-- Jenis acara (induk kategori) -->
       <div class="-mx-4 mt-5 flex gap-2 overflow-x-auto px-4 py-1.5 pb-3 [scrollbar-width:none]" role="tablist" aria-label="Jenis acara">
         <button
           v-for="g in data?.groups" :key="g.slug"
-          role="tab" :aria-selected="group === g.slug"
+          type="button" role="tab" :aria-selected="group === g.slug"
           class="flex shrink-0 items-center gap-2.5 rounded-2xl bg-white py-2 pl-2 pr-4 text-left ring-1 transition"
           :class="group === g.slug ? 'ring-2 ring-brand shadow-sm' : 'ring-brand-100 hover:ring-brand-300'"
           @click="group = g.slug"
@@ -226,37 +223,16 @@ useJsonLd('site', () => ({
       </div>
 
       <div v-if="groupCats.length && inGroup.length" class="-mx-4 mt-3 flex gap-2 overflow-x-auto px-4 pb-2 [scrollbar-width:none]">
-        <button class="chip shrink-0 px-4 py-2 text-sm ring-1 transition" :class="!category ? 'bg-brand text-white ring-brand' : 'bg-white text-brand-700 ring-brand-100'" @click="category = ''">
-          Semua
-        </button>
-        <button
-          v-for="c in groupCats" :key="c.id"
-          class="chip shrink-0 px-4 py-2 text-sm ring-1 transition"
-          :class="category === c.slug ? 'bg-brand text-white ring-brand' : 'bg-white text-brand-700 ring-brand-100'"
-          @click="category = c.slug"
+        <NuxtLink
+          v-for="c in groupCats.filter(c => counts.get(c.id))" :key="c.id" :to="`/katalog/${group}/${c.slug}`"
+          class="chip shrink-0 bg-white px-4 py-2 text-sm text-brand-700 ring-1 ring-brand-100 transition hover:ring-brand-300"
         >
-          {{ c.name }}<span v-if="counts.get(c.id)" class="ml-1.5 opacity-60">{{ counts.get(c.id) }}</span>
-        </button>
+          {{ c.name }}<span class="ml-1.5 opacity-60">{{ counts.get(c.id) }}</span>
+        </NuxtLink>
       </div>
 
-      <div v-if="filtered.length" class="mt-6 grid grid-cols-2 gap-3 sm:gap-5 md:grid-cols-3 lg:grid-cols-4">
-        <article v-for="t in filtered" :key="t.id" class="card group overflow-hidden">
-          <NuxtLink :to="`/tema/${t.slug}`" class="block">
-            <ThemeThumb :definition="t.definition" :css="t.compiled_css" :slug="t.slug" />
-            <span class="sr-only">Preview tema undangan {{ t.name }}</span>
-          </NuxtLink>
-          <div class="p-3 sm:p-4">
-            <div class="flex items-center justify-between gap-2 text-[11px] font-semibold uppercase tracking-wider">
-              <span class="text-clay-600">{{ catName(t.category_id) }}</span>
-              <span class="text-brand-400">{{ t.code }}</span>
-            </div>
-            <h3 class="mt-1 truncate font-semibold text-brand-900">{{ t.name }}</h3>
-            <div class="mt-3 grid grid-cols-2 gap-2">
-              <NuxtLink :to="`/tema/${t.slug}`" class="btn-ghost btn-sm px-2">Preview</NuxtLink>
-              <button class="btn-accent btn-sm px-2" @click="ordering = t">Pesan</button>
-            </div>
-          </div>
-        </article>
+      <div v-if="preview?.length" class="mt-6 grid grid-cols-2 gap-3 transition-opacity sm:gap-5 md:grid-cols-3 lg:grid-cols-4" :class="previewStatus === 'pending' && 'opacity-60'">
+        <ThemeCard v-for="t in preview" :key="t.id" :theme="t" :category-name="catName(t.category_id)" @order="ordering = t" />
       </div>
       <div v-else-if="!inGroup.length && activeGroup" class="card mt-6 grid place-items-center gap-3 p-10 text-center">
         <FeatureIcon :name="activeGroup.icon as FeatureIconName" size="lg" />
@@ -264,7 +240,12 @@ useJsonLd('site', () => ({
         <p class="max-w-md text-sm text-brand-600">{{ activeGroup.description }}. Kami sedang menyiapkan desainnya. Butuh sekarang? Kami bisa buatkan desain khusus untuk acara Anda.</p>
         <a :href="waLink(whatsapp, `Assalamu'alaikum, saya ingin memesan undangan digital untuk ${activeGroup.name}.`)" target="_blank" rel="noopener" class="btn-primary">Pesan Desain Khusus via WhatsApp</a>
       </div>
-      <p v-else class="card mt-6 p-10 text-center text-sm text-brand-600">Tema tidak ditemukan. Coba kategori atau kata kunci lain.</p>
+
+      <div v-if="activeGroup && inGroup.length" class="mt-6 flex justify-center">
+        <NuxtLink :to="`/katalog/${activeGroup.slug}`" class="btn-ghost">
+          Lihat semua {{ inGroup.length }} tema {{ activeGroup.name }} →
+        </NuxtLink>
+      </div>
     </section>
 
     <!-- Harga -->

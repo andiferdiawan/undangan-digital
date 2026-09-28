@@ -2,8 +2,13 @@
 const route = useRoute()
 const origin = useSiteOrigin()
 
-// URL kanonik tanpa query/hash, agar ?ref= atau ?kategori= tidak dianggap halaman ganda
-const canonical = computed(() => `${origin}${route.path === '/' ? '' : route.path.replace(/\/$/, '')}` || origin)
+// URL kanonik tanpa query/hash, agar ?ref= atau ?kategori= tidak dianggap halaman ganda.
+// Pengecualian: halaman katalog berpaginasi (?halaman=N) punya kanonik sendiri per halaman.
+const canonical = computed(() => {
+  const base = `${origin}${route.path === '/' ? '' : route.path.replace(/\/$/, '')}` || origin
+  const page = Number.parseInt(String(route.query.halaman ?? '')) || 1
+  return route.path.startsWith('/katalog') && page > 1 ? `${base}?halaman=${page}` : base
+})
 const noindex = computed(() => NOINDEX_PREFIXES.some(p => route.path === p || route.path.startsWith(p.endsWith('/') ? p : `${p}/`)))
 
 useHead({

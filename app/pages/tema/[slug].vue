@@ -1,14 +1,29 @@
 <script setup lang="ts">
+import type { CatalogTheme } from '~/composables/useCatalog'
+
 const route = useRoute()
-const { data } = await useCatalog()
-const theme = computed(() => data.value?.themes.find(t => t.slug === route.params.slug))
+const [{ data }, { data: theme }] = await Promise.all([useCatalog(), useTheme(String(route.params.slug))])
 if (!theme.value) throw createError({ statusCode: 404, statusMessage: 'Tema tidak ditemukan', fatal: true })
 
 const category = computed(() => data.value?.categories.find(c => c.id === theme.value?.category_id))
+const groupSlug = computed(() => groupOfCategory(data.value?.categories ?? [], theme.value?.category_id ?? null))
+const group = computed(() => data.value?.groups.find(g => g.slug === groupSlug.value))
 const ordering = ref(false)
+const relatedOrder = ref<CatalogTheme | null>(null)
+
+// Tema lain dalam kategori yang sama (lalu jenis acara yang sama) — tautan internal untuk tamu & mesin pencari
+const supabase = useSupabaseClient()
+const { data: related } = await useAsyncData(`related-${route.params.slug}`, () => {
+  const all = data.value?.themes ?? []
+  const cats = data.value?.categories ?? []
+  const others = all.filter(t => t.slug !== theme.value?.slug)
+  const same = others.filter(t => t.category_id === theme.value?.category_id)
+  const sameGroup = others.filter(t => t.category_id !== theme.value?.category_id && groupOfCategory(cats, t.category_id) === groupSlug.value)
+  return fetchThemesByIds(supabase, [...same, ...sameGroup].slice(0, 4).map(t => t.id))
+})
 const frameKey = ref(0)
 
-const desc = computed(() => `Tema undangan pernikahan digital ${theme.value?.name}${category.value ? ` (${category.value.name})` : ''}. ${theme.value?.description ?? ''} Lihat preview langsung, isi sendiri dari ponsel, dan bagikan link personal ke setiap tamu.`.replace(/\s+/g, ' ').trim())
+const desc = computed(() => `Tema undangan ${(group.value?.name ?? 'pernikahan').toLowerCase()} digital ${theme.value?.name}${category.value ? ` (${category.value.name})` : ''}. ${theme.value?.description ?? ''} Lihat preview langsung, isi sendiri dari ponsel, dan bagikan link personal ke setiap tamu.`.replace(/\s+/g, ' ').trim())
 const origin = useSiteOrigin()
 useSeoMeta({
   title: () => `Tema ${theme.value?.name}${category.value ? ` — Undangan ${category.value.name}` : ''}`,
@@ -45,8 +60,10 @@ useJsonLd('theme', () => !theme.value ? null : ({
       '@type': 'BreadcrumbList',
       'itemListElement': [
         { '@type': 'ListItem', 'position': 1, 'name': 'Beranda', 'item': `${origin}/` },
-        { '@type': 'ListItem', 'position': 2, 'name': 'Katalog Tema', 'item': `${origin}/#katalog` },
-        { '@type': 'ListItem', 'position': 3, 'name': theme.value.name, 'item': `${origin}/tema/${theme.value.slug}` },
+        { '@type': 'ListItem', 'position': 2, 'name': 'Katalog Tema', 'item': `${origin}/katalog` },
+        ...(group.value ? [{ '@type': 'ListItem', 'position': 3, 'name': `Undangan ${group.value.name}`, 'item': `${origin}/katalog/${group.value.slug}` }] : []),
+        ...(group.value && category.value ? [{ '@type': 'ListItem', 'position': 4, 'name': category.value.name, 'item': `${origin}/katalog/${group.value.slug}/${category.value.slug}` }] : []),
+        { '@type': 'ListItem', 'position': group.value ? (category.value ? 5 : 4) : 3, 'name': theme.value.name, 'item': `${origin}/tema/${theme.value.slug}` },
       ],
     },
   ],
@@ -67,10 +84,20 @@ useJsonLd('theme', () => !theme.value ? null : ({
     </div>
 
     <div class="md:order-1 md:pt-10">
-      <NuxtLink to="/#katalog" class="text-sm text-brand-600 hover:text-brand">← Kembali ke katalog</NuxtLink>
+      <nav aria-label="Breadcrumb" class="flex flex-wrap items-center gap-1.5 text-sm text-brand-500">
+        <NuxtLink to="/katalog" class="hover:text-brand">Katalog</NuxtLink>
+        <template v-if="group">
+          <span aria-hidden="true">›</span>
+          <NuxtLink :to="`/katalog/${group.slug}`" class="hover:text-brand">{{ group.name }}</NuxtLink>
+        </template>
+        <template v-if="group && category">
+          <span aria-hidden="true">›</span>
+          <NuxtLink :to="`/katalog/${group.slug}/${category.slug}`" class="hover:text-brand">{{ category.name }}</NuxtLink>
+        </template>
+      </nav>
       <p class="mt-6 text-xs font-semibold uppercase tracking-wider text-clay-600">{{ category?.name }} · {{ theme.code }}</p>
       <h1 class="mt-1 font-display text-4xl text-brand">{{ theme.name }}</h1>
-      <p class="mt-1 text-sm text-brand-500">Tema undangan pernikahan digital{{ category ? ` ${category.name.toLowerCase()}` : '' }}</p>
+      <p class="mt-1 text-sm text-brand-500">Tema undangan {{ (group?.name ?? 'pernikahan').toLowerCase() }} digital{{ category ? ` · ${category.name}` : '' }}</p>
       <p class="mt-3 max-w-md text-brand-600">{{ theme.description }}</p>
 
       <div class="mt-6 flex flex-wrap gap-2">
@@ -91,6 +118,16 @@ useJsonLd('theme', () => !theme.value ? null : ({
       </div>
     </div>
 
-    <OrderSheet :theme="ordering ? theme : null" :packages="data?.packages ?? []" @close="ordering = false" />
+    <section v-if="related?.length" class="md:order-3 md:col-span-2" aria-labelledby="tema-lain">
+      <div class="flex items-end justify-between gap-3">
+        <h2 id="tema-lain" class="font-display text-2xl text-brand">Tema {{ group?.name ?? '' }} lainnya</h2>
+        <NuxtLink v-if="group" :to="category ? `/katalog/${group.slug}/${category.slug}` : `/katalog/${group.slug}`" class="shrink-0 text-sm font-semibold text-clay-700 hover:underline">Lihat semua →</NuxtLink>
+      </div>
+      <div class="mt-4 grid grid-cols-2 gap-3 sm:gap-5 md:grid-cols-4">
+        <ThemeCard v-for="t in related" :key="t.id" :theme="t" :category-name="data?.categories.find(c => c.id === t.category_id)?.name ?? ''" @order="ordering = true; relatedOrder = t" />
+      </div>
+    </section>
+
+    <OrderSheet :theme="ordering ? (relatedOrder ?? theme) : null" :packages="data?.packages ?? []" @close="ordering = false; relatedOrder = null" />
   </div>
 </template>
