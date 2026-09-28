@@ -11,7 +11,7 @@ export interface Person {
   instagram: string
 }
 
-/** Data anak untuk undangan aqiqah (tidak dipakai tema pernikahan). */
+/** Data anak untuk undangan aqiqah & khitanan (tidak dipakai tema pernikahan). */
 export interface Child {
   name: string
   nickname: string
@@ -163,7 +163,53 @@ export const AQIQAH_CONTENT: InvitationContent = {
   },
 }
 
-export type ContentKind = 'wedding' | 'aqiqah'
+/** Contoh isi untuk undangan khitanan (walimatul khitan). */
+export const KHITAN_CONTENT: InvitationContent = {
+  ...AQIQAH_CONTENT,
+  child: {
+    name: 'Muhammad Rizky Ramadhan',
+    nickname: 'Rizky',
+    gender: 'l',
+    birth_date: '2019-05-12',
+    birth_time: '',
+    weight: '',
+    length: '',
+    order: 'Putra kedua',
+    photo: '',
+  },
+  opening: {
+    greeting: 'Assalamu\'alaikum Warahmatullahi Wabarakatuh',
+    text: 'Dengan memohon rahmat dan ridha Allah Subhanahu wa Ta\'ala, kami bermaksud menyelenggarakan walimatul khitan putra kami:',
+  },
+  quote: {
+    arabic: 'ثُمَّ أَوْحَيْنَآ إِلَيْكَ أَنِ اتَّبِعْ مِلَّةَ إِبْرٰهِيْمَ حَنِيْفًا ۗوَمَا كَانَ مِنَ الْمُشْرِكِيْنَ',
+    text: 'Kemudian Kami wahyukan kepadamu (Muhammad), "Ikutilah agama Ibrahim yang lurus, dan dia bukanlah termasuk orang musyrik."',
+    source: 'QS. An-Nahl : 123',
+  },
+  events: [
+    {
+      name: 'Walimatul Khitan',
+      date: '2026-12-20',
+      time_start: '09:00',
+      time_end: '13:00',
+      timezone: 'WIB',
+      venue: 'Kediaman Keluarga',
+      address: 'Jl. Contoh No. 1, Kota Anda',
+      map_url: 'https://maps.google.com/?q=Monas+Jakarta',
+    },
+  ],
+  closing: {
+    text: 'Merupakan suatu kehormatan dan kebahagiaan bagi kami apabila Bapak/Ibu/Saudara/i berkenan hadir dan mendoakan putra kami agar menjadi anak yang shalih, sehat, dan berbakti.',
+    greeting: 'Wassalamu\'alaikum Warahmatullahi Wabarakatuh',
+  },
+}
+
+export type ContentKind = 'wedding' | 'aqiqah' | 'khitan'
+/** Label jenis acara untuk judul undangan */
+export const KIND_LABEL: Record<ContentKind, string> = { wedding: 'Pernikahan', aqiqah: 'Aqiqah', khitan: 'Khitanan' }
+/** Jenis acara yang berpusat pada anak (data child + ayah/ibu) */
+export const isChildKind = (kind?: string | null): kind is 'aqiqah' | 'khitan' => kind === 'aqiqah' || kind === 'khitan'
+const SAMPLE: Record<ContentKind, InvitationContent> = { wedding: DEFAULT_CONTENT, aqiqah: AQIQAH_CONTENT, khitan: KHITAN_CONTENT }
 
 function isObject(v: unknown): v is Record<string, unknown> {
   return !!v && typeof v === 'object' && !Array.isArray(v)
@@ -171,7 +217,7 @@ function isObject(v: unknown): v is Record<string, unknown> {
 
 /**
  * Gabungkan konten tersimpan dengan default agar field baru selalu ada. Array tidak digabung.
- * kind menentukan contoh isi (pernikahan atau aqiqah) untuk field yang belum diisi.
+ * kind menentukan contoh isi (pernikahan, aqiqah, khitanan) untuk field yang belum diisi.
  */
 export function withDefaults(saved: unknown, kind: ContentKind = 'wedding'): InvitationContent {
   const merge = (base: any, over: any): any => {
@@ -186,13 +232,13 @@ export function withDefaults(saved: unknown, kind: ContentKind = 'wedding'): Inv
     }
     return out
   }
-  return merge(kind === 'aqiqah' ? AQIQAH_CONTENT : DEFAULT_CONTENT, saved)
+  return merge(SAMPLE[kind] ?? DEFAULT_CONTENT, saved)
 }
 
 /** Nama yang ditampilkan untuk undangan (judul, pratinjau link, dashboard). */
 export function inviteNames(c: InvitationContent, kind: ContentKind = 'wedding'): string {
-  return kind === 'aqiqah' ? c.child.nickname || c.child.name : `${c.groom.nickname} & ${c.bride.nickname}`
+  return isChildKind(kind) ? c.child.nickname || c.child.name : `${c.groom.nickname} & ${c.bride.nickname}`
 }
 export function inviteTitle(c: InvitationContent, kind: ContentKind = 'wedding'): string {
-  return kind === 'aqiqah' ? `Undangan Aqiqah ${inviteNames(c, kind)}` : `Undangan Pernikahan ${inviteNames(c, kind)}`
+  return `Undangan ${KIND_LABEL[kind] ?? 'Pernikahan'} ${inviteNames(c, kind)}`
 }

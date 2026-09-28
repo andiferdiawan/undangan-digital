@@ -47,7 +47,7 @@ function nameSize(name: string) {
   return Math.max(18, Math.min(30, Math.floor(190 / Math.max(1, name.length * 0.56))))
 }
 
-export async function renderBrandOg(opts: { groom: string, bride: string, date: string, child?: string }): Promise<Buffer> {
+export async function renderBrandOg(opts: { groom: string, bride: string, date: string, child?: string, childLabel?: string }): Promise<Buffer> {
   const [marcellus, jakarta500, jakarta600] = await Promise.all([
     loadFont('Marcellus', 400),
     loadFont('Plus Jakarta Sans', 500),
@@ -87,7 +87,7 @@ export async function renderBrandOg(opts: { groom: string, bride: string, date: 
       ...(opts.child
         // Aqiqah: satu nama anak
         ? [
-            h('div', { fontSize: 11, fontWeight: 500, letterSpacing: 2.2, color: C.sage }, 'TASYAKURAN AQIQAH'),
+            h('div', { fontSize: 11, fontWeight: 500, letterSpacing: 2.2, color: C.sage }, opts.childLabel ?? 'TASYAKURAN AQIQAH'),
             h('div', { marginTop: 16 }, [name(opts.child.trim().slice(0, 28))]),
           ]
         : [

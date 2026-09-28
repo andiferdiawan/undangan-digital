@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { withDefaults as contentWithDefaults, inviteNames } from '#shared/theme/content'
+import { withDefaults as contentWithDefaults, inviteNames, isChildKind, type ContentKind } from '#shared/theme/content'
 
 useSeoMeta({ title: 'Dashboard' })
 const supabase = useSupabaseClient()
@@ -16,6 +16,8 @@ const { data: list } = await useAsyncData('my-invitations', async () => {
     .order('created_at', { ascending: false })
   return (data ?? []) as any[]
 })
+
+const kindOf = (inv: { theme?: { kind?: string | null } }): ContentKind => (inv.theme?.kind as ContentKind) || 'wedding'
 
 const { data: isReseller } = await useAsyncData('is-reseller', async () => {
   const { data } = await supabase.from('resellers').select('status').maybeSingle()
@@ -51,11 +53,11 @@ async function logout() {
     <div v-if="list?.length" class="mt-4 grid gap-3">
       <NuxtLink v-for="inv in list" :key="inv.id" :to="`/dashboard/${inv.id}`" class="card flex items-center gap-4 p-4 transition hover:ring-brand-300">
         <div class="grid h-14 w-14 shrink-0 place-items-center rounded-2xl bg-brand-50 font-display text-lg text-brand">
-          {{ inv.theme?.kind === 'aqiqah' ? contentWithDefaults(inv.content, 'aqiqah').child.nickname.charAt(0) : `${contentWithDefaults(inv.content).groom.nickname.charAt(0)}&${contentWithDefaults(inv.content).bride.nickname.charAt(0)}` }}
+          {{ isChildKind(inv.theme?.kind) ? contentWithDefaults(inv.content, kindOf(inv)).child.nickname.charAt(0) : `${contentWithDefaults(inv.content).groom.nickname.charAt(0)}&${contentWithDefaults(inv.content).bride.nickname.charAt(0)}` }}
         </div>
         <div class="min-w-0 flex-1">
           <p class="truncate font-semibold text-brand-900">
-            {{ inviteNames(contentWithDefaults(inv.content, inv.theme?.kind === 'aqiqah' ? 'aqiqah' : 'wedding'), inv.theme?.kind === 'aqiqah' ? 'aqiqah' : 'wedding') }}
+            {{ inviteNames(contentWithDefaults(inv.content, kindOf(inv)), kindOf(inv)) }}
           </p>
           <p class="truncate text-xs text-brand-500">/{{ inv.slug }} · {{ inv.theme?.name }}</p>
           <div class="mt-2 flex flex-wrap gap-1.5 text-[11px]">

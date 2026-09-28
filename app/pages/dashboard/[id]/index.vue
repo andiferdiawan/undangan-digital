@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ALLOWED_FONTS, COLOR_KEYS, type ColorKey } from '#shared/theme/constants'
-import { withDefaults as contentWithDefaults, type EventItem, type InvitationContent } from '#shared/theme/content'
+import { withDefaults as contentWithDefaults, isChildKind, type EventItem, type InvitationContent } from '#shared/theme/content'
 
 const route = useRoute()
 const id = String(route.params.id)
@@ -12,6 +12,8 @@ useSeoMeta({ title: () => `Editor /${inv.value?.slug}` })
 // ---------- State lokal yang langsung terhubung ke live preview ----------
 const eventKind = computed(() => inv.value?.theme.definition.kind ?? 'wedding')
 const isAqiqah = computed(() => eventKind.value === 'aqiqah')
+const isKhitan = computed(() => eventKind.value === 'khitan')
+const isChild = computed(() => isChildKind(eventKind.value))
 const content = ref<InvitationContent>(contentWithDefaults(inv.value?.content, eventKind.value))
 const style = ref<Record<string, string>>({ ...(inv.value?.style ?? {}) })
 const assets = ref<Record<string, string>>({ ...(inv.value?.assets ?? {}) })
@@ -68,7 +70,7 @@ if (import.meta.client) {
 }
 
 // ---------- Helper daftar ----------
-const newEvent = (): EventItem => ({ name: isAqiqah.value ? 'Pengajian & Doa' : 'Resepsi', date: content.value.events[0]?.date ?? '', time_start: '11:00', time_end: '13:00', timezone: 'WIB', venue: '', address: '', map_url: '' })
+const newEvent = (): EventItem => ({ name: isChild.value ? 'Pengajian & Doa' : 'Resepsi', date: content.value.events[0]?.date ?? '', time_start: '11:00', time_end: '13:00', timezone: 'WIB', venue: '', address: '', map_url: '' })
 function move<T>(list: T[], i: number, d: -1 | 1) {
   const j = i + d
   if (j < 0 || j >= list.length) return
@@ -127,8 +129,8 @@ const url = computed(() => inviteUrl(inv.value!.slug))
           <ImageField v-if="themeAssetKeys.includes('hero_image')" v-model="assets.hero_image" :invitation-id="id" label="Foto sampul / prewedding" hint="Mengganti latar bawaan tema. Kosongkan untuk memakai latar tema." />
         </EditorCard>
 
-        <template v-if="isAqiqah">
-          <EditorCard v-model:open="open.child" title="Data Buah Hati" :hint="content.child.name">
+        <template v-if="isChild">
+          <EditorCard v-model:open="open.child" :title="isKhitan ? 'Data Anak yang Dikhitan' : 'Data Buah Hati'" :hint="content.child.name">
             <label class="label">Nama lengkap anak
               <input v-model="content.child.name" class="input">
             </label>
@@ -136,7 +138,7 @@ const url = computed(() => inviteUrl(inv.value!.slug))
               <label class="label">Nama panggilan
                 <input v-model="content.child.nickname" class="input" maxlength="30">
               </label>
-              <label class="label">Jenis kelamin
+              <label v-if="!isKhitan" class="label">Jenis kelamin
                 <select v-model="content.child.gender" class="input">
                   <option value="l">Laki-laki (Putra)</option>
                   <option value="p">Perempuan (Putri)</option>
@@ -150,17 +152,20 @@ const url = computed(() => inviteUrl(inv.value!.slug))
               <label class="label">Tanggal lahir
                 <input v-model="content.child.birth_date" type="date" class="input">
               </label>
-              <label class="label">Jam lahir
-                <input v-model="content.child.birth_time" class="input" placeholder="08.15 WIB">
-              </label>
-              <label class="label">Berat lahir
-                <input v-model="content.child.weight" class="input" placeholder="3,2 kg">
-              </label>
-              <label class="label">Panjang lahir
-                <input v-model="content.child.length" class="input" placeholder="49 cm">
-              </label>
+              <template v-if="!isKhitan">
+                <label class="label">Jam lahir
+                  <input v-model="content.child.birth_time" class="input" placeholder="08.15 WIB">
+                </label>
+                <label class="label">Berat lahir
+                  <input v-model="content.child.weight" class="input" placeholder="3,2 kg">
+                </label>
+                <label class="label">Panjang lahir
+                  <input v-model="content.child.length" class="input" placeholder="49 cm">
+                </label>
+              </template>
             </div>
-            <ImageField v-model="content.child.photo" :invitation-id="id" label="Foto buah hati (opsional)" hint="Kosongkan agar ilustrasi tema yang tampil." />
+            <p v-if="isKhitan" class="text-xs text-brand-500">Usia anak dihitung otomatis dari tanggal lahir sampai tanggal acara.</p>
+            <ImageField v-model="content.child.photo" :invitation-id="id" :label="isKhitan ? 'Foto anak (opsional)' : 'Foto buah hati (opsional)'" hint="Kosongkan agar ilustrasi tema yang tampil." />
           </EditorCard>
           <EditorCard v-model:open="open.couple" title="Orang Tua" :hint="`${content.groom.name} & ${content.bride.name}`">
             <div v-for="who in (['groom', 'bride'] as const)" :key="who" class="grid gap-3 rounded-2xl bg-brand-50/60 p-3">
@@ -204,7 +209,7 @@ const url = computed(() => inviteUrl(inv.value!.slug))
               </div>
             </div>
             <label class="label">Nama acara
-              <input v-model="ev.name" class="input" :placeholder="isAqiqah ? 'Tasyakuran Aqiqah' : 'Akad Nikah'">
+              <input v-model="ev.name" class="input" :placeholder="isKhitan ? 'Walimatul Khitan' : isAqiqah ? 'Tasyakuran Aqiqah' : 'Akad Nikah'">
             </label>
             <div class="grid grid-cols-2 gap-3">
               <label class="label col-span-2">Tanggal
@@ -265,7 +270,7 @@ const url = computed(() => inviteUrl(inv.value!.slug))
           <p v-if="galleryError" class="text-xs text-red-600">{{ galleryError }}</p>
         </EditorCard>
 
-        <EditorCard v-model:open="open.story" :title="isAqiqah ? 'Cerita Kelahiran' : 'Kisah Cinta'" hint="Kosongkan untuk menyembunyikan">
+        <EditorCard v-model:open="open.story" :title="isKhitan ? 'Cerita Si Kecil' : isAqiqah ? 'Cerita Kelahiran' : 'Kisah Cinta'" hint="Kosongkan untuk menyembunyikan">
           <div v-for="(st, i) in content.story" :key="i" class="grid gap-3 rounded-2xl bg-brand-50/60 p-3">
             <div class="flex items-center justify-between">
               <p class="text-sm font-bold text-brand">Momen {{ i + 1 }}</p>

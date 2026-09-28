@@ -32,6 +32,16 @@ function nearbyDays(iso: string) {
   return { event_day_minus_two: at(-2), event_day_minus_one: at(-1), event_day_plus_one: at(1), event_day_plus_two: at(2) }
 }
 
+/** Usia (tahun penuh) dari tanggal lahir sampai tanggal acara, mis. "7 tahun". */
+function ageYears(birth: string, at?: string) {
+  const b = /^(\d{4})-(\d{2})-(\d{2})$/.exec(birth || '')
+  const a = /^(\d{4})-(\d{2})-(\d{2})$/.exec(at || '') ?? /^(\d{4})-(\d{2})-(\d{2})/.exec(new Date().toISOString())
+  if (!b || !a) return ''
+  let y = +a[1]! - +b[1]!
+  if (+a[2]! < +b[2]! || (+a[2]! === +b[2]! && +a[3]! < +b[3]!)) y--
+  return y >= 0 ? `${y} tahun` : ''
+}
+
 export function eventStart(ev: { date: string, time_start: string, timezone: keyof typeof TZ_OFFSET }): Date | null {
   if (!/^\d{4}-\d{2}-\d{2}$/.test(ev.date)) return null
   const time = /^\d{2}:\d{2}$/.test(ev.time_start) ? ev.time_start : '00:00'
@@ -93,7 +103,7 @@ export function resolveAssets(
 
 export function buildContext(
   c: InvitationContent,
-  opts: { guestName?: string, assets: Record<string, string>, kind?: 'wedding' | 'aqiqah' },
+  opts: { guestName?: string, assets: Record<string, string>, kind?: 'wedding' | 'aqiqah' | 'khitan' },
 ): RenderContext {
   const main = c.events[0]
   const p = main ? dateParts(main.date) : null
@@ -139,6 +149,7 @@ export function buildContext(
     child_weight: c.child.weight,
     child_length: c.child.length,
     child_order: c.child.order,
+    child_age: ageYears(c.child.birth_date, main?.date),
     father_name: c.groom.name,
     mother_name: c.bride.name,
     parents_names: [c.groom.name, c.bride.name].filter(Boolean).join(' & '),
@@ -167,7 +178,7 @@ export function buildContext(
     countdownTarget: start ? start.toISOString() : null,
     calendar: start
       ? {
-          title: opts.kind === 'aqiqah' ? `Aqiqah ${values.child_nickname}` : `Pernikahan ${values.couple_names}`,
+          title: opts.kind === 'aqiqah' ? `Aqiqah ${values.child_nickname}` : opts.kind === 'khitan' ? `Khitanan ${values.child_nickname}` : `Pernikahan ${values.couple_names}`,
           start: fmt(start),
           end: fmt(end ?? new Date(start.getTime() + 2 * 3600e3)),
           location: [main?.venue, main?.address].filter(Boolean).join(', '),

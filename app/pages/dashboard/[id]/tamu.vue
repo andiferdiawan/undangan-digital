@@ -115,10 +115,10 @@ Merupakan suatu kebahagiaan bagi kami apabila Bapak/Ibu/Saudara/i berkenan hadir
 
 Wassalamu'alaikum Warahmatullahi Wabarakatuh`)
 onMounted(() => {
-  if (eventKind.value === 'aqiqah') {
+  if (eventKind.value === 'aqiqah' || eventKind.value === 'khitan') {
     template.value = template.value
-      .replace('acara pernikahan kami', 'tasyakuran aqiqah buah hati kami')
-      .replace('hadir dan memberikan doa restu', 'hadir dan mendoakan buah hati kami')
+      .replace('acara pernikahan kami', eventKind.value === 'khitan' ? 'walimatul khitan putra kami' : 'tasyakuran aqiqah buah hati kami')
+      .replace('hadir dan memberikan doa restu', eventKind.value === 'khitan' ? 'hadir dan mendoakan putra kami' : 'hadir dan mendoakan buah hati kami')
   }
   try {
     const saved = localStorage.getItem(TEMPLATE_KEY)

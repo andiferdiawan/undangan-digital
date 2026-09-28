@@ -15,13 +15,13 @@ export default defineEventHandler(async (event) => {
   const db = publicDb(event)
 
   let raw: unknown
-  let eventKind: 'wedding' | 'aqiqah' = 'wedding'
+  let eventKind: 'wedding' | 'aqiqah' | 'khitan' = 'wedding'
   let demoChild: Record<string, string> | undefined
   if (kind === 'tema') {
     const { data } = await db.from('themes').select('id, definition').eq('slug', slug!).eq('status', 'published').maybeSingle()
     if (!data) throw createError({ statusCode: 404, statusMessage: 'Tema tidak ditemukan' })
     raw = undefined // nama & tanggal contoh
-    const def = (data as { definition: { kind?: 'wedding' | 'aqiqah', demo?: { child?: Record<string, string> } } }).definition
+    const def = (data as { definition: { kind?: 'wedding' | 'aqiqah' | 'khitan', demo?: { child?: Record<string, string> } } }).definition
     eventKind = def?.kind ?? 'wedding'
     demoChild = def?.demo?.child
   }
@@ -29,7 +29,7 @@ export default defineEventHandler(async (event) => {
     const { data } = await db.rpc('get_public_invitation', { p_slug: slug } as never)
     if (!data) throw createError({ statusCode: 404, statusMessage: 'Undangan tidak ditemukan' })
     raw = (data as { content: unknown }).content
-    eventKind = (data as { theme?: { definition?: { kind?: 'wedding' | 'aqiqah' } } }).theme?.definition?.kind ?? 'wedding'
+    eventKind = (data as { theme?: { definition?: { kind?: 'wedding' | 'aqiqah' | 'khitan' } } }).theme?.definition?.kind ?? 'wedding'
   }
 
   const c = contentWithDefaults(raw, eventKind)
@@ -38,7 +38,8 @@ export default defineEventHandler(async (event) => {
     groom: c.groom.nickname,
     bride: c.bride.nickname,
     date: dateParts(c.events[0]?.date ?? '')?.full ?? '',
-    child: eventKind === 'aqiqah' ? (c.child.nickname || c.child.name) : undefined,
+    child: eventKind === 'wedding' ? undefined : (c.child.nickname || c.child.name),
+    childLabel: eventKind === 'khitan' ? 'WALIMATUL KHITAN' : 'TASYAKURAN AQIQAH',
   })
 
   setHeader(event, 'content-type', 'image/png')
