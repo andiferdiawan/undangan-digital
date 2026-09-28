@@ -245,6 +245,11 @@ const bgUrl = (bg?: string) => {
 .invite-root.uv-motion .uv-z, .invite-root.uv-motion .uv-z-left, .invite-root.uv-motion .uv-z-right { will-change: transform, opacity; }
 /* Adegan zoom: wadah tinggi dengan isi sticky; --uv-s = progres 0..1 sepanjang wadah */
 .invite-root:not(.uv-motion) .uv-scene { --uv-s: 1; height: auto !important; }
+/* Album bolak-balik (uv-flip-book): tanpa gerak, halaman ditampilkan berurutan biasa */
+.invite-root:not(.uv-motion) .uv-flip-book { height: auto !important; display: grid; gap: 1rem; }
+.invite-root:not(.uv-motion) .uv-flip-book .uv-flip-page,
+.invite-root:not(.uv-motion) .uv-flip-book .uv-flip-end { position: relative !important; inset: auto !important; aspect-ratio: 4 / 5; }
+.invite-root:not(.uv-motion) .uv-flip-page > * { transform: none !important; }
 .invite-root:not(.uv-motion) .uv-scene-stage { position: relative !important; height: auto !important; min-height: 70vh; padding-top: 4rem; padding-bottom: 4rem; }
 @keyframes uv-pop { from { opacity: 0; transform: scale(0.5) rotate(-6deg); } }
 @keyframes uv-wiggle { 0% { transform: rotate(-3deg); } 33% { transform: rotate(2deg) translateY(-1px); } 66% { transform: rotate(-1deg) translateX(1px); } }
