@@ -99,6 +99,7 @@ export const themeDefinitionSchema = z.object({
     /** Contoh data anak (mis. nama putri untuk tema aqiqah putri) */
     child: z.object({
       name: z.string().max(60), nickname: z.string().max(30), gender: z.enum(['l', 'p']), order: z.string().max(40),
+      birth_date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
     }).partial().strict().optional(),
   }).strict().optional(),
 }).strict()

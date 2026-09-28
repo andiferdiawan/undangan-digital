@@ -1,5 +1,6 @@
 import { withDefaults as contentWithDefaults } from '#shared/theme/content'
 import { dateParts } from '#shared/theme/context'
+import type { EventKind } from '#shared/theme/constants'
 
 /**
  * Gambar pratinjau link (gaya iklan brand, nama mempelai dinamis):
@@ -15,13 +16,13 @@ export default defineEventHandler(async (event) => {
   const db = publicDb(event)
 
   let raw: unknown
-  let eventKind: 'wedding' | 'aqiqah' | 'khitan' = 'wedding'
+  let eventKind: EventKind = 'wedding'
   let demoChild: Record<string, string> | undefined
   if (kind === 'tema') {
     const { data } = await db.from('themes').select('id, definition').eq('slug', slug!).eq('status', 'published').maybeSingle()
     if (!data) throw createError({ statusCode: 404, statusMessage: 'Tema tidak ditemukan' })
     raw = undefined // nama & tanggal contoh
-    const def = (data as { definition: { kind?: 'wedding' | 'aqiqah' | 'khitan', demo?: { child?: Record<string, string> } } }).definition
+    const def = (data as { definition: { kind?: EventKind, demo?: { child?: Record<string, string> } } }).definition
     eventKind = def?.kind ?? 'wedding'
     demoChild = def?.demo?.child
   }
@@ -29,7 +30,7 @@ export default defineEventHandler(async (event) => {
     const { data } = await db.rpc('get_public_invitation', { p_slug: slug } as never)
     if (!data) throw createError({ statusCode: 404, statusMessage: 'Undangan tidak ditemukan' })
     raw = (data as { content: unknown }).content
-    eventKind = (data as { theme?: { definition?: { kind?: 'wedding' | 'aqiqah' | 'khitan' } } }).theme?.definition?.kind ?? 'wedding'
+    eventKind = (data as { theme?: { definition?: { kind?: EventKind } } }).theme?.definition?.kind ?? 'wedding'
   }
 
   const c = contentWithDefaults(raw, eventKind)
@@ -39,7 +40,7 @@ export default defineEventHandler(async (event) => {
     bride: c.bride.nickname,
     date: dateParts(c.events[0]?.date ?? '')?.full ?? '',
     child: eventKind === 'wedding' ? undefined : (c.child.nickname || c.child.name),
-    childLabel: eventKind === 'khitan' ? 'WALIMATUL KHITAN' : 'TASYAKURAN AQIQAH',
+    childLabel: { khitan: 'WALIMATUL KHITAN', birthday: 'SYUKURAN ULANG TAHUN' }[eventKind as string] ?? 'TASYAKURAN AQIQAH',
   })
 
   setHeader(event, 'content-type', 'image/png')

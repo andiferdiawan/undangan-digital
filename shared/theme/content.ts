@@ -204,12 +204,58 @@ export const KHITAN_CONTENT: InvitationContent = {
   },
 }
 
-export type ContentKind = 'wedding' | 'aqiqah' | 'khitan'
+/**
+ * Contoh isi untuk undangan ulang tahun (syukuran): yang berulang tahun di child,
+ * orang tua/tuan rumah di groom/bride (boleh kosong untuk milad dewasa).
+ */
+export const BIRTHDAY_CONTENT: InvitationContent = {
+  ...AQIQAH_CONTENT,
+  child: {
+    name: 'Aisyah Nur Azzahra',
+    nickname: 'Aisyah',
+    gender: 'p',
+    birth_date: '2019-12-19',
+    birth_time: '',
+    weight: '',
+    length: '',
+    order: 'Putri pertama',
+    photo: '',
+  },
+  opening: {
+    greeting: 'Assalamu\'alaikum Warahmatullahi Wabarakatuh',
+    text: 'Alhamdulillah, dengan penuh rasa syukur atas nikmat usia yang Allah berikan, kami mengundang Bapak/Ibu/Saudara/i untuk hadir di syukuran ulang tahun:',
+  },
+  quote: {
+    arabic: 'خَيْرُ النَّاسِ مَنْ طَالَ عُمُرُهُ وَحَسُنَ عَمَلُهُ',
+    text: 'Sebaik-baik manusia adalah yang panjang umurnya dan baik amalnya.',
+    source: 'HR. At-Tirmidzi',
+  },
+  events: [
+    {
+      name: 'Syukuran Ulang Tahun',
+      date: '2026-12-19',
+      time_start: '15:30',
+      time_end: '17:30',
+      timezone: 'WIB',
+      venue: 'Kediaman Keluarga',
+      address: 'Jl. Contoh No. 1, Kota Anda',
+      map_url: 'https://maps.google.com/?q=Monas+Jakarta',
+    },
+  ],
+  gifts: [],
+  closing: {
+    text: 'Kehadiran dan doa Bapak/Ibu/Saudara/i menjadi hadiah terindah. Semoga usia yang bertambah membawa keberkahan, kesehatan, dan amal yang semakin baik.',
+    greeting: 'Wassalamu\'alaikum Warahmatullahi Wabarakatuh',
+  },
+}
+
+export type ContentKind = 'wedding' | 'aqiqah' | 'khitan' | 'birthday'
 /** Label jenis acara untuk judul undangan */
-export const KIND_LABEL: Record<ContentKind, string> = { wedding: 'Pernikahan', aqiqah: 'Aqiqah', khitan: 'Khitanan' }
-/** Jenis acara yang berpusat pada anak (data child + ayah/ibu) */
-export const isChildKind = (kind?: string | null): kind is 'aqiqah' | 'khitan' => kind === 'aqiqah' || kind === 'khitan'
-const SAMPLE: Record<ContentKind, InvitationContent> = { wedding: DEFAULT_CONTENT, aqiqah: AQIQAH_CONTENT, khitan: KHITAN_CONTENT }
+export const KIND_LABEL: Record<ContentKind, string> = { wedding: 'Pernikahan', aqiqah: 'Aqiqah', khitan: 'Khitanan', birthday: 'Ulang Tahun' }
+/** Jenis acara yang berpusat pada satu orang (data child + ayah/ibu) */
+export const isChildKind = (kind?: string | null): kind is 'aqiqah' | 'khitan' | 'birthday' =>
+  kind === 'aqiqah' || kind === 'khitan' || kind === 'birthday'
+const SAMPLE: Record<ContentKind, InvitationContent> = { wedding: DEFAULT_CONTENT, aqiqah: AQIQAH_CONTENT, khitan: KHITAN_CONTENT, birthday: BIRTHDAY_CONTENT }
 
 function isObject(v: unknown): v is Record<string, unknown> {
   return !!v && typeof v === 'object' && !Array.isArray(v)
@@ -217,7 +263,7 @@ function isObject(v: unknown): v is Record<string, unknown> {
 
 /**
  * Gabungkan konten tersimpan dengan default agar field baru selalu ada. Array tidak digabung.
- * kind menentukan contoh isi (pernikahan, aqiqah, khitanan) untuk field yang belum diisi.
+ * kind menentukan contoh isi (pernikahan, aqiqah, khitanan, ulang tahun) untuk field yang belum diisi.
  */
 export function withDefaults(saved: unknown, kind: ContentKind = 'wedding'): InvitationContent {
   const merge = (base: any, over: any): any => {

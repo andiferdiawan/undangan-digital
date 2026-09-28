@@ -103,7 +103,7 @@ export function resolveAssets(
 
 export function buildContext(
   c: InvitationContent,
-  opts: { guestName?: string, assets: Record<string, string>, kind?: 'wedding' | 'aqiqah' | 'khitan' },
+  opts: { guestName?: string, assets: Record<string, string>, kind?: 'wedding' | 'aqiqah' | 'khitan' | 'birthday' },
 ): RenderContext {
   const main = c.events[0]
   const p = main ? dateParts(main.date) : null
@@ -150,6 +150,7 @@ export function buildContext(
     child_length: c.child.length,
     child_order: c.child.order,
     child_age: ageYears(c.child.birth_date, main?.date),
+    age_number: ageYears(c.child.birth_date, main?.date).replace(' tahun', ''),
     father_name: c.groom.name,
     mother_name: c.bride.name,
     parents_names: [c.groom.name, c.bride.name].filter(Boolean).join(' & '),
@@ -178,7 +179,7 @@ export function buildContext(
     countdownTarget: start ? start.toISOString() : null,
     calendar: start
       ? {
-          title: opts.kind === 'aqiqah' ? `Aqiqah ${values.child_nickname}` : opts.kind === 'khitan' ? `Khitanan ${values.child_nickname}` : `Pernikahan ${values.couple_names}`,
+          title: opts.kind === 'aqiqah' ? `Aqiqah ${values.child_nickname}` : opts.kind === 'khitan' ? `Khitanan ${values.child_nickname}` : opts.kind === 'birthday' ? `Ulang Tahun ${values.child_nickname}` : `Pernikahan ${values.couple_names}`,
           start: fmt(start),
           end: fmt(end ?? new Date(start.getTime() + 2 * 3600e3)),
           location: [main?.venue, main?.address].filter(Boolean).join(', '),

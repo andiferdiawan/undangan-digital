@@ -13,6 +13,9 @@ useSeoMeta({ title: () => `Editor /${inv.value?.slug}` })
 const eventKind = computed(() => inv.value?.theme.definition.kind ?? 'wedding')
 const isAqiqah = computed(() => eventKind.value === 'aqiqah')
 const isKhitan = computed(() => eventKind.value === 'khitan')
+const isBirthday = computed(() => eventKind.value === 'birthday')
+/** Ulang tahun & khitan: data lahir detail (jam, berat, panjang) tidak diperlukan */
+const noBirthDetail = computed(() => isKhitan.value || isBirthday.value)
 const isChild = computed(() => isChildKind(eventKind.value))
 const content = ref<InvitationContent>(contentWithDefaults(inv.value?.content, eventKind.value))
 const style = ref<Record<string, string>>({ ...(inv.value?.style ?? {}) })
@@ -130,8 +133,8 @@ const url = computed(() => inviteUrl(inv.value!.slug))
         </EditorCard>
 
         <template v-if="isChild">
-          <EditorCard v-model:open="open.child" :title="isKhitan ? 'Data Anak yang Dikhitan' : 'Data Buah Hati'" :hint="content.child.name">
-            <label class="label">Nama lengkap anak
+          <EditorCard v-model:open="open.child" :title="isBirthday ? 'Yang Berulang Tahun' : isKhitan ? 'Data Anak yang Dikhitan' : 'Data Buah Hati'" :hint="content.child.name">
+            <label class="label">{{ isBirthday ? 'Nama lengkap' : 'Nama lengkap anak' }}
               <input v-model="content.child.name" class="input">
             </label>
             <div class="grid grid-cols-2 gap-3">
@@ -145,14 +148,14 @@ const url = computed(() => inviteUrl(inv.value!.slug))
                 </select>
               </label>
             </div>
-            <label class="label">Anak ke- (keterangan)
+            <label class="label">{{ isBirthday ? 'Keterangan (opsional)' : 'Anak ke- (keterangan)' }}
               <input v-model="content.child.order" class="input" :placeholder="content.child.gender === 'p' ? 'Putri pertama' : 'Putra pertama'">
             </label>
             <div class="grid grid-cols-2 gap-3">
               <label class="label">Tanggal lahir
                 <input v-model="content.child.birth_date" type="date" class="input">
               </label>
-              <template v-if="!isKhitan">
+              <template v-if="!noBirthDetail">
                 <label class="label">Jam lahir
                   <input v-model="content.child.birth_time" class="input" placeholder="08.15 WIB">
                 </label>
@@ -164,10 +167,10 @@ const url = computed(() => inviteUrl(inv.value!.slug))
                 </label>
               </template>
             </div>
-            <p v-if="isKhitan" class="text-xs text-brand-500">Usia anak dihitung otomatis dari tanggal lahir sampai tanggal acara.</p>
-            <ImageField v-model="content.child.photo" :invitation-id="id" :label="isKhitan ? 'Foto anak (opsional)' : 'Foto buah hati (opsional)'" hint="Kosongkan agar ilustrasi tema yang tampil." />
+            <p v-if="noBirthDetail" class="text-xs text-brand-500">{{ isBirthday ? 'Usia (angka besar di undangan)' : 'Usia anak' }} dihitung otomatis dari tanggal lahir sampai tanggal acara.</p>
+            <ImageField v-model="content.child.photo" :invitation-id="id" :label="isBirthday ? 'Foto (opsional)' : isKhitan ? 'Foto anak (opsional)' : 'Foto buah hati (opsional)'" hint="Kosongkan agar ilustrasi tema yang tampil." />
           </EditorCard>
-          <EditorCard v-model:open="open.couple" title="Orang Tua" :hint="`${content.groom.name} & ${content.bride.name}`">
+          <EditorCard v-model:open="open.couple" :title="isBirthday ? 'Orang Tua / Tuan Rumah' : 'Orang Tua'" :hint="isBirthday ? 'Boleh dikosongkan' : `${content.groom.name} & ${content.bride.name}`">
             <div v-for="who in (['groom', 'bride'] as const)" :key="who" class="grid gap-3 rounded-2xl bg-brand-50/60 p-3">
               <p class="text-sm font-bold text-brand">{{ who === 'groom' ? 'Ayah' : 'Ibu' }}</p>
               <label class="label">Nama lengkap & gelar
@@ -209,7 +212,7 @@ const url = computed(() => inviteUrl(inv.value!.slug))
               </div>
             </div>
             <label class="label">Nama acara
-              <input v-model="ev.name" class="input" :placeholder="isKhitan ? 'Walimatul Khitan' : isAqiqah ? 'Tasyakuran Aqiqah' : 'Akad Nikah'">
+              <input v-model="ev.name" class="input" :placeholder="isBirthday ? 'Syukuran Ulang Tahun' : isKhitan ? 'Walimatul Khitan' : isAqiqah ? 'Tasyakuran Aqiqah' : 'Akad Nikah'">
             </label>
             <div class="grid grid-cols-2 gap-3">
               <label class="label col-span-2">Tanggal
@@ -270,7 +273,7 @@ const url = computed(() => inviteUrl(inv.value!.slug))
           <p v-if="galleryError" class="text-xs text-red-600">{{ galleryError }}</p>
         </EditorCard>
 
-        <EditorCard v-model:open="open.story" :title="isKhitan ? 'Cerita Si Kecil' : isAqiqah ? 'Cerita Kelahiran' : 'Kisah Cinta'" hint="Kosongkan untuk menyembunyikan">
+        <EditorCard v-model:open="open.story" :title="isBirthday ? 'Perjalanan & Kenangan' : isKhitan ? 'Cerita Si Kecil' : isAqiqah ? 'Cerita Kelahiran' : 'Kisah Cinta'" hint="Kosongkan untuk menyembunyikan">
           <div v-for="(st, i) in content.story" :key="i" class="grid gap-3 rounded-2xl bg-brand-50/60 p-3">
             <div class="flex items-center justify-between">
               <p class="text-sm font-bold text-brand">Momen {{ i + 1 }}</p>

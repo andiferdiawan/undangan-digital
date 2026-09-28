@@ -115,10 +115,15 @@ Merupakan suatu kebahagiaan bagi kami apabila Bapak/Ibu/Saudara/i berkenan hadir
 
 Wassalamu'alaikum Warahmatullahi Wabarakatuh`)
 onMounted(() => {
-  if (eventKind.value === 'aqiqah' || eventKind.value === 'khitan') {
+  const phrase = {
+    aqiqah: ['tasyakuran aqiqah buah hati kami', 'hadir dan mendoakan buah hati kami'],
+    khitan: ['walimatul khitan putra kami', 'hadir dan mendoakan putra kami'],
+    birthday: ['syukuran ulang tahun', 'hadir dan memberikan doa terbaik'],
+  }[eventKind.value as string]
+  if (phrase) {
     template.value = template.value
-      .replace('acara pernikahan kami', eventKind.value === 'khitan' ? 'walimatul khitan putra kami' : 'tasyakuran aqiqah buah hati kami')
-      .replace('hadir dan memberikan doa restu', eventKind.value === 'khitan' ? 'hadir dan mendoakan putra kami' : 'hadir dan mendoakan buah hati kami')
+      .replace('acara pernikahan kami', phrase[0]!)
+      .replace('hadir dan memberikan doa restu', phrase[1]!)
   }
   try {
     const saved = localStorage.getItem(TEMPLATE_KEY)

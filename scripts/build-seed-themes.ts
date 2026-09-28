@@ -23,8 +23,10 @@ import * as aqBintang from './themes/aqiqah-bintang'
 import * as aqBunga from './themes/aqiqah-bunga'
 import * as khCeria from './themes/khitan-ceria'
 import * as khMihrab from './themes/khitan-mihrab'
+import * as utBalon from './themes/ultah-balon'
+import * as utEmas from './themes/ultah-emas'
 
-const themes = [sakinah, minimalis, floral, arka, noir, rustic, bugis, makassar, toraja, senja, arunika, lontara, aurelia, doodle, alur, aqBintang, aqBunga, khCeria, khMihrab]
+const themes = [sakinah, minimalis, floral, arka, noir, rustic, bugis, makassar, toraja, senja, arunika, lontara, aurelia, doodle, alur, aqBintang, aqBunga, khCeria, khMihrab, utBalon, utEmas]
 const q = (s: string) => `'${s.replace(/'/g, "''")}'`
 const rows: string[] = []
 let failed = false

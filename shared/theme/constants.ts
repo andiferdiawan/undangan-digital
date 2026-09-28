@@ -122,7 +122,8 @@ export const PLACEHOLDERS = {
   child_weight: 'Aqiqah: berat lahir, mis. "3,2 kg"',
   child_length: 'Aqiqah: panjang lahir, mis. "49 cm"',
   child_order: 'Aqiqah/khitan: urutan anak, mis. "Putra pertama"',
-  child_age: 'Khitan: usia anak saat acara, mis. "7 tahun"',
+  child_age: 'Khitan/ulang tahun: usia saat acara, mis. "7 tahun"',
+  age_number: 'Ulang tahun: angka usia saja, mis. "7" (untuk angka besar)',
   father_name: 'Nama ayah (aqiqah/khitanan)',
   mother_name: 'Nama ibu (aqiqah/khitanan)',
   parents_names: 'Nama ayah & ibu, mis. "Ahmad Fauzan & Aisyah Humaira"',
@@ -139,7 +140,7 @@ export const REPEAT_FIELDS: Record<RepeatSource, readonly string[]> = {
 }
 
 /** Jenis acara yang didukung model konten. Menentukan data isian & placeholder wajib. */
-export const EVENT_KINDS = ['wedding', 'aqiqah', 'khitan'] as const
+export const EVENT_KINDS = ['wedding', 'aqiqah', 'khitan', 'birthday'] as const
 export type EventKind = (typeof EVENT_KINDS)[number]
 
 /** Placeholder yang wajib muncul di setiap tema agar data user pasti tampil (per jenis acara). */
@@ -147,6 +148,7 @@ export const REQUIRED_PLACEHOLDERS_BY_KIND: Record<EventKind, PlaceholderKey[]> 
   wedding: ['bride_name', 'groom_name', 'event_date', 'location_map'],
   aqiqah: ['child_name', 'father_name', 'mother_name', 'event_date', 'location_map'],
   khitan: ['child_name', 'father_name', 'mother_name', 'event_date', 'location_map'],
+  birthday: ['child_name', 'event_date', 'location_map'],
 }
 export const REQUIRED_PLACEHOLDERS: PlaceholderKey[] = REQUIRED_PLACEHOLDERS_BY_KIND.wedding
 
