@@ -35,7 +35,9 @@ function bosara(o: { lid: string, t: string, z: string, inner: ThemeNode[] }): T
   const fade = `[opacity:calc(1_-_${o.z}_*_1.8)]`
   return div('relative mt-4 h-[270px] w-[240px] [transform-style:preserve-3d]', [
     // kartu undangan (di dalam mangkuk)
-    div(`absolute left-[26px] top-[164px] h-[104px] w-[188px] rounded-[2px] border border-[${GOLD}]/70 bg-[${IVORY}] px-3 py-3 text-center shadow-[0_8px_22px_-10px_rgba(0,0,0,0.35)] [clip-path:inset(-40px_-40px_max(0px,calc(108px_-_${o.t}_*_150px))_-40px)] [transform:translateY(calc(${o.t}_*_-150px))_translateZ(calc(1px_+_${o.z}_*_300px))]`, o.inner),
+    div(`absolute left-[18px] top-[164px] h-[176px] w-[204px] [clip-path:inset(-40px_-40px_max(0px,calc(180px_-_${o.t}_*_190px))_-40px)] [transform:translateY(calc(${o.t}_*_-190px_+_${o.z}_*_90px))_translateZ(calc(1px_+_${o.z}_*_300px))]`, [
+      div(`flex h-full w-full flex-col items-center justify-center rounded-[3px] border border-[${GOLD}]/70 bg-[${IVORY}] px-5 py-5 text-center shadow-[0_10px_26px_-12px_rgba(0,0,0,0.35)] outline outline-1 outline-offset-[-7px] outline-[${GOLD}]/40`, o.inner),
+    ]),
     // mangkuk berkaki
     img(`absolute bottom-0 left-0 h-[120px] w-[240px] [transform:translateZ(3px)] ${fade}`, '{{asset.dasar}}', 'Bosara'),
     // tutup kubah
@@ -125,11 +127,12 @@ export const definition: ThemeDefinition = {
             t: ramp(0.3, 3),
             z: ramp(0.64, 2.8),
             inner: [
-              p(`font-body text-[7.5px] uppercase tracking-[0.3em] text-[${GOLD}]`, 'Bismillahirrahmanirrahim'),
-              p('mt-1 font-body text-[8px] italic leading-snug text-muted', 'Dengan rahmat Allah, kami mengundang Anda di hari bahagia kami'),
-              p('mt-1 font-script text-[24px] leading-none text-primary', '{{groom_nickname}} & {{bride_nickname}}'),
-              sabbe('mt-1.5 !h-[4px] !w-20'),
-              p('mt-1.5 font-body text-[8px] uppercase tracking-[0.25em] text-primary', '{{event_date}}'),
+              p(`font-body text-[7.5px] uppercase tracking-[0.28em] text-[${GOLD}]`, 'The Wedding Of'),
+              p('mt-2 font-script text-[28px] leading-[1.1] text-primary', '{{groom_nickname}}'),
+              p(`font-heading text-[11px] leading-none text-[${GOLD}]`, '&'),
+              p('font-script text-[28px] leading-[1.1] text-primary', '{{bride_nickname}}'),
+              sabbe('mt-2.5 !h-[4px] !w-20'),
+              p('mt-2.5 font-body text-[8px] uppercase tracking-[0.22em] text-primary', '{{event_date}}'),
             ],
           }),
           p(`pointer-events-none absolute inset-x-0 bottom-9 font-body text-[11px] uppercase tracking-[0.35em] text-muted [opacity:calc(1_-_${S}_*_6)]`, 'Scroll untuk membuka'),
@@ -263,7 +266,7 @@ export const definition: ThemeDefinition = {
       class: `uv-scene relative h-[calc(var(--uv-vh,100svh)_*_2.4)] bg-[${IVORY}]`,
       children: [
         div(stage, [
-          div('px-8', [
+          div('mb-10 px-8', [
             p('font-body text-[14px] italic text-muted', '{{closing_text}}'),
           ]),
           bosara({
@@ -271,10 +274,10 @@ export const definition: ThemeDefinition = {
             t: `calc(1_-_${ramp(0.1, 3)})`,
             z: '0',
             inner: [
-              p(`font-body text-[7.5px] uppercase tracking-[0.3em] text-[${GOLD}]`, 'Terima kasih'),
-              p('mt-2 font-script text-[24px] leading-none text-primary', '{{couple_names}}'),
-              sabbe('mt-2 !h-[4px] !w-20'),
-              p('mt-2 font-body text-[8px] italic text-muted', '{{closing_greeting}}'),
+              p(`font-body text-[7.5px] uppercase tracking-[0.28em] text-[${GOLD}]`, 'Terima Kasih'),
+              p('mt-2 font-script text-[26px] leading-[1.15] text-primary', '{{couple_names}}'),
+              sabbe('mt-2.5 !h-[4px] !w-20'),
+              p('mt-2.5 font-body text-[8.5px] italic leading-snug text-muted', '{{closing_greeting}}'),
             ],
           }),
           div(`mt-4 [opacity:${ramp(0.74, 4)}]`, [
