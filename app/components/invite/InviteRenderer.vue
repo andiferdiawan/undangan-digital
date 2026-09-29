@@ -250,6 +250,9 @@ const bgUrl = (bg?: string) => {
 .invite-root:not(.uv-motion) .uv-flip-book .uv-flip-page,
 .invite-root:not(.uv-motion) .uv-flip-book .uv-flip-end { position: relative !important; inset: auto !important; aspect-ratio: 4 / 5; }
 .invite-root:not(.uv-motion) .uv-flip-page > * { transform: none !important; }
+/* Cincin foto 3D (uv-ring): tanpa gerak, foto ditampilkan sebagai grid biasa */
+.invite-root:not(.uv-motion) .uv-ring { transform: none !important; width: min(320px, 86vw) !important; height: auto !important; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.75rem; }
+.invite-root:not(.uv-motion) .uv-ring .uv-ring-item { position: relative !important; inset: auto !important; transform: none !important; aspect-ratio: 2 / 3; }
 .invite-root:not(.uv-motion) .uv-scene-stage { position: relative !important; height: auto !important; min-height: 70vh; padding-top: 4rem; padding-bottom: 4rem; }
 @keyframes uv-pop { from { opacity: 0; transform: scale(0.5) rotate(-6deg); } }
 @keyframes uv-wiggle { 0% { transform: rotate(-3deg); } 33% { transform: rotate(2deg) translateY(-1px); } 66% { transform: rotate(-1deg) translateX(1px); } }

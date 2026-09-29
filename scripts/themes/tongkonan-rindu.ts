@@ -3,12 +3,12 @@ import { comp, div, el, img, p } from './_h'
 
 /**
  * Tongkonan Rindu — adat Toraja yang lapang & elegan, 3 warna saja (gading, hitam arang, merah Toraja) dan
- * 2 aset (rumah tongkonan beratap perahu & ukiran pa'barre allo). Konsep 3D mengikuti scroll:
- * - pembuka: tongkonan datang dari kejauhan sambil berputar pelan (rotateY); setelah cukup dekat rumah turun
- *   keluar layar, matahari pa'barre allo terbit dari balik atap sambil berputar 3D dan kartu undangan muncul
+ * 2 aset (tongkonan tampak depan & ukiran pa'barre allo). Konsep 3D mengikuti scroll:
+ * - pembuka: tongkonan tampak depan mendekat, daun pintu berukir terbuka, lalu kamera masuk menembus pintu
+ *   dan kartu undangan di dalam rumah membesar
  * - tengah: kartu datang dari kejauhan (uv-z), pita segitiga ukiran pa'ssura' sebagai aksen
- * - galeri: lembar foto tersingkap ke atas satu per satu (uv-flip-book)
- * - penutup: tongkonan naik kembali ke layar dan matahari terbenam di balik atapnya
+ * - galeri: cincin foto 3D yang berputar mengikuti scroll (uv-ring)
+ * - penutup: kamera mundur keluar rumah, daun pintu menutup kembali
  */
 const IVORY = '#f8f3ea'
 const CHAR = '#2b2522'
@@ -34,28 +34,46 @@ function letter(inner: ThemeNode[], cls = ''): ThemeNode {
   return div(`flex h-[196px] w-[210px] flex-col items-center justify-center rounded-[3px] border border-[${RED}]/70 bg-[${IVORY}] px-5 py-5 text-center shadow-[0_10px_26px_-12px_rgba(0,0,0,0.3)] outline outline-1 outline-offset-[-7px] outline-[${RED}]/40 ${cls}`, inner)
 }
 
+const plank = `bg-[${IVORY}] bg-[repeating-linear-gradient(0deg,transparent_0_15px,rgba(43,37,34,0.14)_15px_16px)]`
+// ukiran segitiga pada daun pintu — murni CSS
+const carve = `bg-[${CHAR}] [background-image:conic-gradient(from_135deg_at_50%_0,${RED}_90deg,transparent_0)] [background-size:10px_9px]`
+
+/** Daun pintu; `open` 0..1 = sudut buka. */
+function doors(open: string): ThemeNode[] {
+  return [
+    div(`absolute inset-y-0 left-0 w-1/2 border border-[${RED}]/70 ${carve} [transform-origin:left] [transform:perspective(500px)_rotateY(calc(${open}_*_-110deg))]`),
+    div(`absolute inset-y-0 right-0 w-1/2 border border-[${RED}]/70 ${carve} [transform-origin:right] [transform:perspective(500px)_rotateY(calc(${open}_*_110deg))]`),
+  ]
+}
+
 /**
- * Lembah & tongkonan 3D. near = 0..1 rumah dari kejauhan, turn = sudut putar rumah, lift = 0..1 rumah turun
- * keluar layar, sunY/spin = posisi & putaran matahari pa'barre allo, sunOp = kemunculan matahari.
- * `front` diletakkan di bawah matahari (mis. kartu undangan). Semua berupa ekspresi CSS.
+ * Tongkonan tampak depan. Titik asal transform di pusat pintu sehingga zoom terasa masuk ke dalam rumah.
+ * near = 0..1 rumah mendekat, open = pintu terbuka, z = 0..1 kamera masuk.
  */
-function valley(o: { near: string, turn: string, lift: string, sunY: string, spin: string, sunOp: string, front?: ThemeNode }): ThemeNode {
-  return div('relative h-[320px] w-[320px] shrink-0 [perspective:700px]', [
-    ...(o.front ? [o.front] : []),
-    // matahari pa'barre allo (di balik atap)
-    div(`absolute left-1/2 top-[70px] -ml-[36px] w-[72px] [opacity:${o.sunOp}] [transform:translateY(${o.sunY})_rotateY(${o.spin})]`, [
-      img('block w-full', '{{asset.barre}}', "Ukiran pa'barre allo"),
-    ]),
-    // tanah & rumah — turun bersama saat kamera "naik"
-    div(`absolute inset-0 [transform:translateY(calc(${o.lift}_*_480px))]`, [
-      div(`absolute inset-x-[-40px] bottom-[40px] h-px bg-[${RED}]`),
-      div('absolute inset-x-0 bottom-[40px] flex justify-center', [
-        div(`w-[280px] [transform-origin:50%_100%] [transform:scale(calc(0.25_+_${o.near}_*_0.75))_rotateY(${o.turn})]`, [
-          img('block w-full', '{{asset.tongkonan}}', 'Rumah adat tongkonan'),
-        ]),
+function house(near: string, open: string, z: string): ThemeNode {
+  const wall = `absolute ${plank}`
+  return div(`absolute inset-0 flex items-center justify-center [opacity:clamp(0,calc((0.94_-_${z})_*_4),1)]`, [
+    div(`relative w-[300px] [transform-origin:50%_73.5%] [transform:scale(calc((0.62_+_${near}_*_0.38)_*_(1_+_${z}_*_${z}_*_10)))]`, [
+      img('relative block h-[200px] w-[300px]', '{{asset.depan}}', 'Rumah adat tongkonan tampak depan'),
+      div('relative mx-auto h-[150px] w-[232px]', [
+        div(`${wall} inset-x-0 top-0 h-[40px]`),
+        div(`${wall} left-0 top-[40px] h-[110px] w-[85px]`),
+        div(`${wall} right-0 top-[40px] h-[110px] w-[85px]`),
+        div(`absolute inset-x-0 top-[10px] h-[7px] [background-image:conic-gradient(from_135deg_at_50%_0,${RED}_90deg,transparent_0)] [background-size:9px_7px]`),
+        div(`pointer-events-none absolute inset-0 border-x-2 border-b-2 border-[${CHAR}]`),
+        // kusen pintu
+        div(`absolute left-[85px] top-[40px] h-[110px] w-[62px] outline outline-2 outline-[${CHAR}]`, doors(open)),
       ]),
+      div(`mx-auto h-[8px] w-[250px] bg-[${CHAR}]`),
+      div('mx-auto flex h-[34px] w-[220px] justify-between', [0, 1, 2, 3, 4].map(() => div(`h-full w-[6px] bg-[${CHAR}]`))),
+      div(`mx-auto h-px w-[300px] bg-[${RED}]`),
     ]),
   ])
+}
+
+/** Isi di dalam rumah: kecil di ambang pintu, membesar saat kamera masuk. */
+function inside(z: string, children: ThemeNode[]): ThemeNode {
+  return div(`absolute inset-0 flex items-center justify-center [transform:translateY(calc((1_-_${z})_*_96px))_scale(calc(0.26_+_${z}_*_0.74))]`, children)
 }
 
 function person(who: 'groom' | 'bride'): ThemeNode {
@@ -72,22 +90,25 @@ function person(who: 'groom' | 'bride'): ThemeNode {
   ])
 }
 
-// Adegan pembuka: rumah mendekat, lalu turun keluar layar; matahari terbit & kartu undangan muncul
-const NEAR = ramp(0.02, 2.4)
-const LIFT = ramp(0.46, 2.6)
-const LETTER = ramp(0.62, 3.2)
-// Adegan penutup: rumah naik kembali, matahari terbenam di balik atap
-const RISE = ramp(0.06, 2.2)
+// Adegan pembuka: rumah mendekat, pintu terbuka, kamera masuk
+const NEAR = ramp(0.02, 3.4)
+const OPEN = ramp(0.3, 3.4)
+const ZIN = ramp(0.5, 2.1)
+// Adegan penutup: kamera mundur keluar rumah, pintu menutup
+const ZOUT = `calc(1_-_${ramp(0.06, 2.6)})`
+const SHUT = `calc(1_-_${ramp(0.5, 4)})`
+const END = ramp(0.7, 4)
 
-// Lembar galeri: indeks & tumpukan (lembar pertama di atas) lewat nth-child pada tiap lembar
-const PAGES = [0, 1, 2, 3, 4, 5].map(i => `[&:nth-child(6n+${i + 1})]:[--i:${i}] [&:nth-child(6n+${i + 1})]:z-[${6 - i}]`).join(' ')
+// Cincin galeri: sudut tiap foto (6 posisi) lewat nth-child
+const RING = [0, 1, 2, 3, 4, 5].map(i => `[&:nth-child(6n+${i + 1})]:[--a:${i * 60}deg]`).join(' ')
+
 
 export const meta = {
   code: 'ADT-007',
   slug: 'tongkonan-rindu',
   name: 'Tongkonan Rindu',
   category: 'adat',
-  description: 'Adat Toraja yang lapang dan elegan, tiga warna (gading, hitam arang, merah Toraja) dengan efek 3D saat di-scroll: rumah tongkonan datang dari kejauhan, matahari ukiran pa\'barre allo terbit sambil berputar, foto tersingkap satu per satu, dan tongkonan kembali di akhir.',
+  description: 'Adat Toraja yang lapang dan elegan, tiga warna (gading, hitam arang, merah Toraja) dengan efek 3D saat di-scroll: pintu tongkonan tampak depan terbuka lalu kita masuk ke dalam rumah, galeri berupa cincin foto 3D yang berputar, dan di akhir pintu menutup kembali.',
 }
 
 export const definition: ThemeDefinition = {
@@ -105,9 +126,9 @@ export const definition: ThemeDefinition = {
     font_script: 'Great Vibes',
   },
   root_class: 'text-[15px] leading-relaxed',
-  assets: { tongkonan: `${A}/tongkonan.svg`, barre: `${A}/barre-allo.svg` },
+  assets: { depan: `${A}/depan.svg`, barre: `${A}/barre-allo.svg` },
   demo: {
-    gallery: ['/theme-assets/lontara-bugis/pelaminan.jpg', '/theme-assets/lontara-bugis/slide-2.jpg', '/theme-assets/lontara-bugis/keluarga.jpg', '/theme-assets/lontara-bugis/slide-3.jpg'],
+    gallery: ['/theme-assets/lontara-bugis/pelaminan.jpg', '/theme-assets/lontara-bugis/slide-2.jpg', '/theme-assets/lontara-bugis/keluarga.jpg', '/theme-assets/lontara-bugis/slide-3.jpg', '/theme-assets/lontara-bugis/bride.jpg', '/theme-assets/lontara-bugis/groom.jpg'],
     groom_photo: '/theme-assets/lontara-bugis/groom.jpg',
     bride_photo: '/theme-assets/lontara-bugis/bride.jpg',
   },
@@ -125,7 +146,7 @@ export const definition: ThemeDefinition = {
         ]),
         divider('uv-reveal uv-d2 mt-5'),
         p('uv-reveal uv-d2 mt-4 font-body text-[13px] uppercase tracking-[0.3em] text-muted', '{{event_date}}'),
-        div('uv-reveal-pop uv-d3 relative mx-auto mt-8 w-44 pt-3', [img('absolute left-1/2 top-0 w-11 -translate-x-1/2 motion-safe:animate-spin motion-safe:[animation-duration:24s]', '{{asset.barre}}', ''), img('relative block w-full', '{{asset.tongkonan}}', 'Rumah adat tongkonan')]),
+        div('uv-reveal-pop uv-d3 mx-auto mt-8 w-40', [img('uv-float block w-full', '{{asset.depan}}', 'Rumah adat tongkonan')]),
         div('uv-reveal uv-d4 relative mt-7', [
           p('font-body text-[13px] italic text-muted', 'Kepada Yth. Bapak/Ibu/Saudara/i'),
           comp('guest_name', 'mt-1 block font-heading text-[19px] tracking-[0.04em] text-primary', { fallback: 'Tamu Undangan' }),
@@ -133,32 +154,26 @@ export const definition: ThemeDefinition = {
         div('uv-reveal-pop uv-d5 relative mt-8', [comp('open_button', btn, { label: 'Buka Undangan' })]),
       ],
     },
-    // ---------- Pembuka: tongkonan mendekat, matahari terbit, kartu undangan muncul ----------
+    // ---------- Pembuka: tongkonan tampak depan, pintu terbuka, masuk ke dalam rumah ----------
     {
       type: 'hero',
       class: `uv-scene relative h-[calc(var(--uv-vh,100svh)_*_3)] bg-[${IVORY}]`,
       children: [
         div(stage, [
-          div(`absolute inset-x-0 top-[11%] [opacity:calc(1_-_${ramp(0.4, 3)})]`, [kicker('Kabar bahagia dari tongkonan'), divider('mt-4')]),
-          valley({
-            near: NEAR,
-            turn: `calc((1_-_${NEAR})_*_-40deg)`,
-            lift: LIFT,
-            sunY: `calc(${LIFT}_*_-60px)`,
-            spin: `calc(${LIFT}_*_360deg)`,
-            sunOp: NEAR,
-            front: div(`absolute inset-0 flex items-center justify-center [opacity:${LETTER}] [transform:translateY(calc((1_-_${LETTER})_*_36px))_scale(calc(0.9_+_${LETTER}_*_0.1))]`, [
-              letter([
+          inside(ZIN, [
+            letter([
+                img('mx-auto -mt-2 mb-1 w-9', '{{asset.barre}}', ''),
                 p(`font-body text-[7.5px] uppercase tracking-[0.28em] text-[${RED}]`, 'The Wedding Of'),
-                p('mt-2 font-script text-[28px] leading-[1.1] text-primary', '{{groom_nickname}}'),
+                p('mt-1.5 font-script text-[28px] leading-[1.1] text-primary', '{{groom_nickname}}'),
                 p(`font-heading text-[11px] leading-none text-[${RED}]`, '&'),
                 p('font-script text-[28px] leading-[1.1] text-primary', '{{bride_nickname}}'),
-                sabbe('mt-2.5 !w-20'),
-                p('mt-2.5 font-body text-[8px] uppercase tracking-[0.22em] text-primary', '{{event_date}}'),
-              ], 'scale-[1.25] pt-10'),
-            ]),
-          }),
-          p(`pointer-events-none absolute inset-x-0 bottom-9 font-body text-[11px] uppercase tracking-[0.35em] text-muted [opacity:calc(1_-_${S}_*_6)]`, 'Scroll untuk membuka'),
+                sabbe('mt-2 !w-20'),
+                p('mt-2 font-body text-[8px] uppercase tracking-[0.22em] text-primary', '{{event_date}}'),
+              ], 'scale-[1.3]'),
+          ]),
+          house(NEAR, OPEN, ZIN),
+          div(`pointer-events-none absolute inset-x-0 top-[7%] [opacity:calc(1_-_${ramp(0.3, 4)})]`, [kicker('Selamat datang di tongkonan'), divider('mt-4')]),
+          p(`pointer-events-none absolute inset-x-0 bottom-7 font-body text-[11px] uppercase tracking-[0.35em] text-muted [opacity:calc(1_-_${S}_*_6)]`, 'Scroll untuk masuk'),
         ]),
       ],
     },
@@ -224,27 +239,23 @@ export const definition: ThemeDefinition = {
         ], { if: 'story' }),
       ],
     },
-    // ---------- Galeri: lembar foto tersingkap ke atas satu per satu ----------
+    // ---------- Galeri: cincin foto 3D berputar mengikuti scroll ----------
     {
       type: 'gallery',
-      class: `uv-scene relative h-[calc(var(--uv-vh,100svh)_*_2.4)] bg-[${IVORY}]`,
+      class: `uv-scene relative h-[calc(var(--uv-vh,100svh)_*_2.6)] bg-[${CHAR}]`,
       children: [
         div(stage, [
-          div('absolute inset-x-0 top-[9%]', [kicker('Galeri'), heading('Momen Kami')]),
-          div('uv-flip-book relative mt-16 h-[320px] w-[250px]', [
-            div(`uv-flip-page absolute inset-0 ${PAGES}`, [
-              div(`h-full w-full rounded-t-[125px] border border-[${RED}] bg-white p-2.5 shadow-[0_22px_40px_-22px_rgba(43,37,34,0.55)] [backface-visibility:hidden] [transform-origin:top_center] [transform:perspective(1100px)_rotateX(calc(clamp(0,${S}*7_-_var(--i,0)*1.05,1)*100deg))]`, [
-                img('h-full w-full rounded-t-[118px] object-cover', '{{item.url}}', '{{item.caption}}'),
-              ]),
-            ], { repeat: 'gallery' }),
-            div(`uv-flip-end absolute inset-0 z-0 grid place-items-center rounded-t-[125px] border border-[${RED}] bg-[${CHAR}] p-6`, [
-              div('', [
-                p(`font-script text-[34px] leading-tight text-[${IVORY}]`, 'semoga sakinah, mawaddah, wa rahmah'),
-                divider('mt-4'),
-              ]),
+          div('', [kicker('Galeri'), heading('Lingkar Kenangan', true), sabbe('mt-4')]),
+          div('mt-14 [perspective:900px]', [
+            div(`uv-ring relative h-[230px] w-[150px] [transform-style:preserve-3d] [transform:rotateX(-8deg)_rotateY(calc(${S}_*_-330deg))]`, [
+              div(`uv-ring-item absolute inset-0 [backface-visibility:hidden] ${RING} [transform:rotateY(var(--a,0deg))_translateZ(185px)]`, [
+                div(`h-full w-full rounded-t-full border border-[${RED}] bg-[${IVORY}] p-1.5 shadow-[0_20px_40px_-18px_rgba(0,0,0,0.7)]`, [
+                  img('h-full w-full rounded-t-full object-cover', '{{item.url}}', '{{item.caption}}'),
+                ]),
+              ], { repeat: 'gallery' }),
             ]),
           ]),
-          p(`absolute inset-x-0 bottom-[7%] font-body text-[11px] uppercase tracking-[0.35em] text-muted`, 'Scroll untuk menyingkap'),
+          p(`mt-[84px] font-body text-[11px] uppercase tracking-[0.35em] text-[${IVORY}]/60`, 'Scroll untuk memutar'),
         ], { if: 'gallery' }),
       ],
     },
@@ -283,27 +294,30 @@ export const definition: ThemeDefinition = {
         ], { if: 'gifts' }),
       ],
     },
-    // ---------- Penutup: tongkonan naik kembali, matahari terbenam di balik atap ----------
+    // ---------- Penutup: kamera mundur keluar rumah, pintu menutup ----------
     {
       type: 'closing',
       class: `uv-scene relative h-[calc(var(--uv-vh,100svh)_*_2.4)] bg-[${IVORY}]`,
       children: [
         div(stage, [
-          div('px-8', [
+          div(`px-8 [opacity:${END}]`, [
             p('font-body text-[14px] italic text-muted', '{{closing_text}}'),
           ]),
-          valley({
-            near: '1',
-            turn: '0deg',
-            lift: `calc(1_-_${RISE})`,
-            sunY: `calc((1_-_${RISE})_*_-60px)`,
-            spin: `calc((1_-_${RISE})_*_-360deg)`,
-            sunOp: '1',
-          }),
-          div(`[opacity:${ramp(0.6, 4)}]`, [
-            p(`font-body text-[11px] uppercase tracking-[0.35em] text-[${RED}]`, 'Terima Kasih'),
-            p('mt-2 font-body text-[13px] italic text-muted', '{{closing_greeting}}'),
-            p('mt-1 font-script text-[36px] text-primary', '{{couple_names}}'),
+          div('relative my-3 h-[400px] w-full shrink-0', [
+            inside(ZOUT, [
+              letter([
+                img('mx-auto -mt-2 mb-1 w-9', '{{asset.barre}}', ''),
+                p(`font-body text-[7.5px] uppercase tracking-[0.28em] text-[${RED}]`, 'Terima Kasih'),
+                p('mt-2 font-script text-[26px] leading-[1.15] text-primary', '{{couple_names}}'),
+                sabbe('mt-2 !w-20'),
+                p('mt-2 font-body text-[8.5px] italic leading-snug text-muted', '{{closing_greeting}}'),
+              ], 'scale-[1.3]'),
+            ]),
+            house('1', SHUT, ZOUT),
+          ]),
+          div(`[opacity:${END}]`, [
+            p('font-body text-[13px] italic text-muted', '{{closing_greeting}}'),
+            p('mt-1 font-script text-[34px] text-primary', '{{couple_names}}'),
           ]),
         ]),
       ],
