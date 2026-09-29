@@ -4,11 +4,11 @@ import { comp, div, el, img, p } from './_h'
 /**
  * Layar Phinisi — adat Makassar yang lapang & elegan, 3 warna saja (gading, biru laut, emas) dan 2 aset
  * (kapal phinisi tujuh layar beranimasi & ombak berjalan). Konsep 3D mengikuti scroll:
- * - pembuka: phinisi berlayar dari cakrawala mendekat sambil berbelok (rotateY), lalu kamera menembus
- *   layar utamanya dan kartu undangan mendekat ke layar
+ * - pembuka: phinisi berlayar dari cakrawala mendekat sambil berbelok (rotateY), lalu berlayar ke depan
+ *   keluar layar dan kartu undangan muncul
  * - tengah: kartu datang dari kejauhan (uv-z), pita kotak-kotak lipa' sabbe sebagai aksen
  * - galeri: lembar foto tersingkap ke atas satu per satu (uv-flip-book)
- * - penutup: phinisi berbalik dan berlayar menjauh ke cakrawala
+ * - penutup: phinisi berlayar masuk dari kanan ke tengah
  */
 const IVORY = '#faf6ee'
 const OCEAN = '#1f3d5a'
@@ -67,11 +67,12 @@ function person(who: 'groom' | 'bride'): ThemeNode {
   ])
 }
 
-// Adegan pembuka: kapal mendekat, lalu kamera menembus layar utama
-const NEAR = ramp(0.02, 2.4)
-const ZIN = ramp(0.5, 2.4)
-// Adegan penutup: kapal menjauh
-const AWAY = ramp(0.08, 2)
+// Adegan pembuka: kapal mendekat, lalu berlayar ke depan & kartu undangan muncul
+const NEAR = ramp(0.02, 2.4) // mendekat dari cakrawala
+const SAIL = ramp(0.46, 2.6) // berlayar ke depan (ke kiri) keluar layar
+const LETTER = ramp(0.66, 3.4) // kartu undangan muncul
+// Adegan penutup: kapal berlayar masuk dari kanan
+const ARRIVE = ramp(0.06, 2.2) // kapal masuk dari kanan ke tengah
 
 // Lembar galeri: indeks & tumpukan (lembar pertama di atas) lewat nth-child pada tiap lembar
 const PAGES = [0, 1, 2, 3, 4, 5].map(i => `[&:nth-child(6n+${i + 1})]:[--i:${i}] [&:nth-child(6n+${i + 1})]:z-[${6 - i}]`).join(' ')
@@ -81,7 +82,7 @@ export const meta = {
   slug: 'layar-phinisi',
   name: 'Layar Phinisi',
   category: 'adat',
-  description: 'Adat Makassar yang lapang dan elegan, tiga warna (gading, biru laut, emas) dengan efek 3D saat di-scroll: kapal phinisi berlayar dari cakrawala mendekat lalu kamera menembus layarnya, foto tersingkap satu per satu, dan di akhir phinisi berlayar menjauh.',
+  description: 'Adat Makassar yang lapang dan elegan, tiga warna (gading, biru laut, emas) dengan efek 3D saat di-scroll: kapal phinisi berlayar dari cakrawala mendekat lalu melaju keluar layar dan kartu undangan muncul, foto tersingkap satu per satu, dan di akhir phinisi berlayar masuk kembali.',
 }
 
 export const definition: ThemeDefinition = {
@@ -127,15 +128,15 @@ export const definition: ThemeDefinition = {
         div('uv-reveal-pop uv-d5 relative mt-8', [comp('open_button', btn, { label: 'Buka Undangan' })]),
       ],
     },
-    // ---------- Pembuka: phinisi berlayar mendekat, kamera menembus layar ----------
+    // ---------- Pembuka: phinisi mendekat, berlayar ke depan, kartu undangan muncul ----------
     {
       type: 'hero',
       class: `uv-scene relative h-[calc(var(--uv-vh,100svh)_*_3)] bg-[${IVORY}]`,
       children: [
         div(stage, [
           div(`absolute inset-x-0 top-[11%] [opacity:calc(1_-_${ramp(0.4, 3)})]`, [kicker('Berlayar menuju hari bahagia'), divider('mt-4')]),
-          sea({ near: NEAR, turn: `calc((1_-_${NEAR})_*_-38deg)`, x: `calc((1_-_${NEAR})_*_70px)`, z: ZIN }),
-          div(`absolute inset-0 flex items-center justify-center [opacity:${ZIN}] [transform:scale(calc(0.55_+_${ZIN}_*_0.45))]`, [
+          sea({ near: NEAR, turn: `calc((1_-_${NEAR})_*_-38deg)`, x: `calc((1_-_${NEAR})_*_70px_-_${SAIL}_*_480px)`, z: '0' }),
+          div(`absolute inset-0 flex items-center justify-center [opacity:${LETTER}] [transform:translateY(calc((1_-_${LETTER})_*_36px))_scale(calc(0.9_+_${LETTER}_*_0.1))]`, [
             letter([
               p(`font-body text-[7.5px] uppercase tracking-[0.28em] text-[${GOLD}]`, 'The Wedding Of'),
               p('mt-2 font-script text-[28px] leading-[1.1] text-primary', '{{groom_nickname}}'),
@@ -270,7 +271,7 @@ export const definition: ThemeDefinition = {
         ], { if: 'gifts' }),
       ],
     },
-    // ---------- Penutup: phinisi berbalik & berlayar menjauh ----------
+    // ---------- Penutup: phinisi berlayar masuk dari kanan ----------
     {
       type: 'closing',
       class: `uv-scene relative h-[calc(var(--uv-vh,100svh)_*_2.4)] bg-[${IVORY}]`,
@@ -279,7 +280,7 @@ export const definition: ThemeDefinition = {
           div('px-8', [
             p('font-body text-[14px] italic text-muted', '{{closing_text}}'),
           ]),
-          sea({ near: `calc(1_-_${AWAY}_*_0.8)`, turn: `calc(${AWAY}_*_40deg)`, x: `calc(${AWAY}_*_-60px)`, z: '0' }),
+          sea({ near: '0.85', turn: '0deg', x: `calc((1_-_${ARRIVE})_*_480px)`, z: '0' }),
           div(`[opacity:${ramp(0.6, 4)}]`, [
             p(`font-body text-[11px] uppercase tracking-[0.35em] text-[${GOLD}]`, 'Terima Kasih'),
             p('mt-2 font-body text-[13px] italic text-muted', '{{closing_greeting}}'),
