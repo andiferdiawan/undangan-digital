@@ -9,6 +9,10 @@ import type { Ref } from 'vue'
  * - uv-float3d / uv-spin3d / uv-wiggle / uv-float        : ornamen berulang (CSS murni)
  * - uv-z / uv-z-left / uv-z-right                         : zoom sumbu Z mengikuti scroll (--uv-d, --uv-o)
  * - uv-scene                                              : wadah adegan (isi sticky) yang diberi --uv-s (0..1)
+ * - uv-play                                               : adegan berbasis waktu: --uv-t 0..1 berjalan sekali
+ *   (durasi --uv-dur) saat masuk layar, mis. buku terbuka otomatis ketika halaman dimuat
+ * - uv-leaf                                               : halaman buku yang terbalik 3D (--uv-f 0..1) saat
+ *   bagian bawahnya lewat ke atas layar
  * - uv-scroll-line                                        : wadah yang diberi --uv-p (0..1) sesuai posisi
  *   scroll; di dalamnya uv-scroll-draw (garis tergambar sampai titik baca) dan
  *   uv-scroll-follow (penanda yang menempel di ujung garis gelombang)
@@ -26,6 +30,7 @@ export function useInviteMotion(root: Ref<HTMLElement | null>, enabled: () => bo
   let lines: HTMLElement[] = []
   let zooms: HTMLElement[] = []
   let scenes: HTMLElement[] = []
+  let leaves: HTMLElement[] = []
   let scroller: HTMLElement | null = null
   let scrollRaf = 0
   let lastInput = 0
@@ -37,12 +42,13 @@ export function useInviteMotion(root: Ref<HTMLElement | null>, enabled: () => bo
   function scan() {
     const el = root.value
     if (!el || !io) return
-    el.querySelectorAll('[class*="uv-reveal"]:not(.uv-in)').forEach(n => io!.observe(n))
-    const prev = lines.length + zooms.length + scenes.length
+    el.querySelectorAll('[class*="uv-reveal"]:not(.uv-in), .uv-play:not(.uv-in)').forEach(n => io!.observe(n))
+    const prev = lines.length + zooms.length + scenes.length + leaves.length
     lines = [...el.querySelectorAll<HTMLElement>('.uv-scroll-line')]
     zooms = [...el.querySelectorAll<HTMLElement>('.uv-z, .uv-z-left, .uv-z-right')]
     scenes = [...el.querySelectorAll<HTMLElement>('.uv-scene')]
-    if (lines.length + zooms.length + scenes.length !== prev) onScroll()
+    leaves = [...el.querySelectorAll<HTMLElement>('.uv-leaf')]
+    if (lines.length + zooms.length + scenes.length + leaves.length !== prev) onScroll()
     const had = hasTilt
     hasTilt = !!el.querySelector('.uv-tilt')
     if (hasTilt && !had) loop()
@@ -76,7 +82,7 @@ export function useInviteMotion(root: Ref<HTMLElement | null>, enabled: () => bo
   /** Garis cerita: ujungnya mengikuti titik baca (62% tinggi layar/bingkai). */
   function updateLines() {
     scrollRaf = 0
-    if (!lines.length && !zooms.length && !scenes.length) return
+    if (!lines.length && !zooms.length && !scenes.length && !leaves.length) return
     const v = scroller ? scroller.getBoundingClientRect() : { top: 0, height: window.innerHeight }
     const mid = v.top + v.height / 2
     // Posisi diukur dari layout (offsetTop), bukan rect yang sudah ter-transform, agar tidak bergetar
@@ -90,6 +96,13 @@ export function useInviteMotion(root: Ref<HTMLElement | null>, enabled: () => bo
       const o = Math.max(0, Math.min(1, 1 - Math.max(0, d - 0.3) * 1.7 - Math.max(0, -d - 0.32) * 2))
       el.style.setProperty('--uv-d', d.toFixed(4))
       el.style.setProperty('--uv-o', o.toFixed(3))
+    }
+    // Halaman terbalik: mulai saat tepi bawah halaman naik melewati 60% layar, selesai di 8%
+    for (const el of leaves) {
+      const bottom = rootTop + layoutTop(el) - baseOff + el.offsetHeight
+      const f = Math.max(0, Math.min(1, (0.6 - (bottom - v.top) / v.height) / 0.52))
+      el.style.setProperty('--uv-f', f.toFixed(4))
+      el.classList.toggle('uv-leaf-gone', f >= 0.999)
     }
     for (const el of scenes) {
       const r = el.getBoundingClientRect()
@@ -178,6 +191,7 @@ export function useInviteMotion(root: Ref<HTMLElement | null>, enabled: () => bo
     lines = []
     zooms = []
     scenes = []
+    leaves = []
     document.removeEventListener('scroll', onScroll, { capture: true })
     window.removeEventListener('resize', onResize)
     window.removeEventListener('pointermove', onPointer)
