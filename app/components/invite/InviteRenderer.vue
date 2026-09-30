@@ -254,6 +254,17 @@ const bgUrl = (bg?: string) => {
 .invite-root:not(.uv-motion) .uv-ring { transform: none !important; width: min(320px, 86vw) !important; height: auto !important; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.75rem; }
 .invite-root:not(.uv-motion) .uv-ring .uv-ring-item { position: relative !important; inset: auto !important; transform: none !important; aspect-ratio: 2 / 3; }
 .invite-root:not(.uv-motion) .uv-scene-stage { position: relative !important; height: auto !important; min-height: 70vh; padding-top: 4rem; padding-bottom: 4rem; }
+/* Adegan berbasis waktu (uv-play): --uv-t 0 → 1 sekali saat masuk layar. Tanpa gerak: langsung 1 (akhir). */
+.invite-root.uv-motion .uv-play:not(.uv-in) { --uv-t: 0; }
+.invite-root.uv-motion .uv-play.uv-in { animation: uv-play var(--uv-dur, 5s) linear both; }
+/* Halaman buku terbalik (uv-leaf): berengsel di tepi kiri, --uv-f 0..1 dari useInviteMotion */
+.invite-root .uv-leaf {
+  transform-origin: left center;
+  transform: perspective(1700px) rotateY(calc(var(--uv-f, 0) * -178deg));
+  backface-visibility: hidden;
+}
+.invite-root.uv-motion .uv-leaf { will-change: transform; }
+.invite-root .uv-leaf-gone { visibility: hidden; }
 @keyframes uv-pop { from { opacity: 0; transform: scale(0.5) rotate(-6deg); } }
 @keyframes uv-wiggle { 0% { transform: rotate(-3deg); } 33% { transform: rotate(2deg) translateY(-1px); } 66% { transform: rotate(-1deg) translateX(1px); } }
 @keyframes uv-float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
@@ -264,6 +275,8 @@ const bgUrl = (bg?: string) => {
   50% { transform: perspective(700px) translateY(-10px) rotateY(14deg) rotateX(-4deg); }
 }
 @keyframes uv-spin3d { from { transform: perspective(700px) rotateY(0deg); } to { transform: perspective(700px) rotateY(360deg); } }
+@property --uv-t { syntax: '<number>'; inherits: true; initial-value: 1; }
+@keyframes uv-play { from { --uv-t: 0; } to { --uv-t: 1; } }
 @keyframes uv-shine { 0%, 55% { transform: translateX(-120%); } 85%, 100% { transform: translateX(120%); } }
 @media (prefers-reduced-motion: reduce) {
   .invite-root .uv-float3d, .invite-root .uv-spin3d, .invite-root .uv-wiggle, .invite-root .uv-float, .invite-root .uv-shine::after { animation: none; }
