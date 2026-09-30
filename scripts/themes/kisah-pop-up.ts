@@ -3,9 +3,9 @@ import { comp, div, el, img, p } from './_h'
 
 /**
  * Kisah Pop-Up — buku cerita pop-up klasik & romantis. Warna: merah anggur (sampul kulit), kertas gading,
- * emas; 3 aset (siluet mempelai, gedung acara, sepasang cincin). Konsep 3D:
- * - sampul (otomatis saat dimuat, uv-play): buku bersampul kulit terbuka sendiri, siluet pasangan, gedung
- *   dan cincin berdiri dari halaman yang mendatar, lalu kamera perlahan zoom-in
+ * emas; aset: gedung acara  * emas; aset: gedung acara, sepasang cincin, siluet mempelai (album). Konsep 3D: sepasang cincin, plus foto mempelai dari data undangan. Konsep 3D:
+ * - sampul (otomatis saat dimuat, uv-play): buku bersampul kulit terbuka sendiri, bingkai foto mempelai
+ *   pria & wanita dan cincin berdiri dari halaman yang mendatar, lalu kamera perlahan zoom-in
  * - pembuka (scroll): Bab I, kartu nama berdiri, kamera mendekat, lalu lembar halaman dibalik 3D ke Bab II
  * - tengah: setiap bab adalah halaman buku yang terbalik 3D saat selesai dibaca (uv-leaf)
  * - galeri: album yang halamannya terbalik satu per satu (uv-flip-book)
@@ -73,7 +73,7 @@ function book(open: string, tilt: string, pops: ThemeNode[], left: ThemeNode[], 
     // papan belakang & bayangan di meja
     div(`absolute -bottom-[6px] -right-[6px] -top-[6px] left-1/2 rounded-r-[6px] ${leather} shadow-[0_36px_40px_-14px_rgba(0,0,0,0.75)] [transform:translateZ(-4px)]`),
     // tebal kertas di tepi kanan
-    div(`absolute -right-[3px] inset-y-[2px] w-[3px] bg-[repeating-linear-gradient(90deg,#d9caa9_0_1px,${PAPER}_1px_2px)] [transform:translateZ(-2px)]`),
+    div(`absolute -right-[3px] inset-y-[2px] w-[3px] [background-image:repeating-linear-gradient(90deg,#d9caa9_0_1px,${PAPER}_1px_2px)] [transform:translateZ(-2px)]`),
     div(`absolute inset-y-0 left-1/2 w-1/2 rounded-r-[3px] ${paperR} [transform-style:preserve-3d]`, pops),
     // sampul depan: berengsel di punggung buku, sisi dalamnya menjadi halaman kiri
     div(`absolute -bottom-[6px] -top-[6px] left-1/2 w-[156px] [transform-origin:0_50%] [transform-style:preserve-3d] [transform:translateZ(3px)_rotateY(calc(${open}*-180deg))]`, [
@@ -85,10 +85,26 @@ function book(open: string, tilt: string, pops: ThemeNode[], left: ThemeNode[], 
   ])
 }
 
-/** Tiga elemen pop-up utama: gedung (belakang), siluet mempelai (tengah), cincin (depan). */
+/**
+ * Bingkai foto mempelai berbentuk lengkung (foto dari data undangan, atau nama panggilan bila belum ada foto).
+ * `turn` = sudut putar ke arah pasangannya saat bingkai berdiri, agar terasa 3D.
+ */
+function photoFrame(who: 'groom' | 'bride', up: string, turn: number): ThemeNode {
+  return div(`h-full w-full [transform-origin:50%_100%] [transform:rotateY(calc(${up}*${turn}deg))] [backface-visibility:hidden]`, [
+    div(`relative h-full w-full rounded-t-full border-2 border-[${GOLD}] bg-[${PAPER}] p-[3px] shadow-[0_6px_10px_-4px_rgba(0,0,0,0.55)]`, [
+      div('relative h-full w-full overflow-hidden rounded-t-full', [
+        img('absolute inset-0 h-full w-full object-cover object-top', `{{${who}_photo}}`, who === 'groom' ? 'Foto mempelai pria' : 'Foto mempelai wanita', { if: `${who}_photo` }),
+        div(`absolute inset-0 grid place-items-center bg-[${WINE}]/10`, [el('span', 'font-script text-[18px] text-primary', `{{${who}_nickname}}`)], { if: `!${who}_photo` }),
+      ]),
+      div(`absolute -bottom-[5px] left-1/2 h-2.5 w-2.5 -translate-x-1/2 rotate-45 border border-[${GOLD}] bg-[${PAPER}]`),
+    ]),
+  ])
+}
+
+/** Elemen pop-up utama: bingkai foto mempelai pria & wanita yang saling menghadap, cincin di depan. */
 const trio = (a: string, b: string, c: string) => [
-  pop('left-[8px] top-[6px] h-[92px] w-[134px]', a, art('gedung', 'Gedung acara')),
-  pop('left-[33px] top-[58px] h-[100px] w-[75px]', b, art('pasangan', 'Siluet mempelai')),
+  pop('left-[10px] top-[46px] h-[94px] w-[62px]', a, photoFrame('groom', a, 16)),
+  pop('left-[78px] top-[46px] h-[94px] w-[62px]', b, photoFrame('bride', b, -16)),
   pop('left-[48px] top-[150px] h-[40px] w-[54px]', c, art('cincin', 'Sepasang cincin')),
 ]
 
@@ -133,7 +149,7 @@ export const meta = {
   slug: 'kisah-pop-up',
   name: 'Kisah Pop-Up',
   category: 'elegan',
-  description: 'Buku cerita pop-up klasik dan romantis bersampul kulit: buku terbuka sendiri saat undangan dimuat, siluet mempelai, gedung acara dan cincin berdiri dari halaman seperti buku pop-up 3D sementara kamera perlahan mendekat, lalu setiap bab berganti dengan lembar halaman yang dibalik 3D hingga buku kembali tertutup di akhir cerita.',
+  description: 'Buku cerita pop-up klasik dan romantis bersampul kulit: buku terbuka sendiri saat undangan dimuat, bingkai foto kedua mempelai dan cincin berdiri dari halaman seperti buku pop-up 3D sementara kamera perlahan mendekat, lalu setiap bab berganti dengan lembar halaman yang dibalik 3D hingga buku kembali tertutup di akhir cerita.',
 }
 
 export const definition: ThemeDefinition = {
@@ -151,7 +167,7 @@ export const definition: ThemeDefinition = {
     font_script: 'Pinyon Script',
   },
   root_class: `text-[16px] leading-relaxed ${deskBg}`,
-  assets: { pasangan: `${A}/pasangan.svg`, gedung: `${A}/gedung.svg`, cincin: `${A}/cincin.svg` },
+  assets: { gedung: `${A}/gedung.svg`, cincin: `${A}/cincin.svg` },
   demo: {
     gallery: ['/theme-assets/lontara-bugis/pelaminan.jpg', '/theme-assets/lontara-bugis/slide-2.jpg', '/theme-assets/lontara-bugis/keluarga.jpg', '/theme-assets/lontara-bugis/slide-3.jpg', '/theme-assets/lontara-bugis/bride.jpg', '/theme-assets/lontara-bugis/groom.jpg'],
     groom_photo: '/theme-assets/lontara-bugis/groom.jpg',
@@ -166,7 +182,7 @@ export const definition: ThemeDefinition = {
         div(`uv-play relative flex w-full flex-col items-center [--uv-dur:7.5s] [--o:${C_OPEN}]`, [
           p(`font-body text-[12px] uppercase tracking-[0.4em] text-[${GOLD}] [opacity:${ramp(T, 0, 5)}]`, 'Sebuah Kisah Cinta'),
           div(`relative mt-2 flex h-[330px] w-full items-center justify-center [perspective:1000px] [opacity:${ramp(T, 0, 6)}] [--z:${C_ZOOM}]`, [
-            div('flex items-center justify-center [transform-style:preserve-3d] [transform:translate3d(calc(var(--z)*-92px),calc(var(--z)*40px),0)_scale(calc(0.95_+_var(--z)*0.3))]', [
+            div('flex items-center justify-center [transform-style:preserve-3d] [transform:translate3d(0,calc(var(--z)*18px),0)_scale(calc(0.95_+_var(--z)*0.1))]', [
               book('var(--o)', 'calc(24deg_+_var(--o)*38deg)', trio(sm(ramp(T, 0.34, 4)), sm(ramp(T, 0.42, 4)), sm(ramp(T, 0.5, 4.5))), [
                 p(`font-body text-[8px] uppercase tracking-[0.3em] text-[${GOLD}]`, 'Pada suatu hari'),
                 p('mt-1.5 font-script text-[24px] leading-[1.1] text-primary', '{{groom_nickname}}'),
@@ -194,7 +210,7 @@ export const definition: ThemeDefinition = {
         div(stage, [
           div(`pointer-events-none absolute inset-x-0 top-[8%] [opacity:calc(1_-_${ramp(S, 0.2, 5)})]`, [kicker('Bab I'), p(`mt-2 font-heading text-[24px] italic text-[${PAPER}]`, 'Sebuah Awal')]),
           div(`relative flex h-[340px] w-full items-center justify-center [perspective:1000px] [--z:calc(${sm(ramp(S, 0.18, 2.8))}_-_${sm(ramp(S, 0.56, 5))})]`, [
-            div('flex items-center justify-center [transform-style:preserve-3d] [transform:translate3d(calc(var(--z)*-80px),calc(var(--z)*56px),0)_scale(calc(1_+_var(--z)*0.55))]', [
+            div('flex items-center justify-center [transform-style:preserve-3d] [transform:translate3d(0,calc(var(--z)*24px),0)_scale(calc(1_+_var(--z)*0.12))]', [
               div(`relative h-[200px] w-[300px] shrink-0 [transform-style:preserve-3d] [transform:rotateX(60deg)] [--k:${H_FOLD}] [--f:${H_TURN}]`, [
                 div(`absolute -inset-[6px] rounded-[6px] ${leather} shadow-[0_36px_40px_-14px_rgba(0,0,0,0.75)] [transform:translateZ(-4px)]`),
                 // halaman kiri: Bab I
@@ -217,7 +233,6 @@ export const definition: ThemeDefinition = {
                   div(`absolute inset-0 flex flex-col items-center justify-center rounded-l-[3px] px-4 ${paperL} [backface-visibility:hidden] [transform:rotateY(180deg)]`, [
                     p('font-script text-[20px] leading-tight text-primary', 'dan kisah pun dimulai…'),
                   ]),
-                  pop('left-[8px] top-[4px] h-[88px] w-[134px]', `calc(${sm(ramp(S, 0.02, 4))}*(1_-_var(--k)))`, art('gedung', 'Gedung acara')),
                   pop('left-[14px] top-[68px] h-[84px] w-[122px]', `calc(${sm(ramp(S, 0.08, 4))}*(1_-_var(--k)))`,
                     div(`flex h-full w-full flex-col items-center justify-center rounded-[3px] border border-[${GOLD}] bg-[${PAPER}] px-2 shadow-[0_4px_8px_-4px_rgba(0,0,0,0.5)] outline outline-1 outline-offset-[-4px] outline-[${GOLD}]/50 [backface-visibility:hidden]`, [
                       p(`font-body text-[6.5px] uppercase tracking-[0.3em] text-[${GOLD}]`, 'The Wedding Of'),
@@ -326,7 +341,7 @@ export const definition: ThemeDefinition = {
             ], { repeat: 'gallery' }),
             div(`uv-flip-end absolute inset-0 z-0 grid place-items-center rounded-r-[6px] ${paperR} p-6`, [
               div('', [
-                img('mx-auto w-16', '{{asset.pasangan}}'),
+                img('mx-auto w-14', '{{asset.cincin}}'),
                 p('mt-3 font-script text-[32px] leading-tight text-primary', 'bersambung…'),
                 flourish('mt-3'),
               ]),
@@ -383,7 +398,7 @@ export const definition: ThemeDefinition = {
         div(stage, [
           p(`max-w-[300px] font-body text-[16px] italic text-[${PAPER}]/80 [opacity:calc(1_-_${ramp(S, 0.2, 5)})]`, '{{closing_text}}'),
           div(`relative my-2 flex h-[330px] w-full shrink-0 items-center justify-center [perspective:1000px] [--o:${E_OPEN}]`, [
-            div(`flex items-center justify-center [transform-style:preserve-3d] [transform:scale(calc(0.95_+_var(--o)*0.2))]`, [
+            div(`flex items-center justify-center [transform-style:preserve-3d] [transform:scale(calc(0.92_+_var(--o)*0.04))]`, [
               book('var(--o)', 'calc(24deg_+_var(--o)*38deg)', trio(`calc(1_-_${E_FOLD})`, `calc(1_-_${E_FOLD})`, `calc(1_-_${E_FOLD})`), [
                 p('font-script text-[26px] leading-tight text-primary', 'dan mereka hidup bahagia selamanya'),
               ], 'Tamat'),
