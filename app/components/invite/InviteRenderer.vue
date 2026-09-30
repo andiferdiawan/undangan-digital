@@ -138,7 +138,7 @@ const bgUrl = (bg?: string) => {
     <div
       ref="rootEl"
       class="invite-root relative isolate overflow-x-clip bg-base font-body text-ink"
-      :class="[`invite-${mode}`, { 'uv-motion': motion.active.value }]"
+      :class="[`invite-${mode}`, { 'uv-motion': motion.active.value, 'uv-cover-closed': !!cover && !coverOpen }]"
       :style="cssVars"
     >
       <!-- CSS tema di-scope ke .invite-root, jadi root_class dipasang di pembungkus dalam -->
@@ -257,6 +257,8 @@ const bgUrl = (bg?: string) => {
 /* Adegan berbasis waktu (uv-play): --uv-t 0 → 1 sekali saat masuk layar. Tanpa gerak: langsung 1 (akhir). */
 .invite-root.uv-motion .uv-play:not(.uv-in) { --uv-t: 0; }
 .invite-root.uv-motion .uv-play.uv-in { animation: uv-play var(--uv-dur, 5s) linear both; }
+/* Adegan waktu setelah sampul baru diputar ketika sampul dibuka (bukan diam-diam di balik sampul) */
+.invite-root.uv-motion.uv-cover-closed section:not([data-section="cover"]) .uv-play { animation: none; --uv-t: 0; }
 /* Halaman buku terbalik (uv-leaf): berengsel di tepi kiri, --uv-f 0..1 dari useInviteMotion */
 .invite-root .uv-leaf {
   transform-origin: left center;

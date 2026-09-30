@@ -43,8 +43,9 @@ import * as layarPhinisi from './themes/layar-phinisi'
 import * as tongkonanRindu from './themes/tongkonan-rindu'
 import * as kisahPopUp from './themes/kisah-pop-up'
 import * as terminalCinta from './themes/terminal-cinta'
+import * as kotakRahasia from './themes/kotak-rahasia'
 
-const themes = [sakinah, minimalis, floral, arka, noir, rustic, bugis, makassar, toraja, senja, arunika, lontara, aurelia, doodle, alur, aqBintang, aqBunga, khCeria, khMihrab, utBalon, utEmas, ofPrima, ofAgenda, acSilaturahmi, acKumpul, exPramuka, exPmr, exSeni, kabarCinta, harianBahagia, zoomCinta, pintuHati, suratCinta, piringanRindu, bolaUgi, layarPhinisi, tongkonanRindu, kisahPopUp, terminalCinta]
+const themes = [sakinah, minimalis, floral, arka, noir, rustic, bugis, makassar, toraja, senja, arunika, lontara, aurelia, doodle, alur, aqBintang, aqBunga, khCeria, khMihrab, utBalon, utEmas, ofPrima, ofAgenda, acSilaturahmi, acKumpul, exPramuka, exPmr, exSeni, kabarCinta, harianBahagia, zoomCinta, pintuHati, suratCinta, piringanRindu, bolaUgi, layarPhinisi, tongkonanRindu, kisahPopUp, terminalCinta, kotakRahasia]
 const q = (s: string) => `'${s.replace(/'/g, "''")}'`
 const rows: string[] = []
 let failed = false
