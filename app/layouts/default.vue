@@ -2,6 +2,7 @@
 const config = useRuntimeConfig()
 const user = useSupabaseUser()
 const { profile, refresh } = useProfile()
+const { count: likeCount, ready: likesReady } = useThemeLikes()
 watch(user, () => refresh(), { immediate: true })
 const menuOpen = ref(false)
 const route = useRoute()
@@ -22,6 +23,10 @@ watch(() => route.fullPath, () => (menuOpen.value = false))
           <NuxtLink to="/#harga" class="hover:text-brand">Harga</NuxtLink>
           <NuxtLink to="/reseller" class="hover:text-brand">Reseller</NuxtLink>
           <NuxtLink to="/daftar" class="hover:text-brand">Punya Token?</NuxtLink>
+          <NuxtLink to="/favorit" class="inline-flex items-center gap-1.5 hover:text-brand" aria-label="Tema favorit">
+            <svg viewBox="0 0 24 24" class="h-4 w-4" aria-hidden="true"><path d="M12 20.5s-7.3-4.4-9.7-9C.7 8.4 2.6 4.5 6.3 4.5c2.1 0 3.6 1.2 4.5 2.5L12 8.6l1.2-1.6c.9-1.3 2.4-2.5 4.5-2.5 3.7 0 5.6 3.9 4 7-2.4 4.6-9.7 9-9.7 9z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" /></svg>
+            Favorit<span v-if="likesReady && likeCount" class="rounded-full bg-[#d9475f] px-1.5 text-[11px] font-semibold leading-5 text-white">{{ likeCount }}</span>
+          </NuxtLink>
           <NuxtLink v-if="profile?.role === 'admin'" to="/admin" class="hover:text-brand">Admin</NuxtLink>
           <NuxtLink v-if="user" to="/dashboard" class="btn-primary btn-sm">Dashboard</NuxtLink>
           <NuxtLink v-else to="/masuk" class="btn-ghost btn-sm">Masuk</NuxtLink>
@@ -36,6 +41,9 @@ watch(() => route.fullPath, () => (menuOpen.value = false))
         <NuxtLink to="/#harga" class="rounded-lg px-3 py-2.5 hover:bg-brand-50">Harga</NuxtLink>
         <NuxtLink to="/reseller" class="rounded-lg px-3 py-2.5 hover:bg-brand-50">Program Reseller</NuxtLink>
         <NuxtLink to="/daftar" class="rounded-lg px-3 py-2.5 hover:bg-brand-50">Punya Token? Daftar</NuxtLink>
+        <NuxtLink to="/favorit" class="flex items-center justify-between rounded-lg px-3 py-2.5 hover:bg-brand-50">
+          Tema Favorit<span v-if="likesReady && likeCount" class="rounded-full bg-[#d9475f] px-2 text-xs font-semibold leading-5 text-white">{{ likeCount }}</span>
+        </NuxtLink>
         <NuxtLink v-if="profile?.role === 'admin'" to="/admin" class="rounded-lg px-3 py-2.5 hover:bg-brand-50">Admin</NuxtLink>
         <NuxtLink v-if="user" to="/dashboard" class="btn-primary mt-1">Dashboard</NuxtLink>
         <NuxtLink v-else to="/masuk" class="btn-ghost mt-1">Masuk</NuxtLink>

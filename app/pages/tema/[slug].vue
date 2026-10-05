@@ -115,6 +115,7 @@ useJsonLd('theme', () => !theme.value ? null : ({
       <div class="mt-8 flex flex-wrap gap-2">
         <button class="btn-accent w-full md:w-auto" @click="ordering = true">Pesan Tema Ini</button>
         <NuxtLink :to="`/pratinjau/${theme.slug}`" class="btn-ghost w-full md:w-auto">Lihat seperti tamu (layar penuh)</NuxtLink>
+        <LikeButton :theme-id="theme.id" :theme-name="theme.name" variant="inline" />
       </div>
     </div>
 

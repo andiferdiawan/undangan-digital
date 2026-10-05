@@ -7,10 +7,13 @@ defineEmits<{ order: [] }>()
 
 <template>
   <article class="card group overflow-hidden">
-    <NuxtLink :to="`/tema/${theme.slug}`" class="block">
-      <ThemeThumb :definition="theme.definition" :css="theme.compiled_css" :slug="theme.slug" />
-      <span class="sr-only">Preview tema undangan {{ theme.name }}</span>
-    </NuxtLink>
+    <div class="relative">
+      <NuxtLink :to="`/tema/${theme.slug}`" class="block">
+        <ThemeThumb :definition="theme.definition" :css="theme.compiled_css" :slug="theme.slug" />
+        <span class="sr-only">Preview tema undangan {{ theme.name }}</span>
+      </NuxtLink>
+      <LikeButton :theme-id="theme.id" :theme-name="theme.name" class="absolute right-2 top-2 z-10" />
+    </div>
     <div class="p-3 sm:p-4">
       <div class="flex items-center justify-between gap-2 text-[11px] font-semibold uppercase tracking-wider">
         <span class="truncate text-clay-600">{{ categoryName }}</span>
