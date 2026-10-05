@@ -1,5 +1,6 @@
 /**
- * Validasi + kompilasi tema bawaan, lalu tulis SQL upsert ke supabase/seed/themes.sql.
+ * Validasi + kompilasi tema bawaan, lalu tulis SQL upsert ke supabase/seed/themes.sql, plus satu file per
+ * tema di supabase/seed/themes/<slug>.sql (kecil, mudah diambil database saat menambah satu tema baru).
  * Jalankan: npx tsx scripts/build-seed-themes.ts
  */
 import { mkdirSync, writeFileSync } from 'node:fs'
@@ -49,6 +50,7 @@ import * as kotakRahasia from './themes/kotak-rahasia'
 const themes = [sakinah, minimalis, floral, arka, noir, rustic, bugis, makassar, toraja, senja, arunika, lontara, aurelia, doodle, alur, aqBintang, aqBunga, khCeria, khMihrab, utBalon, utEmas, ofPrima, ofAgenda, acSilaturahmi, acKumpul, exPramuka, exPmr, exSeni, kabarCinta, harianBahagia, zoomCinta, pintuHati, suratCinta, piringanRindu, bolaUgi, layarPhinisi, tongkonanRindu, kisahPopUp, terminalCinta, kotakRahasia, bukuNikah]
 const q = (s: string) => `'${s.replace(/'/g, "''")}'`
 const rows: string[] = []
+const perTheme: { slug: string, row: string }[] = []
 let failed = false
 
 for (const t of themes) {
@@ -57,21 +59,25 @@ for (const t of themes) {
   r.errors.forEach(e => console.log('  ✗', e))
   r.warnings.forEach(w => console.log('  !', w))
   if (!r.ok) { failed = true; continue }
-  rows.push(`(${[
+  const row = `(${[
     q(t.meta.code), q(t.meta.slug), q(t.meta.name), q(t.meta.description),
     `(select id from public.categories where slug = ${q(t.meta.category)})`,
     `${q(JSON.stringify(r.definition))}::jsonb`, q(r.css), `'published'`, `'manual'`,
-  ].join(', ')})`)
+  ].join(', ')})`
+  rows.push(row)
+  perTheme.push({ slug: t.meta.slug, row })
 }
 
 if (failed) process.exit(1)
-mkdirSync('supabase/seed', { recursive: true })
-writeFileSync('supabase/seed/themes.sql', `-- Dihasilkan oleh scripts/build-seed-themes.ts — jangan diedit manual
+const upsert = (values: string) => `-- Dihasilkan oleh scripts/build-seed-themes.ts — jangan diedit manual
 insert into public.themes (code, slug, name, description, category_id, definition, compiled_css, status, source)
 values
-${rows.join(',\n')}
+${values}
 on conflict (slug) do update set
   name = excluded.name, description = excluded.description, category_id = excluded.category_id,
   definition = excluded.definition, compiled_css = excluded.compiled_css;
-`)
-console.log('\n→ supabase/seed/themes.sql ditulis')
+`
+mkdirSync('supabase/seed/themes', { recursive: true })
+writeFileSync('supabase/seed/themes.sql', upsert(rows.join(',\n')))
+for (const t of perTheme) writeFileSync(`supabase/seed/themes/${t.slug}.sql`, upsert(t.row))
+console.log(`\n→ supabase/seed/themes.sql + ${perTheme.length} file per tema ditulis`)
