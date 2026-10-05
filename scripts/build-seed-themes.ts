@@ -43,11 +43,12 @@ import * as bolaUgi from './themes/bola-ugi'
 import * as layarPhinisi from './themes/layar-phinisi'
 import * as tongkonanRindu from './themes/tongkonan-rindu'
 import * as bukuNikah from './themes/buku-nikah'
+import * as cetakKenangan from './themes/cetak-kenangan'
 import * as kisahPopUp from './themes/kisah-pop-up'
 import * as terminalCinta from './themes/terminal-cinta'
 import * as kotakRahasia from './themes/kotak-rahasia'
 
-const themes = [sakinah, minimalis, floral, arka, noir, rustic, bugis, makassar, toraja, senja, arunika, lontara, aurelia, doodle, alur, aqBintang, aqBunga, khCeria, khMihrab, utBalon, utEmas, ofPrima, ofAgenda, acSilaturahmi, acKumpul, exPramuka, exPmr, exSeni, kabarCinta, harianBahagia, zoomCinta, pintuHati, suratCinta, piringanRindu, bolaUgi, layarPhinisi, tongkonanRindu, kisahPopUp, terminalCinta, kotakRahasia, bukuNikah]
+const themes = [sakinah, minimalis, floral, arka, noir, rustic, bugis, makassar, toraja, senja, arunika, lontara, aurelia, doodle, alur, aqBintang, aqBunga, khCeria, khMihrab, utBalon, utEmas, ofPrima, ofAgenda, acSilaturahmi, acKumpul, exPramuka, exPmr, exSeni, kabarCinta, harianBahagia, zoomCinta, pintuHati, suratCinta, piringanRindu, bolaUgi, layarPhinisi, tongkonanRindu, kisahPopUp, terminalCinta, kotakRahasia, bukuNikah, cetakKenangan]
 const q = (s: string) => `'${s.replace(/'/g, "''")}'`
 const rows: string[] = []
 const perTheme: { slug: string, row: string }[] = []
