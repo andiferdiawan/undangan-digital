@@ -2,8 +2,8 @@ import type { ThemeDefinition, ThemeNode } from '../../shared/theme/schema'
 import { comp, div, el, img, p } from './_h'
 
 /**
- * Cetak Kenangan — fotografi Gen Z lovely: kamera cetak instan putih, latar cairan ungu, hasil cetak
- * bergaya thermal (merah bertitik). Aset: kamera & latar cair. Alur 3D mengikuti scroll:
+ * Cetak Kenangan — fotografi Gen Z lovely: kamera cetak instan putih, latar kertas lavender bergaris halus
+ * (CSS), hasil cetak bergaya thermal (merah bertitik). Aset: kamera. Alur 3D mengikuti scroll:
  * - pembuka: kamera datang sambil berputar, "cekrek!" (kilat flash), kertas foto keluar dari celah
  *   cetak, lalu kamera naik & hasil cetak mendekat jadi kartu undangan
  * - tengah: kartu cetak & struk acara datang dari kejauhan (uv-z)
@@ -28,6 +28,8 @@ const thermal = '[filter:grayscale(1)_sepia(1)_hue-rotate(-52deg)_saturate(3.2)_
 const dots = '[background-image:radial-gradient(rgba(255,255,255,0.4)_1px,transparent_1.3px)] [background-size:4px_4px]'
 // Struk: tepi bawah bergerigi
 const receipt = `bg-white [mask-image:conic-gradient(from_-45deg_at_bottom,#0000,#000_1deg_89deg,#0000_90deg)_50%/14px_100%]`
+// Latar kertas sederhana: garis lengkung halus ungu + cahaya lavender lembut — murni CSS
+const paperBg = `bg-[${SOFT}] [background-image:radial-gradient(ellipse_at_50%_0%,rgba(203,184,238,0.55),transparent_60%),repeating-radial-gradient(circle_at_50%_120%,rgba(75,42,122,0.08)_0_1px,transparent_1px_8px)]`
 const dashed = `border-t-2 border-dashed border-[${PURPLE}]/25`
 
 /** Kertas foto hasil cetak (foto sampul/galeri bergaya thermal). */
@@ -87,7 +89,7 @@ export const meta = {
   slug: 'cetak-kenangan',
   name: 'Cetak Kenangan',
   category: 'modern',
-  description: 'Fotografi Gen Z yang manis: kamera cetak instan putih di atas latar cairan ungu. Efek 3D saat di-scroll: kamera berputar mendekat, cekrek! kilat flash, foto kalian tercetak keluar bergaya thermal, struk acara, dan galeri cetak yang bisa digeser.',
+  description: 'Fotografi Gen Z yang manis: kamera cetak instan putih dengan aksen ungu lavender. Efek 3D saat di-scroll: kamera berputar mendekat, cekrek! kilat flash, foto kalian tercetak keluar bergaya thermal, struk acara, dan galeri cetak yang bisa digeser.',
 }
 
 export const definition: ThemeDefinition = {
@@ -105,7 +107,7 @@ export const definition: ThemeDefinition = {
     font_script: 'Caveat',
   },
   root_class: 'text-[15px] leading-relaxed',
-  assets: { kamera: `${A}/kamera.svg`, cair: `${A}/cair.svg` },
+  assets: { kamera: `${A}/kamera.svg` },
   demo: {
     gallery: ['/theme-assets/aurelia-luxe/slide-1.jpg', '/theme-assets/rustic-senja/slide-2.jpg', '/theme-assets/aurelia-luxe/rings.jpg', '/theme-assets/rustic-senja/slide-1.jpg', '/theme-assets/aurelia-luxe/bouquet.jpg', '/theme-assets/aurelia-luxe/slide-2.jpg'],
     groom_photo: '/theme-assets/aurelia-luxe/groom.jpg',
@@ -114,8 +116,7 @@ export const definition: ThemeDefinition = {
   sections: [
     {
       type: 'cover',
-      class: 'relative flex flex-col items-center justify-center overflow-hidden px-6 text-center',
-      bg: '{{asset.cair}}',
+      class: `relative flex flex-col items-center justify-center overflow-hidden ${paperBg} px-6 text-center`,
       children: [
         div('uv-reveal-zoom relative mx-auto w-[210px] [perspective:800px]', [
           img('uv-float w-full drop-shadow-[0_24px_30px_rgba(75,42,122,0.45)]', '{{asset.kamera}}', 'Kamera cetak'),
@@ -139,8 +140,7 @@ export const definition: ThemeDefinition = {
     // ---------- Pembuka: kamera memotret, foto tercetak keluar ----------
     {
       type: 'hero',
-      class: 'uv-scene relative h-[calc(var(--uv-vh,100svh)_*_3.2)]',
-      bg: '{{asset.cair}}',
+      class: `uv-scene relative h-[calc(var(--uv-vh,100svh)_*_3.2)] ${paperBg}`,
       children: [
         div(stage, [
           div(`absolute inset-x-0 top-[8%] px-6 [opacity:calc(1_-_${PRINT}_*_2)]`, [kicker('Senyum dulu, ya'), heading('3… 2… 1…')]),
@@ -187,8 +187,7 @@ export const definition: ThemeDefinition = {
     },
     {
       type: 'event',
-      class: 'relative px-6 py-24 text-center',
-      bg: '{{asset.cair}}',
+      class: `relative ${paperBg} px-6 py-24 text-center`,
       children: [
         div('uv-z', [kicker('Save The Date'), heading('Struk Hari Bahagia')]),
         div('uv-z mt-8', [comp('countdown', '', {
@@ -263,8 +262,7 @@ export const definition: ThemeDefinition = {
     },
     {
       type: 'gift',
-      class: 'relative px-6',
-      bg: '{{asset.cair}}',
+      class: `relative ${paperBg} px-6`,
       children: [
         div('py-24 text-center', [
           div('uv-z', [kicker('Tanda Kasih'), heading('Amplop Digital')]),
@@ -284,8 +282,7 @@ export const definition: ThemeDefinition = {
     // ---------- Penutup: kamera mencetak struk terima kasih ----------
     {
       type: 'closing',
-      class: 'uv-scene relative h-[calc(var(--uv-vh,100svh)_*_2.2)]',
-      bg: '{{asset.cair}}',
+      class: `uv-scene relative h-[calc(var(--uv-vh,100svh)_*_2.2)] ${paperBg}`,
       children: [
         div(stage, [
           div('px-6', [p('font-body text-[14px] text-ink/80', '{{closing_text}}')]),
