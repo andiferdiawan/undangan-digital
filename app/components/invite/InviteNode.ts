@@ -8,6 +8,7 @@ import InviteWishes from './InviteWishes.vue'
 import InviteCopyButton from './InviteCopyButton.vue'
 import InviteCalendarButton from './InviteCalendarButton.vue'
 import InviteSlider from './InviteSlider.vue'
+import InviteCarousel from './InviteCarousel.vue'
 
 type Scope = { item?: Record<string, string>, index?: number }
 
@@ -73,6 +74,8 @@ export default defineComponent({
             return h('button', { type: 'button', class: cls, onClick: rt.openCover }, p.label || 'Buka Undangan')
           case 'photo_slider':
             return h(InviteSlider, { class: cls, ...p })
+          case 'gallery_carousel':
+            return h(InviteCarousel, { class: cls, ...p })
           case 'guest_name':
             return h('span', { class: cls }, ctx.values.guest_name || p.fallback || 'Tamu Undangan')
         }

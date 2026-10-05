@@ -37,6 +37,8 @@ export const COMPONENTS = {
   guest_name: { props: ['fallback'] },
   /** Slider foto (Foto Sampul user, lalu galeri). Kosong = tidak tampil, latar section yang terlihat. */
   photo_slider: { props: ['interval', 'image_class', 'dots', 'dot_class'] },
+  /** Galeri digeser satu per satu (swipe, tombol ‹ ›, titik, penanda 1/n) dari daftar galeri. */
+  gallery_carousel: { props: ['item_class', 'image_class', 'text_class', 'button_class', 'dot_class'] },
 } as const
 export type ComponentName = keyof typeof COMPONENTS
 

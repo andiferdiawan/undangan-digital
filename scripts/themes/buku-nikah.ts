@@ -5,10 +5,10 @@ import { comp, div, el, img, p } from './_h'
  * Buku Nikah — modern Gen Z terinspirasi buku & kartu nikah Indonesia: merah (suami), hijau (istri), emas.
  * Sengaja TIDAK memakai Lambang Negara maupun nama instansi; lambangnya orisinal (dua cincin dalam untaian
  * daun). Aset: lambang & chip kartu. Alur 3D mengikuti scroll:
- * - pembuka: dua buku nikah datang dari kejauhan, sampulnya terbuka ke atas memperlihatkan data suami &
- *   istri, lalu keduanya menyatu menjadi satu Kartu Nikah yang berputar 3D ke sisi belakang
+ * - pembuka: buku nikah suami dibuka seperti buku sungguhan (sampul berayun dari punggung), bergeser pergi,
+ *   lalu buku istri dibuka; keduanya menyatu menjadi satu Kartu Nikah yang berputar 3D ke sisi belakang
  * - tengah: halaman "data" berkop merah/hijau dengan pas foto, datang dari kejauhan (uv-z)
- * - galeri: kartu foto digeser satu per satu, foto samping miring 3D seperti coverflow (uv-coverflow)
+ * - galeri: gallery_carousel — foto digeser satu per satu (swipe/tombol), foto samping miring 3D
  * - penutup: stempel "SAH!" dihentakkan ke kartu nikah
  */
 const RED = '#8c1c24'
@@ -32,17 +32,28 @@ const duo = (cls = '') => div(`mx-auto flex items-center justify-center gap-2 ${
   div(`h-[3px] w-12 rounded-full bg-[${RED}]`), div(`h-2 w-2 rounded-full bg-[${GOLD}]`), div(`h-[3px] w-12 rounded-full bg-[${GREEN}]`),
 ])
 
-/** Buku nikah 3D: sampul kulit berengsel di atas; open 0..1 = sampul terbuka ke atas. */
+/**
+ * Buku nikah 3D yang dibuka seperti buku sungguhan: sampul kulit berengsel di punggung (tepi kiri) lalu
+ * berayun ke kiri; open 0..1. Di balik sampul ada halaman sampul dalam, di kanan halaman data + tebal kertas.
+ */
 function booklet(color: string, who: string, open: string, inner: ThemeNode[]): ThemeNode {
-  return div('relative h-[196px] w-[140px] [transform-style:preserve-3d]', [
-    div(`absolute inset-0 flex flex-col items-center justify-center rounded-[6px] ${paper} px-3 text-center shadow-[0_20px_40px_-22px_rgba(0,0,0,0.6)] ring-1 ring-[${GOLD}]/40`, inner),
-    div(`absolute inset-0 [transform-style:preserve-3d] [transform-origin:top] [transform:rotateX(calc(${open}_*_-168deg))]`, [
-      div(`absolute inset-0 flex flex-col items-center justify-between rounded-[6px] ${leather(color)} px-3 py-4 [backface-visibility:hidden] shadow-[0_22px_40px_-20px_rgba(0,0,0,0.7)]`, [
+  return div('relative h-[208px] w-[150px] [transform-style:preserve-3d]', [
+    // halaman isi (kanan) dengan tumpukan kertas
+    div(`absolute inset-0 flex flex-col items-center justify-center rounded-l-[2px] rounded-r-[6px] ${paper} px-3 text-center shadow-[2px_2px_0_#ece2cd,4px_4px_0_#dfd3b9,0_26px_44px_-22px_rgba(0,0,0,0.6)]`, inner),
+    // sampul
+    div(`absolute inset-0 [transform-style:preserve-3d] [transform-origin:left_center] [transform:rotateY(calc(${open}_*_-172deg))]`, [
+      div(`absolute inset-0 flex flex-col items-center justify-between rounded-l-[3px] rounded-r-[7px] border-l-[7px] border-black/20 ${leather(color)} px-3 py-4 [backface-visibility:hidden] shadow-[0_22px_40px_-20px_rgba(0,0,0,0.7)]`, [
         p(`font-body text-[8px] font-semibold uppercase tracking-[0.32em] text-[${GOLD}]`, 'Buku Nikah'),
-        emblem('w-[74px]'),
+        emblem('w-[78px]'),
         p(`font-heading text-[13px] uppercase tracking-[0.22em] text-[${GOLD}]`, who),
       ]),
-      div(`absolute inset-0 rounded-[6px] bg-[${color}] brightness-90 [transform:rotateX(180deg)] [backface-visibility:hidden]`),
+      // sampul dalam (halaman kiri saat terbuka)
+      div(`absolute inset-0 rounded-l-[7px] rounded-r-[3px] bg-[${color}] p-2 [transform:rotateY(180deg)] [backface-visibility:hidden]`, [
+        div(`flex h-full w-full flex-col items-center justify-center rounded-[4px] ${paper} text-center`, [
+          emblem('w-12 opacity-80'),
+          p(`mt-2 font-body text-[7px] font-semibold uppercase tracking-[0.3em] text-[${color}]`, `Buku Nikah ${who}`),
+        ]),
+      ]),
     ]),
   ])
 }
@@ -109,12 +120,14 @@ function dataPage(who: 'groom' | 'bride'): ThemeNode {
   ])
 }
 
-// Adegan pembuka
-const IN = ramp(0.02, 3.2) // buku datang dari kejauhan
-const OPEN = ramp(0.24, 3.4) // sampul terbuka
-const MERGE = ramp(0.54, 3.2) // buku menyatu & memudar
-const CARD = ramp(0.6, 3) // kartu nikah muncul
-const FLIP = ramp(0.76, 4.4) // kartu berputar ke belakang
+// Adegan pembuka: buku suami dibuka lalu bergeser pergi, buku istri dibuka, lalu jadi kartu nikah
+const IN = ramp(0, 8) // buku datang dari kejauhan
+const R_OPEN = ramp(0.06, 4.2) // sampul buku suami terbuka ke kiri
+const R_OUT = ramp(0.33, 6) // buku suami bergeser pergi
+const G_OPEN = ramp(0.42, 4.2) // sampul buku istri terbuka
+const MERGE = ramp(0.68, 6) // buku memudar
+const CARD = ramp(0.7, 4.5) // kartu nikah muncul
+const FLIP = ramp(0.82, 6) // kartu berputar ke belakang
 // Adegan penutup
 const ENTER = ramp(0.04, 3)
 const STAMP = ramp(0.36, 3.2)
@@ -172,21 +185,24 @@ export const definition: ThemeDefinition = {
         div('uv-reveal-pop uv-d5 relative mt-7', [comp('open_button', btn, { label: 'Buka Buku Nikah' })]),
       ],
     },
-    // ---------- Pembuka: dua buku nikah terbuka lalu menyatu jadi kartu nikah ----------
+    // ---------- Pembuka: buku nikah dibuka satu per satu, lalu menyatu jadi kartu nikah ----------
     {
       type: 'hero',
-      class: `uv-scene relative h-[calc(var(--uv-vh,100svh)_*_3)] ${paper}`,
+      class: `uv-scene relative h-[calc(var(--uv-vh,100svh)_*_4)] ${paper}`,
       children: [
         div(stage, [
-          div(`absolute inset-x-0 top-[9%] px-6 [opacity:calc(1_-_${OPEN}_*_1.4)]`, [kicker('Bab baru dimulai'), heading('Dua buku, satu cerita')]),
-          div(`relative mt-24 flex gap-4 [perspective:1100px] [opacity:calc(1_-_${MERGE}_*_1.3)]`, [
-            div(`[transform-style:preserve-3d] [transform:translateX(calc(${MERGE}_*_78px))_translateZ(calc((1_-_${IN})_*_-700px))_rotateY(calc((1_-_${IN})_*_35deg))_scale(calc(1_-_${MERGE}_*_0.35))]`, [
-              booklet(RED, 'Suami', OPEN, bookPage(RED, 'Data Suami', 'groom')),
+          div(`absolute inset-x-0 top-[9%] px-6 [opacity:calc(1_-_${R_OPEN}_*_1.6)]`, [kicker('Bab baru dimulai'), heading('Dua buku, satu cerita')]),
+          div(`relative mt-10 h-[208px] w-[300px] [perspective:1300px] [opacity:calc(1_-_${MERGE})]`, [
+            // buku istri (di bawah, sedikit miring sampai buku suami pergi)
+            div(`absolute left-[75px] top-0 [transform-style:preserve-3d] [transform:translateX(calc(${G_OPEN}_*_75px_+_(1_-_${R_OUT})_*_10px))_translateY(calc((1_-_${R_OUT})_*_10px))_rotate(calc((1_-_${R_OUT})_*_4deg))]`, [
+              booklet(GREEN, 'Istri', G_OPEN, bookPage(GREEN, 'Data Istri', 'bride')),
             ]),
-            div(`[transform-style:preserve-3d] [transform:translateX(calc(${MERGE}_*_-78px))_translateZ(calc((1_-_${IN})_*_-700px))_rotateY(calc((1_-_${IN})_*_-35deg))_scale(calc(1_-_${MERGE}_*_0.35))]`, [
-              booklet(GREEN, 'Istri', OPEN, bookPage(GREEN, 'Data Istri', 'bride')),
+            // buku suami (di atas)
+            div(`absolute left-[75px] top-0 [transform-style:preserve-3d] [opacity:calc(1_-_${R_OUT}_*_1.4)] [transform:translateZ(calc((1_-_${IN})_*_-500px))_translateX(calc(${R_OPEN}_*_75px_-_${R_OUT}_*_60px))_translateY(calc(${R_OUT}_*_-80px))_scale(calc(1_-_${R_OUT}_*_0.25))]`, [
+              booklet(RED, 'Suami', R_OPEN, bookPage(RED, 'Data Suami', 'groom')),
             ]),
           ]),
+          p(`mt-8 font-body text-[12px] uppercase tracking-[0.3em] text-muted [opacity:calc(1_-_${MERGE})]`, 'Halaman demi halaman'),
           div(`absolute inset-0 flex flex-col items-center justify-center [perspective:1000px] [opacity:${CARD}]`, [
             div(`[transform:translateY(calc((1_-_${CARD})_*_50px))_scale(calc(0.7_+_${CARD}_*_0.3))]`, [
               kartu(`calc(${FLIP}_*_180deg_+_(1_-_${CARD})_*_-30deg)`, '0', 'Status: menuju halal ⏳'),
@@ -271,15 +287,14 @@ export const definition: ThemeDefinition = {
       children: [
         div('', [
           div('uv-z px-5', [kicker('Galeri'), heading('Koleksi kartu kenangan', true)]),
-          div('uv-coverflow mt-10 flex snap-x snap-mandatory gap-3 overflow-x-auto px-[14%] pb-6 pt-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden', [
-            div(`uv-coverflow-item w-[72%] shrink-0 snap-center snap-always`, [
-              div(`overflow-hidden rounded-[16px] bg-[${IVORY}] p-2 shadow-[0_22px_40px_-18px_rgba(0,0,0,0.75)]`, [
-                img('aspect-[4/5] w-full rounded-[11px] object-cover', '{{item.url}}', '{{item.caption}}'),
-                p('px-1 pb-1 pt-2 text-left font-body text-[12px] text-ink/80', '{{item.caption}}', { if: 'item.caption' }),
-              ]),
-            ], { repeat: 'gallery' }),
-          ]),
-          p(`mt-2 font-body text-[11px] uppercase tracking-[0.3em] text-[${IVORY}]/65`, 'Geser untuk foto berikutnya →'),
+          div('mt-10', [comp('gallery_carousel', '', {
+            item_class: `overflow-hidden rounded-[16px] bg-[${IVORY}] p-2 font-body text-ink shadow-[0_22px_40px_-18px_rgba(0,0,0,0.75)]`,
+            image_class: 'aspect-[4/5] rounded-[11px] object-cover',
+            text_class: `font-body text-[12px] text-[${IVORY}]/80`,
+            button_class: `!bg-[${GOLD}] !text-[${GREEN}]`,
+            dot_class: `text-[${GOLD}]`,
+          })]),
+          p(`mt-3 font-body text-[11px] uppercase tracking-[0.3em] text-[${IVORY}]/60`, 'Geser atau tekan panah untuk foto berikutnya'),
         ], { if: 'gallery' }),
       ],
     },
