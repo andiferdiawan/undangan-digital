@@ -13,6 +13,8 @@ import type { Ref } from 'vue'
  *   (durasi --uv-dur) saat masuk layar, mis. buku terbuka otomatis ketika halaman dimuat
  * - uv-leaf                                               : halaman buku yang terbalik 3D (--uv-f 0..1) saat
  *   bagian bawahnya lewat ke atas layar
+ * - uv-coverflow (+ uv-coverflow-item)                 : galeri geser satu per satu; foto samping miring 3D
+ *   lewat scroll-driven animation di CSS (tanpa JS)
  * - uv-scroll-line                                        : wadah yang diberi --uv-p (0..1) sesuai posisi
  *   scroll; di dalamnya uv-scroll-draw (garis tergambar sampai titik baca) dan
  *   uv-scroll-follow (penanda yang menempel di ujung garis gelombang)

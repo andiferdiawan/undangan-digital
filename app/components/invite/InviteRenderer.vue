@@ -250,6 +250,16 @@ const bgUrl = (bg?: string) => {
 .invite-root:not(.uv-motion) .uv-flip-book .uv-flip-page,
 .invite-root:not(.uv-motion) .uv-flip-book .uv-flip-end { position: relative !important; inset: auto !important; aspect-ratio: 4 / 5; }
 .invite-root:not(.uv-motion) .uv-flip-page > * { transform: none !important; }
+/* Galeri geser (uv-coverflow): foto digeser satu per satu (scroll-snap); bila browser mendukung
+   scroll-driven animation, foto di samping miring 3D seperti coverflow */
+@supports (animation-timeline: view()) {
+  .invite-root.uv-motion .uv-coverflow .uv-coverflow-item { animation: uv-coverflow linear both; animation-timeline: view(inline); }
+}
+@keyframes uv-coverflow {
+  0% { transform: perspective(900px) rotateY(40deg) scale(0.84); opacity: 0.55; }
+  50% { transform: perspective(900px) rotateY(0deg) scale(1); opacity: 1; }
+  100% { transform: perspective(900px) rotateY(-40deg) scale(0.84); opacity: 0.55; }
+}
 /* Cincin foto 3D (uv-ring): tanpa gerak, foto ditampilkan sebagai grid biasa */
 .invite-root:not(.uv-motion) .uv-ring { transform: none !important; width: min(320px, 86vw) !important; height: auto !important; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.75rem; }
 .invite-root:not(.uv-motion) .uv-ring .uv-ring-item { position: relative !important; inset: auto !important; transform: none !important; aspect-ratio: 2 / 3; }

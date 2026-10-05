@@ -8,7 +8,7 @@ import { comp, div, el, img, p } from './_h'
  * - pembuka: dua buku nikah datang dari kejauhan, sampulnya terbuka ke atas memperlihatkan data suami &
  *   istri, lalu keduanya menyatu menjadi satu Kartu Nikah yang berputar 3D ke sisi belakang
  * - tengah: halaman "data" berkop merah/hijau dengan pas foto, datang dari kejauhan (uv-z)
- * - galeri: kartu foto yang mengembang seperti kipas (uv-ring sebagai fallback grid)
+ * - galeri: kartu foto digeser satu per satu, foto samping miring 3D seperti coverflow (uv-coverflow)
  * - penutup: stempel "SAH!" dihentakkan ke kartu nikah
  */
 const RED = '#8c1c24'
@@ -120,15 +120,12 @@ const ENTER = ramp(0.04, 3)
 const STAMP = ramp(0.36, 3.2)
 const END = ramp(0.62, 4)
 
-// Kipas galeri: indeks tiap kartu (6 posisi) & tumpukan
-const FAN = [0, 1, 2, 3, 4, 5].map(i => `[&:nth-child(6n+${i + 1})]:[--i:${i}] [&:nth-child(6n+${i + 1})]:z-[${i + 1}]`).join(' ')
-
 export const meta = {
   code: 'MOD-009',
   slug: 'buku-nikah',
   name: 'Buku Nikah',
   category: 'modern',
-  description: 'Modern Gen Z terinspirasi buku & kartu nikah: merah untuk suami, hijau untuk istri, aksen emas. Efek 3D saat di-scroll: dua buku nikah terbuka lalu menyatu jadi kartu nikah yang berputar, galeri kartu foto mengembang seperti kipas, dan stempel SAH di akhir.',
+  description: 'Modern Gen Z terinspirasi buku & kartu nikah: merah untuk suami, hijau untuk istri, aksen emas. Efek 3D saat di-scroll: dua buku nikah terbuka lalu menyatu jadi kartu nikah yang berputar, galeri kartu foto digeser satu per satu, dan stempel SAH di akhir.',
 }
 
 export const definition: ThemeDefinition = {
@@ -267,21 +264,22 @@ export const definition: ThemeDefinition = {
         ], { if: 'story' }),
       ],
     },
-    // ---------- Galeri: kartu foto mengembang seperti kipas ----------
+    // ---------- Galeri: kartu foto digeser satu per satu (coverflow 3D) ----------
     {
       type: 'gallery',
-      class: `uv-scene relative h-[calc(var(--uv-vh,100svh)_*_2.4)] ${leather(GREEN)}`,
+      class: `relative ${leather(GREEN)} py-24 text-center`,
       children: [
-        div(stage, [
-          div('', [kicker('Galeri'), heading('Koleksi kartu kenangan', true)]),
-          div('uv-ring relative mt-16 h-[184px] w-[132px]', [
-            div(`uv-ring-item absolute inset-0 ${FAN} [transform-origin:50%_135%] [transform:rotate(calc((var(--i,0)_-_2.5)_*_${S}_*_10deg))_translateY(calc(${S}_*_-6px))]`, [
-              div(`h-full w-full rounded-[12px] bg-[${IVORY}] p-1.5 shadow-[0_18px_34px_-14px_rgba(0,0,0,0.75)]`, [
-                img('h-full w-full rounded-[9px] object-cover', '{{item.url}}', '{{item.caption}}'),
+        div('', [
+          div('uv-z px-5', [kicker('Galeri'), heading('Koleksi kartu kenangan', true)]),
+          div('uv-coverflow mt-10 flex snap-x snap-mandatory gap-3 overflow-x-auto px-[14%] pb-6 pt-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden', [
+            div(`uv-coverflow-item w-[72%] shrink-0 snap-center snap-always`, [
+              div(`overflow-hidden rounded-[16px] bg-[${IVORY}] p-2 shadow-[0_22px_40px_-18px_rgba(0,0,0,0.75)]`, [
+                img('aspect-[4/5] w-full rounded-[11px] object-cover', '{{item.url}}', '{{item.caption}}'),
+                p('px-1 pb-1 pt-2 text-left font-body text-[12px] text-ink/80', '{{item.caption}}', { if: 'item.caption' }),
               ]),
             ], { repeat: 'gallery' }),
           ]),
-          p(`mt-24 font-body text-[11px] uppercase tracking-[0.35em] text-[${IVORY}]/60`, 'Scroll untuk membuka kipas'),
+          p(`mt-2 font-body text-[11px] uppercase tracking-[0.3em] text-[${IVORY}]/65`, 'Geser untuk foto berikutnya →'),
         ], { if: 'gallery' }),
       ],
     },
