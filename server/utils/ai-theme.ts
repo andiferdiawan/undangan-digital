@@ -124,7 +124,7 @@ ${colors}
 - Section "cover" & "hero": gunakan "relative" bila memuat elemen absolute. Cover harus mengisi layar (flex, items-center, justify-center; tinggi diurus sistem). Hero: min-h-[100svh].
 
 # Struktur
-- sections: urutan section. WAJIB ada: ${REQUIRED_SECTIONS.join(', ')}. Tersedia juga: ${SECTION_TYPES.filter(t => !(REQUIRED_SECTIONS as readonly string[]).includes(t)).join(', ')}.
+- sections: ARRAY berisi urutan section (disarankan 8–11 section). WAJIB ada minimal: ${REQUIRED_SECTIONS.join(', ')}. Urutan yang dianjurkan: cover, hero, quote, profile, event, countdown, gallery, rsvp, wishes, gift, closing. Tersedia juga: ${SECTION_TYPES.filter(t => !(REQUIRED_SECTIONS as readonly string[]).includes(t)).join(', ')}.
 - Jika ada "cover", ia harus section PERTAMA dan wajib memuat komponen open_button serta guest_name.
 - Node: { tag, class, text, attrs, bg, if, repeat, component, props, children }. Kedalaman maksimal ${AI_MAX_DEPTH} level.
 - tag yang boleh: ${ALLOWED_TAGS.join(', ')}.
@@ -160,6 +160,27 @@ export interface AiThemeResult extends CompileResult {
   attempts: number
   model: string
   raw: unknown
+}
+
+/** Rapikan bentuk jawaban model yang sedikit meleset (dibungkus {"theme": …}, sections berupa objek per tipe). */
+function normalizeRaw(raw: any): any {
+  if (raw && typeof raw === 'object' && !Array.isArray(raw) && !raw.sections) {
+    const inner = Object.values(raw).find((v: any) => v && typeof v === 'object' && !Array.isArray(v) && v.sections)
+    if (inner) raw = inner
+  }
+  if (raw?.sections && !Array.isArray(raw.sections) && typeof raw.sections === 'object') {
+    raw.sections = Object.entries(raw.sections).map(([type, v]: [string, any]) =>
+      Array.isArray(v) ? { type, children: v } : { type, ...(v ?? {}) })
+  }
+  return raw
+}
+
+/** Petunjuk tambahan pada putaran perbaikan bila struktur section kurang. */
+function repairHint(raw: any, errors: string[]) {
+  const have = new Set<string>((Array.isArray(raw?.sections) ? raw.sections : []).map((x: any) => String(x?.type)))
+  const missing = REQUIRED_SECTIONS.filter(t => !have.has(t))
+  if (!missing.length && !errors.some(e => e.startsWith('sections'))) return ''
+  return `\n\nSection yang ada sekarang: ${[...have].join(', ') || '(kosong)'}.${missing.length ? ` Yang WAJIB ditambahkan: ${missing.join(', ')}.` : ''} Kirim ulang tema LENGKAP dengan semua section (cover, hero, quote, profile, event, countdown, gallery, rsvp, wishes, gift, closing), bukan hanya bagian yang diperbaiki.`
 }
 
 function toDefinition(raw: any) {
@@ -254,9 +275,12 @@ Balas HANYA dengan SATU objek JSON valid — tanpa penjelasan, tanpa markdown, t
   "assets": [ { "key": "pattern", "path": "path dari pustaka aset" } ],
   "sections": [
     { "type": "cover", "class": "…", "children": [ { "tag": "p", "class": "…", "text": "…" }, { "component": "guest_name", "class": "…", "props": { "fallback": "Tamu Undangan" } }, { "component": "open_button", "class": "…", "props": { "label": "Buka Undangan" } } ] },
-    { "type": "hero", "class": "…", "children": [ … ] }
+    { "type": "hero", "class": "…", "children": [ … ] },
+    { "type": "quote", … }, { "type": "profile", … }, { "type": "event", … }, { "type": "countdown", … },
+    { "type": "gallery", … }, { "type": "rsvp", … }, { "type": "wishes", … }, { "type": "gift", … }, { "type": "closing", … }
   ]
 }
+"sections" WAJIB berisi SEMUA section di atas secara lengkap (minimal ${REQUIRED_SECTIONS.join(', ')}), masing-masing dengan children lengkap. Jangan memotong jawaban.
 Font WAJIB salah satu dari: ${ALLOWED_FONTS.join(', ')}.
 Setiap node hanya boleh berisi kunci: tag, class, text, attrs, bg, if, repeat, component, props, children.`
 }
@@ -278,18 +302,22 @@ export async function generateThemeOpenRouter(opts: {
     { role: 'user', content: `Buatkan satu tema undangan pernikahan lengkap berdasarkan brief berikut:\n\n${opts.prompt}` },
   ]
 
+  // Batas fungsi Vercel 300 dtk: sisakan waktu untuk validasi & simpan log
+  const deadline = Date.now() + 270_000
   let last: AiThemeResult | null = null
-  for (let attempt = 1; attempt <= 2; attempt++) {
-    const res = await openRouterChat({ apiKey: opts.apiKey, model: opts.model, messages, siteUrl: opts.siteUrl, jsonSchema: schema })
+  for (let attempt = 1; attempt <= 3; attempt++) {
+    const left = deadline - Date.now()
+    if (attempt > 1 && left < 45_000) break
+    const res = await openRouterChat({ apiKey: opts.apiKey, model: opts.model, messages, siteUrl: opts.siteUrl, jsonSchema: schema, timeoutMs: left })
     if (res.finish === 'length')
       throw new Error('Output AI terpotong (batas token model gratis). Sederhanakan brief atau pilih model dengan keluaran lebih panjang.')
 
     let raw: any
     try {
-      raw = extractJson(res.text)
+      raw = normalizeRaw(extractJson(res.text))
     }
     catch {
-      if (attempt === 2) throw new Error('Jawaban AI bukan JSON yang valid. Coba lagi atau pilih model lain.')
+      if (attempt === 3) throw new Error('Jawaban AI bukan JSON yang valid. Coba lagi atau pilih model lain.')
       messages.push({ role: 'assistant', content: res.text.slice(0, 4000) })
       messages.push({ role: 'user', content: 'Jawaban tadi bukan JSON valid. Kirim ulang HANYA objek JSON tema lengkap, tanpa teks lain.' })
       continue
@@ -308,9 +336,9 @@ export async function generateThemeOpenRouter(opts: {
     messages.push({ role: 'assistant', content: res.text })
     messages.push({
       role: 'user',
-      content: `Validator menolak tema tersebut dengan error berikut. Perbaiki SEMUA error dan kirim ulang tema lengkap (hanya JSON):\n${compiled.errors.map(e => `- ${e}`).join('\n')}`,
+      content: `Validator menolak tema tersebut dengan error berikut. Perbaiki SEMUA error dan kirim ulang tema lengkap (hanya JSON):\n${compiled.errors.map(e => `- ${e}`).join('\n')}${repairHint(raw, compiled.errors)}`,
     })
   }
-  if (!last) throw new Error('AI tidak menghasilkan tema.')
+  if (!last) throw new Error('AI tidak menghasilkan tema yang bisa dibaca. Coba lagi atau pilih model lain.')
   return last
 }

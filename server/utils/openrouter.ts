@@ -62,6 +62,7 @@ export async function openRouterChat(o: {
   messages: ChatMessage[]
   siteUrl: string
   jsonSchema?: Record<string, unknown>
+  timeoutMs?: number
 }): Promise<{ text: string, model: string, finish: string }> {
   const maxTokens = Math.min(o.model.maxOutput ?? 32_000, 32_000)
   const responseFormat = o.model.structured && o.jsonSchema
@@ -72,7 +73,7 @@ export async function openRouterChat(o: {
   try {
     res = await $fetch(`${API}/chat/completions`, {
       method: 'POST',
-      timeout: 280_000,
+      timeout: o.timeoutMs ?? 280_000,
       headers: {
         'Authorization': `Bearer ${o.apiKey}`,
         'HTTP-Referer': o.siteUrl,
@@ -89,6 +90,8 @@ export async function openRouterChat(o: {
   }
   catch (err: any) {
     const status = err?.response?.status ?? err?.statusCode
+    if (err?.name === 'TimeoutError' || /timeout|aborted/i.test(String(err?.message)))
+      throw new Error('Model gratis terlalu lama merespons. Coba lagi atau pilih model lain.')
     const detail = err?.data?.error?.message || err?.message || 'tidak diketahui'
     if (status === 401) throw new Error('API key OpenRouter tidak valid. Periksa di Admin → Pengaturan.')
     if (status === 402) throw new Error('Kredit OpenRouter tidak cukup untuk model ini. Pilih model berlabel gratis.')
