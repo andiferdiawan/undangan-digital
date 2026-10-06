@@ -264,7 +264,7 @@ const devices = computed(() => Object.entries(data.value?.devices ?? {}).sort((a
         </section>
 
         <div class="mt-5 grid gap-5 md:grid-cols-2 lg:grid-cols-4">
-          <section class="card p-5">
+          <section class="card min-w-0 p-5">
             <h2 class="text-sm font-semibold text-brand">Mesin pencari & iklan</h2>
             <ul class="mt-3 grid gap-1.5 text-sm">
               <li v-for="e in data.engines" :key="e.name" class="flex justify-between"><span>{{ e.name }}</span><b class="tabular-nums">{{ num(e.views) }}</b></li>
@@ -272,24 +272,27 @@ const devices = computed(() => Object.entries(data.value?.devices ?? {}).sort((a
             </ul>
             <p class="mt-2 text-[11px] text-brand-500">Jumlah sesi masuk.</p>
           </section>
-          <section class="card p-5">
+          <section class="card min-w-0 p-5">
             <h2 class="text-sm font-semibold text-brand">Situs perujuk</h2>
             <ul class="mt-3 grid gap-1.5 text-sm">
               <li v-for="r in data.referrers.slice(0, 12)" :key="r.host" class="flex justify-between gap-2"><span class="truncate">{{ r.host }}</span><b class="tabular-nums">{{ num(r.sessions) }}</b></li>
               <li v-if="!data.referrers.length" class="text-brand-500">Belum ada.</li>
             </ul>
           </section>
-          <section class="card p-5">
+          <section class="card min-w-0 p-5">
             <h2 class="text-sm font-semibold text-brand">Kampanye (UTM)</h2>
             <ul class="mt-3 grid gap-1.5 text-sm">
               <li v-for="(c, i) in data.campaigns.slice(0, 12)" :key="i" class="flex justify-between gap-2">
                 <span class="min-w-0 truncate" :title="`${c.source ?? '-'} / ${c.medium ?? '-'}`">{{ c.campaign || c.source }}<span class="block truncate text-[11px] text-brand-500">{{ c.source ?? '-' }} / {{ c.medium ?? '-' }}</span></span>
                 <b class="tabular-nums">{{ num(c.sessions) }}</b>
               </li>
-              <li v-if="!data.campaigns.length" class="text-brand-500">Belum ada. Tambahkan ?utm_source=…&amp;utm_medium=cpc&amp;utm_campaign=… di link iklan.</li>
+              <li v-if="!data.campaigns.length" class="min-w-0 text-brand-500">
+                Belum ada kampanye. Tambahkan parameter UTM di link iklan, contoh:
+                <code class="mt-1.5 block break-all rounded-lg bg-brand-50 px-2 py-1.5 font-mono text-[11px] leading-relaxed text-brand-700">?utm_source=instagram&amp;utm_medium=cpc&amp;utm_campaign=promo-nikah</code>
+              </li>
             </ul>
           </section>
-          <section class="card p-5">
+          <section class="card min-w-0 p-5">
             <h2 class="text-sm font-semibold text-brand">Perangkat & negara</h2>
             <ul class="mt-3 grid gap-1.5 text-sm">
               <li v-for="[d, n] in devices" :key="d" class="flex justify-between"><span class="capitalize">{{ d }}</span><b class="tabular-nums">{{ num(n) }} <span class="font-normal text-brand-400">{{ pct(n, t.views) }}%</span></b></li>
