@@ -68,18 +68,18 @@ begin
   if not public.is_admin() then raise exception 'FORBIDDEN' using errcode = '42501'; end if;
   return (
     with v as (select * from public.page_views where at >= v_from),
-    src as (select source, count(*) views, count(distinct visitor || (at at time zone 'Asia/Jakarta')::date) visitors, count(*) filter (where is_entry) entries from v group by source),
+    src as (select source, count(*) as views, count(distinct visitor || (at at time zone 'Asia/Jakarta')::date) as visitors, count(*) filter (where is_entry) as entries from v group by source),
     pages as (
-      select path, min(page_type) page_type, count(*) views,
-             count(distinct visitor || (at at time zone 'Asia/Jakarta')::date) visitors,
-             count(*) filter (where is_entry) entries,
-             count(*) filter (where source = 'organik') organik,
-             count(*) filter (where source = 'iklan') iklan,
-             count(*) filter (where source = 'sosial') sosial,
-             count(*) filter (where source = 'referral') referral,
-             count(*) filter (where source = 'langsung') langsung,
-             count(*) filter (where is_entry and source = 'organik') organik_entries,
-             max(at) last_at
+      select path, min(page_type) as page_type, count(*) as views,
+             count(distinct visitor || (at at time zone 'Asia/Jakarta')::date) as visitors,
+             count(*) filter (where is_entry) as entries,
+             count(*) filter (where source = 'organik') as organik,
+             count(*) filter (where source = 'iklan') as iklan,
+             count(*) filter (where source = 'sosial') as sosial,
+             count(*) filter (where source = 'referral') as referral,
+             count(*) filter (where source = 'langsung') as langsung,
+             count(*) filter (where is_entry and source = 'organik') as organik_entries,
+             max(at) as last_at
       from v group by path order by count(*) desc limit 500
     )
     select jsonb_build_object(
@@ -92,18 +92,18 @@ begin
       'sources', coalesce((select jsonb_object_agg(source, jsonb_build_object('views', views, 'visitors', visitors, 'entries', entries)) from src), '{}'),
       'daily', coalesce((
         select jsonb_agg(jsonb_build_object('day', d::date, 'views', coalesce(x.views, 0), 'organik', coalesce(x.organik, 0), 'iklan', coalesce(x.iklan, 0), 'visitors', coalesce(x.visitors, 0)) order by d)
-        from generate_series((v_from at time zone 'Asia/Jakarta')::date, (now() at time zone 'Asia/Jakarta')::date, interval '1 day') d
+        from generate_series((v_from at time zone 'Asia/Jakarta')::date, (now() at time zone 'Asia/Jakarta')::date, interval '1 day') as d
         left join (
-          select (at at time zone 'Asia/Jakarta')::date day, count(*) views, count(*) filter (where source = 'organik') organik,
-                 count(*) filter (where source = 'iklan') iklan, count(distinct visitor) visitors
+          select (at at time zone 'Asia/Jakarta')::date as day, count(*) as views, count(*) filter (where source = 'organik') as organik,
+                 count(*) filter (where source = 'iklan') as iklan, count(distinct visitor) as visitors
           from v group by 1
-        ) x on x.day = d::date
+        ) as x on x.day = d::date
       ), '[]'),
       'types', coalesce((
         select jsonb_agg(jsonb_build_object('page_type', page_type, 'views', views, 'visitors', visitors, 'organik', organik, 'iklan', iklan) order by views desc)
-        from (select page_type, count(*) views, count(distinct visitor || (at at time zone 'Asia/Jakarta')::date) visitors,
-                     count(*) filter (where source = 'organik') organik, count(*) filter (where source = 'iklan') iklan
-              from v group by page_type) t
+        from (select page_type, count(*) as views, count(distinct visitor || (at at time zone 'Asia/Jakarta')::date) as visitors,
+                     count(*) filter (where source = 'organik') as organik, count(*) filter (where source = 'iklan') as iklan
+              from v group by page_type) as t
       ), '[]'),
       'pages', coalesce((
         select jsonb_agg(to_jsonb(p) || jsonb_build_object('title', coalesce(
@@ -111,18 +111,18 @@ begin
           (select bp.title from public.blog_posts bp where p.page_type = 'artikel' and bp.slug = split_part(p.path, '/', 3)),
           (select pg.title from public.pages pg where p.page_type = 'halaman' and pg.slug = split_part(p.path, '/', 2))
         )) order by p.views desc)
-        from pages p
+        from pages as p
       ), '[]'),
       'engines', coalesce((select jsonb_agg(jsonb_build_object('name', engine, 'views', n) order by n desc)
-        from (select engine, count(*) n from v where is_entry and engine is not null group by engine) e), '[]'),
+        from (select engine, count(*) as n from v where is_entry and engine is not null group by engine) as e), '[]'),
       'referrers', coalesce((select jsonb_agg(jsonb_build_object('host', referrer_host, 'source', source, 'sessions', n) order by n desc)
-        from (select referrer_host, min(source) source, count(*) n from v where is_entry and referrer_host is not null group by referrer_host order by n desc limit 30) r), '[]'),
+        from (select referrer_host, min(source) as source, count(*) as n from v where is_entry and referrer_host is not null group by referrer_host order by n desc limit 30) as r), '[]'),
       'campaigns', coalesce((select jsonb_agg(jsonb_build_object('source', utm_source, 'medium', utm_medium, 'campaign', utm_campaign, 'sessions', n, 'views', vw) order by n desc)
-        from (select utm_source, utm_medium, utm_campaign, count(*) filter (where is_entry) n, count(*) vw from v
-              where utm_source is not null or utm_campaign is not null group by 1, 2, 3 order by 4 desc limit 30) c), '[]'),
-      'devices', coalesce((select jsonb_object_agg(coalesce(device, 'lainnya'), n) from (select device, count(*) n from v group by device) d), '{}'),
+        from (select utm_source, utm_medium, utm_campaign, count(*) filter (where is_entry) as n, count(*) as vw from v
+              where utm_source is not null or utm_campaign is not null group by 1, 2, 3 order by 4 desc limit 30) as c), '[]'),
+      'devices', coalesce((select jsonb_object_agg(coalesce(device, 'lainnya'), n) from (select device, count(*) as n from v group by device) as d), '{}'),
       'countries', coalesce((select jsonb_agg(jsonb_build_object('country', country, 'views', n) order by n desc)
-        from (select country, count(*) n from v where country is not null group by country order by n desc limit 10) c), '[]')
+        from (select country, count(*) as n from v where country is not null group by country order by n desc limit 10) as c), '[]')
     )
   );
 end;
