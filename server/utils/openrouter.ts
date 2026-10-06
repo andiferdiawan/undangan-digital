@@ -76,7 +76,7 @@ export async function openRouterChat(o: {
       headers: {
         'Authorization': `Bearer ${o.apiKey}`,
         'HTTP-Referer': o.siteUrl,
-        'X-Title': 'Undangan Virtual — Generator Tema',
+        'X-Title': 'Undangan Virtual - Generator Tema',
       },
       body: {
         model: o.model.id,
