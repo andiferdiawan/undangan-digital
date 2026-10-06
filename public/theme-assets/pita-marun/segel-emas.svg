@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+<defs>
+<radialGradient id="g" cx=".38" cy=".32" r=".75"><stop offset="0" stop-color="#f7e3a6"/><stop offset=".45" stop-color="#d4aa5c"/><stop offset=".8" stop-color="#a87b34"/><stop offset="1" stop-color="#7a531c"/></radialGradient>
+<radialGradient id="h" cx=".6" cy=".65" r=".7"><stop offset="0" stop-color="#b8893d"/><stop offset="1" stop-color="#e7c57a"/></radialGradient>
+<filter id="s"><feDropShadow dx="0" dy="2" stdDeviation="2" flood-color="#3a0a0f" flood-opacity=".5"/></filter>
+</defs>
+<path filter="url(#s)" fill="url(#g)" d="M50 4 C60 3 64 9 72 10 C80 12 84 18 88 25 C93 32 97 38 95 47 C94 55 98 62 94 70 C90 78 82 81 76 87 C69 93 62 96 52 95 C43 95 36 98 28 93 C20 88 16 82 10 75 C5 68 3 61 5 52 C6 44 2 37 7 29 C12 21 19 18 26 12 C33 7 41 5 50 4 Z"/>
+<circle cx="50" cy="50" r="31" fill="url(#h)"/>
+<circle cx="50" cy="50" r="31" fill="none" stroke="#8c6224" stroke-width="1.6"/>
+<circle cx="50" cy="50" r="26" fill="none" stroke="#f3dc9a" stroke-opacity=".7" stroke-width=".8" stroke-dasharray="1.6 2.2"/>
+<path d="M50 66 C38 57 32 51 32 44 C32 38 37 34 42 34 C45.5 34 48.5 36 50 39 C51.5 36 54.5 34 58 34 C63 34 68 38 68 44 C68 51 62 57 50 66 Z" fill="#a87b34" stroke="#f3dc9a" stroke-opacity=".75" stroke-width="1.1"/>
+<path d="M40 41 C42 38 45 38 47 40" fill="none" stroke="#fff3cf" stroke-opacity=".8" stroke-width="1.2" stroke-linecap="round"/>
+</svg>
