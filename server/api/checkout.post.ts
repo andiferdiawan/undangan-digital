@@ -56,6 +56,13 @@ export default defineEventHandler(async (event) => {
     p_created_by: resellerUser,
   })
 
+  // Link reseller yang terakhir diklik pembeli (cookie dari /r/KODE/slug) → analitik per link
+  const refLink = getCookie(event, 'ref_link')
+  if (!resellerUser && refCode && refLink && /^[0-9a-f-]{36}$/i.test(refLink)) {
+    await serverRpc(event, 'server_order_ref_link', { p_order_id: order.id, p_link_id: refLink })
+      .catch(e => console.error('[checkout ref_link]', e instanceof Error ? e.message : e))
+  }
+
   const { data: meta } = await publicDb(event)
     .from('themes').select('code, name').eq('id', body.theme_id).single()
   const { data: pkg } = await publicDb(event)

@@ -15,6 +15,8 @@ export default defineEventHandler((event) => {
     'Disallow: /confirm',
     'Disallow: /reset-password',
     'Disallow: /reseller/dashboard',
+    'Disallow: /reseller/analitik',
+    'Disallow: /r/',
     '',
     `Sitemap: ${origin}/sitemap.xml`,
     '',

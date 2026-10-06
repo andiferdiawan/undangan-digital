@@ -62,7 +62,7 @@ export function classifyTraffic({ referrer, siteHost, query }: TrafficInput): Tr
 
 const STATIC_PAGES = new Set(['tentang-kami', 'syarat-ketentuan', 'kebijakan-privasi', 'kebijakan-pengembalian', 'kontak', 'favorit'])
 /** Halaman privat/transaksional yang tidak dihitung. */
-const PRIVATE = /^\/(dashboard|admin|masuk|daftar|confirm|reset-password|checkout|pesanan|r|api|og|reseller\/dashboard)(\/|$)/
+const PRIVATE = /^\/(dashboard|admin|masuk|daftar|confirm|reset-password|checkout|pesanan|r|api|og|reseller\/dashboard|reseller\/analitik)(\/|$)/
 
 /** Jenis halaman dari path; null = tidak dilacak. */
 export function pageTypeOf(path: string): PageType | null {

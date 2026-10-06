@@ -187,6 +187,7 @@ const STATUS: Record<string, [string, string]> = {
           <p class="text-xs text-brand-500">Pembeli lewat link ini tercatat sebagai penjualan Anda (30 hari).</p>
         </div>
         <button class="btn-ghost btn-sm" @click="copy(refLink, 'ref')">{{ copied === 'ref' ? '✓ Disalin' : 'Salin link' }}</button>
+        <NuxtLink to="/reseller/analitik" class="btn-primary btn-sm">Analitik & buat link →</NuxtLink>
       </div>
 
       <div class="mt-4 grid gap-4 lg:grid-cols-[1fr_380px]">
