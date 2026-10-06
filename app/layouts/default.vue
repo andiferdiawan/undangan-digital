@@ -21,6 +21,7 @@ watch(() => route.fullPath, () => (menuOpen.value = false))
         <nav class="hidden items-center gap-6 text-sm font-medium text-brand-700 md:flex">
           <NuxtLink to="/katalog" class="hover:text-brand">Katalog Tema</NuxtLink>
           <NuxtLink to="/#harga" class="hover:text-brand">Harga</NuxtLink>
+          <NuxtLink to="/blog" class="hover:text-brand">Blog</NuxtLink>
           <NuxtLink to="/reseller" class="hover:text-brand">Reseller</NuxtLink>
           <NuxtLink to="/daftar" class="hover:text-brand">Punya Token?</NuxtLink>
           <NuxtLink to="/favorit" class="inline-flex items-center gap-1.5 hover:text-brand" aria-label="Tema favorit">
@@ -39,6 +40,7 @@ watch(() => route.fullPath, () => (menuOpen.value = false))
       <nav v-if="menuOpen" class="grid gap-1 border-t border-brand-100 bg-cream px-4 py-3 text-sm font-medium text-brand-800 md:hidden">
         <NuxtLink to="/katalog" class="rounded-lg px-3 py-2.5 hover:bg-brand-50">Katalog Tema</NuxtLink>
         <NuxtLink to="/#harga" class="rounded-lg px-3 py-2.5 hover:bg-brand-50">Harga</NuxtLink>
+        <NuxtLink to="/blog" class="rounded-lg px-3 py-2.5 hover:bg-brand-50">Blog & Inspirasi</NuxtLink>
         <NuxtLink to="/reseller" class="rounded-lg px-3 py-2.5 hover:bg-brand-50">Program Reseller</NuxtLink>
         <NuxtLink to="/daftar" class="rounded-lg px-3 py-2.5 hover:bg-brand-50">Punya Token? Daftar</NuxtLink>
         <NuxtLink to="/favorit" class="flex items-center justify-between rounded-lg px-3 py-2.5 hover:bg-brand-50">
@@ -61,6 +63,7 @@ watch(() => route.fullPath, () => (menuOpen.value = false))
         <NuxtLink to="/katalog" class="hover:text-brand">Katalog Tema</NuxtLink>
         <NuxtLink to="/#harga" class="hover:text-brand">Harga</NuxtLink>
         <NuxtLink to="/#faq" class="hover:text-brand">FAQ</NuxtLink>
+        <NuxtLink to="/blog" class="hover:text-brand">Blog</NuxtLink>
         <NuxtLink to="/reseller" class="hover:text-brand">Program Reseller</NuxtLink>
         <a :href="waLink(config.public.adminWhatsapp, 'Assalamu\'alaikum, saya ingin bertanya tentang Undangan Virtual.')" target="_blank" rel="noopener" class="hover:text-brand">Hubungi Kami</a>
       </nav>

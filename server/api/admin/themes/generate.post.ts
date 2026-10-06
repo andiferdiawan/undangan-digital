@@ -3,9 +3,9 @@ import type { AiThemeResult } from '../../../utils/ai-theme'
 
 const Body = z.object({
   prompt: z.string().trim().min(10).max(2000),
-  provider: z.enum(['anthropic', 'openrouter']).optional(),
+  provider: z.enum(['anthropic', 'openrouter', 'gemini']).optional(),
   model: z.string().trim().max(200).optional(),
-  // Putaran perbaikan OpenRouter: jawaban model sebelumnya + error validator
+  // Putaran perbaikan OpenRouter/Gemini: jawaban model sebelumnya + error validator
   previous: z.object({
     text: z.string().max(200_000),
     errors: z.array(z.string().max(500)).max(50),
@@ -19,17 +19,17 @@ export default defineEventHandler(async (event) => {
   const { client, uid } = await requireAdmin(event)
   const body = await readValidatedBody(event, Body.parse)
   const config = useRuntimeConfig(event)
-  const or = await getOpenRouterConfig(event)
-  const hasOpenRouter = !!or.apiKey
-  const provider = body.provider ?? (hasOpenRouter ? 'openrouter' : 'anthropic')
-  if (provider === 'openrouter' && !hasOpenRouter)
-    throw createError({ statusCode: 500, statusMessage: 'API key OpenRouter belum diisi. Isi di Admin → Pengaturan.' })
+  const ai = await getAiConfig(event)
+  const free = pickProvider(ai, body.provider === 'anthropic' ? null : body.provider)
+  const provider = body.provider ?? free ?? 'anthropic'
+  if (provider !== 'anthropic' && !ai[provider].apiKey)
+    throw createError({ statusCode: 500, statusMessage: `API key ${PROVIDER_LABEL[provider]} belum diisi. Isi di Admin → Pengaturan.` })
   if (provider === 'anthropic' && !config.anthropicApiKey)
     throw createError({ statusCode: 500, statusMessage: 'NUXT_ANTHROPIC_API_KEY belum diisi di environment server' })
 
   const { data: cats } = await client.from('categories').select('slug').order('sort')
   const categories = ((cats ?? []) as { slug: string }[]).map(c => c.slug)
-  let modelLabel = provider === 'anthropic' ? config.anthropicModel : (body.model || or.model || 'openrouter')
+  let modelLabel = provider === 'anthropic' ? config.anthropicModel : (body.model || ai[provider].model || provider)
 
   try {
     let result: AiThemeResult
@@ -37,13 +37,24 @@ export default defineEventHandler(async (event) => {
     if (provider === 'openrouter') {
       // Hanya model gratis yang boleh dipakai (cegah tagihan tak terduga)
       const models = await listFreeModels()
-      const wanted = body.model || or.model
+      const wanted = body.model || ai.openrouter.model
       const model = models.find(m => m.id === wanted) ?? models[0]
       if (!model) throw new Error('Tidak ada model gratis OpenRouter yang tersedia saat ini.')
       if (body.model && model.id !== body.model) throw new Error(`Model "${body.model}" bukan model gratis OpenRouter.`)
       modelLabel = model.id
       const r = await generateThemeOpenRouter({
-        apiKey: or.apiKey, model, prompt: body.prompt, categories, siteUrl: config.public.siteUrl,
+        apiKey: ai.openrouter.apiKey, model, prompt: body.prompt, categories, siteUrl: config.public.siteUrl,
+        timeoutMs: deadline - Date.now() - 15_000, previous: body.previous,
+      })
+      rawText = r.rawText
+      result = r
+    }
+    else if (provider === 'gemini') {
+      let model = body.model || ai.gemini.model
+      if (!model) model = (await listGeminiModels(ai.gemini.apiKey).catch(() => []))[0]?.id ?? GEMINI_FALLBACK_MODEL
+      modelLabel = model
+      const r = await generateThemeGemini({
+        apiKey: ai.gemini.apiKey, model, prompt: body.prompt, categories,
         timeoutMs: deadline - Date.now() - 15_000, previous: body.previous,
       })
       rawText = r.rawText
@@ -67,8 +78,8 @@ export default defineEventHandler(async (event) => {
       meta: result.meta,
       attempts: result.attempts,
       model: result.model,
-      // Untuk putaran perbaikan berikutnya (OpenRouter), dikirim balik oleh browser
-      raw_text: !result.ok && provider === 'openrouter' ? rawText : undefined,
+      // Untuk putaran perbaikan berikutnya (OpenRouter/Gemini), dikirim balik oleh browser
+      raw_text: !result.ok && provider !== 'anthropic' ? rawText : undefined,
       generation_id: (log as { id?: string } | null)?.id ?? null,
     }
   }

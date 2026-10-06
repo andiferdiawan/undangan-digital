@@ -6,6 +6,7 @@ import {
 import { ASSET_LIBRARY } from '../../shared/theme/asset-library'
 import { compileTheme, type CompileResult } from './theme-compiler'
 import { type ChatMessage, extractJson, type FreeModel, openRouterChat } from './openrouter'
+import { geminiChat } from './gemini'
 
 /**
  * Structured outputs tidak mendukung skema rekursif, jadi pohon node "dibuka"
@@ -321,6 +322,60 @@ export async function generateThemeOpenRouter(opts: {
   const res = await openRouterChat({ apiKey: opts.apiKey, model: opts.model, messages, siteUrl: opts.siteUrl, jsonSchema: schema, timeoutMs: opts.timeoutMs })
   if (res.finish === 'length')
     throw new Error('Output AI terpotong (batas token model gratis). Sederhanakan brief atau pilih model dengan keluaran lebih panjang.')
+
+  let raw: any
+  try {
+    raw = normalizeRaw(extractJson(res.text))
+  }
+  catch {
+    return { ok: false, errors: ['Jawaban AI bukan JSON yang valid.'], warnings: [], classes: [], css: '', meta: null, attempts: attempt, model: res.model, raw: null, rawText: res.text.slice(0, 60_000) }
+  }
+  const compiled = await compileTheme(toDefinition(raw))
+  return {
+    ...compiled,
+    meta: { name: String(raw?.name ?? ''), description: String(raw?.description ?? ''), category: String(raw?.category ?? '') },
+    attempts: attempt,
+    model: res.model,
+    raw,
+    rawText: res.text,
+  }
+}
+
+/**
+ * Pipeline yang sama lewat Google Gemini (AI Studio, gratis). Satu request = satu panggilan model; putaran
+ * perbaikan dijalankan browser sebagai request terpisah (sama seperti OpenRouter).
+ */
+export async function generateThemeGemini(opts: {
+  apiKey: string
+  model: string
+  prompt: string
+  categories: string[]
+  timeoutMs: number
+  previous?: { text: string, errors: string[], attempt: number }
+}): Promise<AiThemeResult & { rawText: string }> {
+  const turns: { role: 'user' | 'assistant', content: string }[] = [
+    { role: 'user', content: `Buatkan satu tema undangan pernikahan lengkap berdasarkan brief berikut:\n\n${opts.prompt}` },
+  ]
+  const attempt = (opts.previous?.attempt ?? 0) + 1
+  if (opts.previous) {
+    let prevRaw: any = null
+    try { prevRaw = normalizeRaw(extractJson(opts.previous.text)) }
+    catch { /* jawaban sebelumnya bukan JSON */ }
+    turns.push({ role: 'assistant', content: opts.previous.text })
+    turns.push({
+      role: 'user',
+      content: prevRaw
+        ? `Validator menolak tema tersebut dengan error berikut. Perbaiki SEMUA error dan kirim ulang tema lengkap (hanya JSON):\n${opts.previous.errors.map(e => `- ${e}`).join('\n')}${repairHint(prevRaw, opts.previous.errors)}`
+        : 'Jawaban tadi bukan JSON valid. Kirim ulang HANYA objek JSON tema lengkap, tanpa teks lain.',
+    })
+  }
+
+  const res = await geminiChat({
+    apiKey: opts.apiKey, model: opts.model, system: systemPrompt() + jsonFormatGuide(opts.categories),
+    turns, json: true, temperature: 0.6, maxOutput: 65_536, timeoutMs: opts.timeoutMs,
+  })
+  if (res.finish === 'length')
+    throw new Error('Output AI terpotong (batas token). Sederhanakan brief lalu coba lagi.')
 
   let raw: any
   try {

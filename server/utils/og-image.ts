@@ -112,3 +112,40 @@ export async function renderBrandOg(opts: { groom: string, bride: string, date: 
   })
   return new Resvg(svg, { fitTo: { mode: 'width', value: OG_W }, font: { loadSystemFonts: false } }).render().asPng()
 }
+
+/** Gambar pratinjau artikel blog (teks saja, dibuat saat diminta & di-cache CDN — tidak memakan storage). */
+export async function renderBlogOg(opts: { title: string, category?: string, meta?: string }): Promise<Buffer> {
+  const [marcellus, jakarta500, jakarta600] = await Promise.all([
+    loadFont('Marcellus', 400),
+    loadFont('Plus Jakarta Sans', 500),
+    loadFont('Plus Jakarta Sans', 600),
+  ])
+  const title = opts.title.trim().slice(0, 120)
+  const size = title.length > 90 ? 50 : title.length > 60 ? 58 : 66
+  const tree = h('div', { width: OG_W, height: OG_H, position: 'relative', backgroundColor: C.cream, fontFamily: 'Jakarta' }, [
+    h('img', { position: 'absolute', right: 0, top: 0, width: 90, height: OG_H }, undefined, { src: PANEL, width: 430, height: OG_H }),
+    h('div', { position: 'absolute', left: 80, top: 0, width: 960, height: OG_H, flexDirection: 'column', justifyContent: 'center' }, [
+      h('div', { alignItems: 'center' }, [
+        h('img', { width: 52, height: 52 }, undefined, { src: LOGO, width: 52, height: 52 }),
+        h('div', { fontFamily: 'Marcellus', fontSize: 30, color: C.green, marginLeft: 14 }, 'Undangan Virtual'),
+        h('div', { fontSize: 18, fontWeight: 600, color: C.sage, marginLeft: 14 }, '· Blog'),
+      ]),
+      opts.category
+        ? h('div', { marginTop: 40 }, [h('div', { fontSize: 18, fontWeight: 600, color: C.clayDark, backgroundColor: C.clayLight, padding: '8px 16px', borderRadius: 999 }, opts.category.toUpperCase())])
+        : null,
+      h('div', { fontFamily: 'Marcellus', fontSize: size, lineHeight: 1.15, color: C.green, marginTop: 24 }, title),
+      opts.meta ? h('div', { fontSize: 22, fontWeight: 500, color: C.text, marginTop: 26 }, opts.meta) : null,
+    ]),
+    h('div', { position: 'absolute', left: 80, bottom: 42, fontSize: 19, fontWeight: 600, color: C.sage, letterSpacing: 0.4 }, 'undanganvirtual.com/blog'),
+  ])
+  const svg = await satori(tree as any, {
+    width: OG_W,
+    height: OG_H,
+    fonts: [
+      { name: 'Marcellus', data: marcellus, weight: 400, style: 'normal' },
+      { name: 'Jakarta', data: jakarta500, weight: 500, style: 'normal' },
+      { name: 'Jakarta', data: jakarta600, weight: 600, style: 'normal' },
+    ],
+  })
+  return new Resvg(svg, { fitTo: { mode: 'width', value: OG_W }, font: { loadSystemFonts: false } }).render().asPng()
+}

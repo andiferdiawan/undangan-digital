@@ -66,12 +66,15 @@ export async function openRouterChat(o: {
   messages: ChatMessage[]
   siteUrl: string
   jsonSchema?: Record<string, unknown>
+  /** Minta keluaran objek JSON (tanpa skema) bila model mendukungnya. */
+  json?: boolean
+  temperature?: number
   timeoutMs: number
 }): Promise<{ text: string, model: string, finish: string }> {
   const maxTokens = Math.min(o.model.maxOutput ?? 32_000, 32_000)
   const responseFormat = o.model.structured && o.jsonSchema
     ? { type: 'json_schema', json_schema: { name: 'tema_undangan', strict: true, schema: o.jsonSchema } }
-    : o.model.jsonMode ? { type: 'json_object' } : undefined
+    : (o.jsonSchema || o.json) && o.model.jsonMode ? { type: 'json_object' } : undefined
 
   const ctrl = new AbortController()
   const timer = setTimeout(() => ctrl.abort(), Math.max(5_000, o.timeoutMs))
@@ -91,7 +94,7 @@ export async function openRouterChat(o: {
         model: o.model.id,
         messages: o.messages,
         max_tokens: maxTokens,
-        temperature: 0.6,
+        temperature: o.temperature ?? 0.6,
         ...(responseFormat ? { response_format: responseFormat } : {}),
       }),
     })
@@ -129,20 +132,7 @@ export function extractJson(text: string): unknown {
   return JSON.parse(t.slice(a, b + 1))
 }
 
-/**
- * API key + model OpenRouter: utamakan yang diisi admin di halaman Pengaturan (Supabase Vault),
- * jatuh ke env NUXT_OPENROUTER_API_KEY / NUXT_OPENROUTER_MODEL bila belum diisi.
- */
+/** API key + model OpenRouter (Pengaturan admin → env). Lihat getAiConfig untuk semua penyedia. */
 export async function getOpenRouterConfig(event: H3Event): Promise<{ apiKey: string, model: string, source: 'settings' | 'env' | null }> {
-  const config = useRuntimeConfig(event)
-  try {
-    const db = await serverRpc<{ openrouter_key: string | null, openrouter_model: string }>(event, 'server_ai_config', {})
-    if (db?.openrouter_key) return { apiKey: db.openrouter_key, model: db.openrouter_model || config.openrouter?.model || '', source: 'settings' }
-    if (config.openrouter?.apiKey) return { apiKey: config.openrouter.apiKey, model: db?.openrouter_model || config.openrouter.model || '', source: 'env' }
-  }
-  catch (e) {
-    console.error('[openrouter] gagal membaca pengaturan AI:', e instanceof Error ? e.message : e)
-    if (config.openrouter?.apiKey) return { apiKey: config.openrouter.apiKey, model: config.openrouter.model || '', source: 'env' }
-  }
-  return { apiKey: '', model: '', source: null }
+  return (await getAiConfig(event)).openrouter
 }

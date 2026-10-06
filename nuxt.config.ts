@@ -48,6 +48,11 @@ export default defineNuxtConfig({
     // Alternatif generator tema AI via OpenRouter (model gratis): NUXT_OPENROUTER_API_KEY,
     // NUXT_OPENROUTER_MODEL (kosong = router otomatis openrouter/free)
     openrouter: { apiKey: '', model: '' },
+    // Google Gemini API (AI Studio, gratis): NUXT_GEMINI_API_KEY, NUXT_GEMINI_MODEL (kosong = model flash terbaru).
+    // Biasanya diisi admin lewat Pengaturan (tersimpan terenkripsi di Supabase Vault); env hanya cadangan.
+    gemini: { apiKey: '', model: '' },
+    // Rahasia endpoint cron artikel harian (NUXT_CRON_SECRET; di Vercel cukup isi CRON_SECRET)
+    cronSecret: '',
     // Payment gateway Tripay (server-only): NUXT_TRIPAY_MODE, NUXT_TRIPAY_API_KEY,
     // NUXT_TRIPAY_PRIVATE_KEY, NUXT_TRIPAY_MERCHANT_CODE
     tripay: { mode: 'sandbox', apiKey: '', privateKey: '', merchantCode: '' },
@@ -68,7 +73,8 @@ export default defineNuxtConfig({
   nitro: {
     // Preset Vercel/Netlify/Cloudflare terdeteksi otomatis saat build di platform masing-masing.
     // Generator tema AI butuh waktu 1–3 menit, jadi batas durasi fungsi dinaikkan (Vercel).
-    vercel: { functions: { maxDuration: 300 } },
+    // Cron harian 08.00 WIB: satu artikel blog otomatis (butuh env CRON_SECRET di Vercel)
+    vercel: { functions: { maxDuration: 300 }, config: { crons: [{ path: '/api/cron/blog-daily', schedule: '0 1 * * *' }] } },
     // Gambar pratinjau (satori) memuat file wasm saat runtime; pastikan ikut dibundel
     externals: { traceInclude: ['node_modules/harfbuzzjs/hb.wasm', 'node_modules/harfbuzzjs/hb-subset.wasm'] },
   },

@@ -29,8 +29,13 @@ async function save() {
   if (!error) form.days = days.join(', ')
 }
 
-// ── Integrasi AI (OpenRouter). Key disimpan terenkripsi di Supabase Vault; halaman ini hanya melihat petunjuk tersamar.
-type AiSettings = { openrouter_set: boolean, openrouter_hint: string | null, openrouter_model: string, updated_at: string }
+// ── Integrasi AI (Gemini & OpenRouter). Key disimpan terenkripsi di Supabase Vault; halaman ini hanya melihat petunjuk tersamar.
+type AiSettings = {
+  openrouter_set: boolean, openrouter_hint: string | null, openrouter_model: string
+  gemini_set: boolean, gemini_hint: string | null, gemini_model: string
+  default_provider: '' | 'openrouter' | 'gemini', updated_at: string
+}
+type GeminiModel = { id: string, name: string, context: number }
 type FreeModel = { id: string, name: string, context: number, structured: boolean }
 const ai = ref<AiSettings | null>(null)
 const aiModels = ref<FreeModel[]>([])
@@ -47,14 +52,23 @@ async function loadAi() {
   }
   ai.value = data as unknown as AiSettings
   aiModel.value = ai.value.openrouter_model
+  gmModel.value = ai.value.gemini_model
+  defaultProvider.value = ai.value.default_provider
+}
+const gmModels = ref<GeminiModel[]>([])
+const gmModelsError = ref('')
+async function loadModels() {
+  try {
+    const r = await $fetch<{ openrouter: { models: FreeModel[] }, gemini: { models: GeminiModel[], error: string } }>('/api/admin/themes/ai-models')
+    aiModels.value = r.openrouter.models
+    gmModels.value = r.gemini.models
+    gmModelsError.value = r.gemini.error
+  }
+  catch { /* daftar model opsional */ }
 }
 onMounted(async () => {
   await loadAi()
-  try {
-    const r = await $fetch<{ openrouter: { models: FreeModel[] } }>('/api/admin/themes/ai-models')
-    aiModels.value = r.openrouter.models
-  }
-  catch { /* daftar model opsional */ }
+  await loadModels()
 })
 
 async function aiCall(fn: string, args: Record<string, unknown>, ok: string) {
@@ -84,6 +98,31 @@ async function removeKey() {
 }
 async function saveModel() {
   await aiCall('admin_set_openrouter_model', { p_model: aiModel.value }, 'Model default tersimpan.')
+}
+
+// Gemini (Google AI Studio)
+const gmKey = ref('')
+const gmModel = ref('')
+const defaultProvider = ref<'' | 'openrouter' | 'gemini'>('')
+async function saveGeminiKey() {
+  const k = gmKey.value.trim()
+  if (!/^[A-Za-z0-9_.-]{20,300}$/.test(k)) {
+    aiMsg.value = { ok: false, text: 'Format API key tidak valid. Salin key dari aistudio.google.com/apikey (biasanya diawali AIza).' }
+    return
+  }
+  await aiCall('admin_set_gemini_key', { p_key: k }, 'API key Gemini tersimpan (terenkripsi).')
+  if (aiMsg.value?.ok) {
+    gmKey.value = ''
+    await loadModels()
+  }
+}
+async function removeGeminiKey() {
+  if (!confirm('Hapus API key Gemini?')) return
+  await aiCall('admin_set_gemini_key', { p_key: '' }, 'API key Gemini dihapus.')
+  gmModels.value = []
+}
+async function saveAiOptions() {
+  await aiCall('admin_set_ai_options', { p_default_provider: defaultProvider.value, p_gemini_model: gmModel.value }, 'Pilihan AI tersimpan.')
 }
 </script>
 
@@ -120,11 +159,63 @@ async function saveModel() {
     </form>
 
     <section class="mx-auto grid max-w-xl gap-4 px-4 pb-10">
+      <p v-if="aiMsg" class="rounded-xl px-4 py-3 text-sm" :class="aiMsg.ok ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-600'">{{ aiMsg.text }}</p>
       <div class="card grid gap-4 p-5">
         <div>
-          <h2 class="font-semibold text-brand-900">Integrasi AI (OpenRouter)</h2>
+          <h2 class="font-semibold text-brand-900">Penyedia AI</h2>
+          <p class="mt-1 text-xs text-brand-500">Dipakai generator tema dan generator artikel blog (termasuk artikel harian otomatis).</p>
+        </div>
+        <form class="grid gap-2" @submit.prevent="saveAiOptions">
+          <label class="label">Penyedia utama
+            <select v-model="defaultProvider" class="input">
+              <option value="">Otomatis (Gemini bila key terisi, lalu OpenRouter)</option>
+              <option value="gemini">Gemini · Google AI Studio</option>
+              <option value="openrouter">OpenRouter</option>
+            </select>
+          </label>
+          <label class="label">Model Gemini
+            <select v-model="gmModel" class="input">
+              <option value="">Otomatis (Flash terbaru)</option>
+              <option v-for="m in gmModels" :key="m.id" :value="m.id">{{ m.name }}</option>
+              <option v-if="gmModel && !gmModels.some(m => m.id === gmModel)" :value="gmModel">{{ gmModel }}</option>
+            </select>
+            <span v-if="!ai?.gemini_set" class="text-xs font-normal text-brand-500">Daftar model muncul setelah API key Gemini diisi.</span>
+            <span v-else-if="gmModelsError" class="text-xs font-normal text-red-600">{{ gmModelsError }}</span>
+          </label>
+          <button class="btn-ghost justify-self-start" :disabled="aiBusy || (defaultProvider === (ai?.default_provider ?? '') && gmModel === (ai?.gemini_model ?? ''))">Simpan pilihan</button>
+        </form>
+      </div>
+
+      <div class="card grid gap-4 p-5">
+        <div>
+          <h2 class="font-semibold text-brand-900">Google Gemini (AI Studio)</h2>
           <p class="mt-1 text-xs text-brand-500">
-            Dipakai generator tema AI di menu Tema → Buat baru. Buat key gratis di
+            Buat API key gratis di
+            <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener noreferrer" class="underline">aistudio.google.com/apikey</a>.
+            Tier gratis punya batas permintaan per menit/hari, cukup untuk generate tema dan 1 artikel per hari.
+          </p>
+        </div>
+        <div v-if="ai" class="flex flex-wrap items-center gap-2 text-sm">
+          <span class="chip" :class="ai.gemini_set ? 'bg-green-100 text-green-800' : 'bg-amber-100 text-amber-800'">
+            {{ ai.gemini_set ? 'Terpasang' : 'Belum diisi' }}
+          </span>
+          <code v-if="ai.gemini_hint" class="text-brand-700">{{ ai.gemini_hint }}</code>
+          <button v-if="ai.gemini_set" type="button" class="ml-auto text-xs text-red-600 underline" :disabled="aiBusy" @click="removeGeminiKey">Hapus key</button>
+        </div>
+        <form class="grid gap-2" @submit.prevent="saveGeminiKey">
+          <label class="label">{{ ai?.gemini_set ? 'Ganti API key' : 'API key' }}
+            <input v-model="gmKey" type="password" class="input" placeholder="AIza…" autocomplete="off" spellcheck="false">
+            <span class="text-xs font-normal text-brand-500">Disimpan terenkripsi di Supabase Vault; hanya server yang membacanya.</span>
+          </label>
+          <button class="btn-primary justify-self-start" :disabled="aiBusy || !gmKey.trim()">Simpan key</button>
+        </form>
+      </div>
+
+      <div class="card grid gap-4 p-5">
+        <div>
+          <h2 class="font-semibold text-brand-900">OpenRouter</h2>
+          <p class="mt-1 text-xs text-brand-500">
+            Alternatif gratis. Buat key di
             <a href="https://openrouter.ai/keys" target="_blank" rel="noopener noreferrer" class="underline">openrouter.ai/keys</a>;
             hanya model gratis (<code>:free</code>) yang dipakai, jadi tidak ada tagihan.
           </p>
@@ -155,7 +246,6 @@ async function saveModel() {
           </label>
           <button class="btn-ghost justify-self-start" :disabled="aiBusy || aiModel === (ai?.openrouter_model ?? '')">Simpan model</button>
         </form>
-        <p v-if="aiMsg" class="text-sm" :class="aiMsg.ok ? 'text-green-700' : 'text-red-600'">{{ aiMsg.text }}</p>
       </div>
     </section>
   </div>

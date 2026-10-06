@@ -7,7 +7,7 @@ const origin = useSiteOrigin()
 const canonical = computed(() => {
   const base = `${origin}${route.path === '/' ? '' : route.path.replace(/\/$/, '')}` || origin
   const page = Number.parseInt(String(route.query.halaman ?? '')) || 1
-  return route.path.startsWith('/katalog') && page > 1 ? `${base}?halaman=${page}` : base
+  return (route.path.startsWith('/katalog') || route.path.startsWith('/blog')) && page > 1 ? `${base}?halaman=${page}` : base
 })
 const noindex = computed(() => NOINDEX_PREFIXES.some(p => route.path === p || route.path.startsWith(p.endsWith('/') ? p : `${p}/`)))
 

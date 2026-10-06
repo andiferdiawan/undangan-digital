@@ -16,3 +16,6 @@ body { font-family: "Plus Jakarta Sans", system-ui, sans-serif; color: #243a2d; 
 .prose-page li { margin: .3em 0; }
 .prose-page strong { color: #2f4a3a; }
 .prose-page a { color: #b8623f; font-weight: 600; text-decoration: underline; text-underline-offset: 2px; }
+.prose-page blockquote { margin: 1em 0; padding: .7em 1em; border-left: 3px solid #b8623f; background: #f6f1ea; border-radius: 0 12px 12px 0; font-style: italic; }
+.prose-page blockquote p { margin: .35em 0; }
+.prose-page h2[id], .prose-page h3[id] { scroll-margin-top: 80px; }
