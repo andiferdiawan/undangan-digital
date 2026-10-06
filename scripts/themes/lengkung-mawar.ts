@@ -18,7 +18,7 @@ const caps = (t: string, cls = '') => p(`font-heading text-[14px] uppercase trac
 const divider = (light = false) => div(`mx-auto my-6 flex items-center justify-center gap-2 ${light ? 'text-surface/50' : 'text-primary/40'}`, [
   div('h-px w-14 bg-current'), div('h-1.5 w-1.5 rotate-45 bg-current'), div('h-px w-14 bg-current'),
 ])
-const bouquet = (cls: string) => img(`pointer-events-none relative mx-auto w-[330px] max-w-none select-none ${cls}`, '{{asset.rangkaian}}', 'Rangkaian mawar')
+const bouquet = (cls: string) => img(`pointer-events-none relative mx-auto w-full max-w-[330px] select-none ${cls}`, '{{asset.rangkaian}}', 'Rangkaian mawar')
 const photoTone = 'saturate-[.92]'
 /** Foto penuh (slider Foto Sampul → galeri) yang memudar ke warna latar di bagian bawah. */
 const fadePhoto = (h: number) => div(`relative h-[${h}px] overflow-hidden bg-secondary/30`, [

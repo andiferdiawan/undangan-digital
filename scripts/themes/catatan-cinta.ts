@@ -310,7 +310,7 @@ export const definition: ThemeDefinition = {
       class: `relative overflow-hidden bg-base ${GRAIN} px-6 pb-16 pt-4 text-center`,
       children: [
         type('{{closing_text}}', 'uv-reveal relative mx-auto max-w-[320px] text-[13px]'),
-        div('uv-reveal relative mx-auto mt-8 h-[410px] w-[330px]', [
+        div('uv-reveal relative mx-auto mt-8 h-[410px] w-full max-w-[330px]', [
           div('absolute left-0 top-0 h-[390px] w-[250px] overflow-hidden bg-ink/10', [
             div('absolute inset-0 grid place-items-center', [img('w-16', '{{asset.hati}}')]),
             comp('photo_slider', '', { interval: '5000', image_class: BW, dots: 'false' }),

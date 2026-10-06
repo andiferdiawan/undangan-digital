@@ -22,17 +22,19 @@ const bow = (cls: string) => img(`pointer-events-none select-none ${cls}`, '{{as
 /** Pita teks berjalan: isi digandakan 2× agar geseran -50% menyambung mulus. */
 function marquee(word: string, cls: string): ThemeNode {
   const half = Array.from({ length: 4 }, () => word)
-  return div(`overflow-hidden whitespace-nowrap py-2.5 ${cls}`, [
-    div('uv-marquee [--uv-dur:22s]', [...half, ...half].map(w => p('px-4 font-heading text-[20px] uppercase tracking-[0.12em]', w))),
+  // Jalur dibuat absolute agar lebarnya (max-content) tidak ikut mendorong lebar halaman
+  return div(`relative h-[46px] overflow-hidden whitespace-nowrap ${cls}`, [
+    div('uv-marquee absolute inset-y-0 left-0 items-center [--uv-dur:22s]', [...half, ...half].map(w => p('px-4 font-heading text-[20px] uppercase tracking-[0.12em]', w))),
   ])
 }
 /** Kartu bergaya perangko: lapisan berlubang (mask) di tepi, isi padat di tengah, bingkai tipis di dalam. */
-function stamp(cls: string, children: ThemeNode[], pad = 'px-8 py-10'): ThemeNode {
+function stamp(cls: string, children: ThemeNode[], pad = 'px-8 py-10', extra: ThemeNode[] = []): ThemeNode {
   return div(`relative [filter:drop-shadow(0_12px_16px_rgba(40,10,12,0.22))] ${cls}`, [
     div(`absolute inset-0 bg-surface ${PERF}`),
     div('absolute inset-[6px] bg-surface'),
     div('pointer-events-none absolute inset-[14px] border border-primary/25'),
     div(`relative ${pad}`, children),
+    ...extra,
   ])
 }
 const photoTone = 'saturate-[.85] contrast-[1.05]'
@@ -120,24 +122,23 @@ export const definition: ThemeDefinition = {
       type: 'hero',
       class: 'relative overflow-hidden bg-base px-5 pb-20 pt-16 text-center',
       children: [
-        div('uv-reveal relative mx-auto h-[250px] w-[320px] -rotate-[6deg]', [
+        div('uv-reveal relative mx-auto h-[250px] w-full max-w-[320px] -rotate-[6deg]', [
           div('absolute inset-x-0 -top-[92px] h-[94px] bg-[#efe5d6] [clip-path:polygon(0_100%,100%_100%,50%_0)]'),
           div('absolute inset-0 bg-[#e9dfcf] shadow-[0_24px_40px_-24px_rgba(40,10,12,0.5)]'),
           div('absolute inset-0 bg-[#ece2d3] [clip-path:polygon(0_0,50%_52%,100%_0,100%_100%,0_100%)]'),
         ]),
-        stamp('uv-reveal uv-d1 relative z-[1] mx-auto -mt-[300px] w-[300px] rotate-[3deg]', [
+        stamp('uv-reveal uv-d1 relative z-[1] mx-auto -mt-[300px] w-[300px] max-w-full rotate-[3deg]', [
           script('Kepada Tamu Terhormat', 'text-[34px] text-primary'),
           caps('Dengan penuh sukacita', 'mt-3 text-[11px] text-muted'),
           p('mt-1 font-body text-[16px] italic text-ink', 'kami mengundang Anda ke pernikahan'),
           script('{{groom_nickname}} & {{bride_nickname}}', 'mt-2 text-[42px] text-primary'),
           p('mx-auto mt-2 max-w-[220px] font-body text-[16px] leading-snug text-ink/85', 'untuk hadir dan memberikan doa restu di hari bahagia kami.'),
           caps('{{event_date}}', 'mt-4 text-[11px] text-primary'),
+        ], 'px-8 pb-16 pt-10', [
+          // pita satin melintang di sudut kiri-bawah kartu (ikut posisi kartu, tidak menutupi teks) + simpul
+          div(`pointer-events-none absolute -bottom-5 -left-[70px] h-[16px] w-[190px] -rotate-[40deg] ${SATIN} shadow-[0_3px_6px_rgba(0,0,0,0.3)]`),
+          bow('absolute -bottom-9 -left-9 w-[88px] -rotate-[24deg]'),
         ]),
-        // pita satin melintang di sudut + simpul
-        div('pointer-events-none absolute left-[-46px] top-[456px] z-[2] h-[18px] w-[190px] -rotate-[40deg]', [
-          div(`h-full w-full ${SATIN} shadow-[0_3px_6px_rgba(0,0,0,0.3)]`),
-        ]),
-        bow('absolute left-1 top-[402px] z-[3] w-[92px] -rotate-[24deg]'),
         img('pointer-events-none absolute -right-2 bottom-6 w-[70px] rotate-[18deg]', '{{asset.pena}}', 'Pena bulu'),
       ],
     },
