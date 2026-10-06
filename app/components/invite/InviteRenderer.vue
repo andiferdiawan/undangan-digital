@@ -214,6 +214,9 @@ const bgUrl = (bg?: string) => {
 .invite-root .uv-tilt .uv-depth-3 { transform: translateZ(80px); }
 .invite-root .uv-float3d { animation: uv-float3d 7s ease-in-out infinite; transform-style: preserve-3d; }
 .invite-root .uv-spin3d { animation: uv-spin3d 14s linear infinite; transform-style: preserve-3d; }
+/* Teks berjalan (uv-marquee): isi digandakan 2× di dalam elemen ini, digeser terus ke kiri sejauh setengahnya.
+   Kecepatan lewat --uv-dur (bawaan 24s). Wadahnya diberi overflow-hidden. */
+.invite-root .uv-marquee { display: flex; width: max-content; animation: uv-marquee var(--uv-dur, 24s) linear infinite; }
 .invite-root .uv-shine { position: relative; overflow: hidden; }
 .invite-root .uv-shine::after {
   content: ''; position: absolute; inset: 0; pointer-events: none;
@@ -290,8 +293,9 @@ const bgUrl = (bg?: string) => {
 @property --uv-t { syntax: '<number>'; inherits: true; initial-value: 1; }
 @keyframes uv-play { from { --uv-t: 0; } to { --uv-t: 1; } }
 @keyframes uv-shine { 0%, 55% { transform: translateX(-120%); } 85%, 100% { transform: translateX(120%); } }
+@keyframes uv-marquee { to { transform: translateX(-50%); } }
 @media (prefers-reduced-motion: reduce) {
-  .invite-root .uv-float3d, .invite-root .uv-spin3d, .invite-root .uv-wiggle, .invite-root .uv-float, .invite-root .uv-shine::after { animation: none; }
+  .invite-root .uv-float3d, .invite-root .uv-spin3d, .invite-root .uv-wiggle, .invite-root .uv-float, .invite-root .uv-shine::after, .invite-root .uv-marquee { animation: none; }
   .invite-root .uv-tilt { transform: none; }
 }
 </style>

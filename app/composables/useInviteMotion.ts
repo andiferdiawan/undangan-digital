@@ -7,6 +7,7 @@ import type { Ref } from 'vue'
  * - uv-tilt (+ uv-depth-1..3 di dalamnya)                 : kartu 3D mengikuti giroskop/mouse,
  *                                                          bergoyang pelan bila tidak ada input
  * - uv-float3d / uv-spin3d / uv-wiggle / uv-float        : ornamen berulang (CSS murni)
+ * - uv-marquee                                            : teks berjalan tanpa henti (isi digandakan 2×, CSS murni)
  * - uv-z / uv-z-left / uv-z-right                         : zoom sumbu Z mengikuti scroll (--uv-d, --uv-o)
  * - uv-scene                                              : wadah adegan (isi sticky) yang diberi --uv-s (0..1)
  * - uv-play                                               : adegan berbasis waktu: --uv-t 0..1 berjalan sekali
