@@ -286,8 +286,9 @@ Setiap node hanya boleh berisi kunci: tag, class, text, attrs, bg, if, repeat, c
 }
 
 /**
- * Pipeline sama seperti generateTheme, tetapi lewat OpenRouter (model gratis). Model tanpa structured outputs
- * diberi panduan format JSON di prompt; jawaban diurai dengan toleran (buang <think>/```), lalu divalidasi.
+ * Pipeline sama seperti generateTheme, tetapi lewat OpenRouter (model gratis). Model gratis lambat, jadi SATU request
+ * = SATU panggilan model (batas fungsi Vercel 300 dtk). Bila hasilnya belum lolos validator, browser memanggil lagi
+ * dengan `previous` (jawaban sebelumnya + error) sebagai putaran perbaikan di request terpisah.
  */
 export async function generateThemeOpenRouter(opts: {
   apiKey: string
@@ -295,50 +296,46 @@ export async function generateThemeOpenRouter(opts: {
   prompt: string
   categories: string[]
   siteUrl: string
-}): Promise<AiThemeResult> {
+  timeoutMs: number
+  previous?: { text: string, errors: string[], attempt: number }
+}): Promise<AiThemeResult & { rawText: string }> {
   const schema = buildSchema(opts.categories)
   const messages: ChatMessage[] = [
     { role: 'system', content: systemPrompt() + (opts.model.structured ? '' : jsonFormatGuide(opts.categories)) },
     { role: 'user', content: `Buatkan satu tema undangan pernikahan lengkap berdasarkan brief berikut:\n\n${opts.prompt}` },
   ]
-
-  // Batas fungsi Vercel 300 dtk: sisakan waktu untuk validasi & simpan log
-  const deadline = Date.now() + 270_000
-  let last: AiThemeResult | null = null
-  for (let attempt = 1; attempt <= 3; attempt++) {
-    const left = deadline - Date.now()
-    if (attempt > 1 && left < 45_000) break
-    const res = await openRouterChat({ apiKey: opts.apiKey, model: opts.model, messages, siteUrl: opts.siteUrl, jsonSchema: schema, timeoutMs: left })
-    if (res.finish === 'length')
-      throw new Error('Output AI terpotong (batas token model gratis). Sederhanakan brief atau pilih model dengan keluaran lebih panjang.')
-
-    let raw: any
-    try {
-      raw = normalizeRaw(extractJson(res.text))
-    }
-    catch {
-      if (attempt === 3) throw new Error('Jawaban AI bukan JSON yang valid. Coba lagi atau pilih model lain.')
-      messages.push({ role: 'assistant', content: res.text.slice(0, 4000) })
-      messages.push({ role: 'user', content: 'Jawaban tadi bukan JSON valid. Kirim ulang HANYA objek JSON tema lengkap, tanpa teks lain.' })
-      continue
-    }
-
-    const compiled = await compileTheme(toDefinition(raw))
-    last = {
-      ...compiled,
-      meta: { name: String(raw?.name ?? ''), description: String(raw?.description ?? ''), category: String(raw?.category ?? '') },
-      attempts: attempt,
-      model: res.model,
-      raw,
-    }
-    if (compiled.ok) return last
-
-    messages.push({ role: 'assistant', content: res.text })
+  const attempt = (opts.previous?.attempt ?? 0) + 1
+  if (opts.previous) {
+    let prevRaw: any = null
+    try { prevRaw = normalizeRaw(extractJson(opts.previous.text)) }
+    catch { /* jawaban sebelumnya bukan JSON */ }
+    messages.push({ role: 'assistant', content: opts.previous.text })
     messages.push({
       role: 'user',
-      content: `Validator menolak tema tersebut dengan error berikut. Perbaiki SEMUA error dan kirim ulang tema lengkap (hanya JSON):\n${compiled.errors.map(e => `- ${e}`).join('\n')}${repairHint(raw, compiled.errors)}`,
+      content: prevRaw
+        ? `Validator menolak tema tersebut dengan error berikut. Perbaiki SEMUA error dan kirim ulang tema lengkap (hanya JSON):\n${opts.previous.errors.map(e => `- ${e}`).join('\n')}${repairHint(prevRaw, opts.previous.errors)}`
+        : 'Jawaban tadi bukan JSON valid. Kirim ulang HANYA objek JSON tema lengkap, tanpa teks lain.',
     })
   }
-  if (!last) throw new Error('AI tidak menghasilkan tema yang bisa dibaca. Coba lagi atau pilih model lain.')
-  return last
+
+  const res = await openRouterChat({ apiKey: opts.apiKey, model: opts.model, messages, siteUrl: opts.siteUrl, jsonSchema: schema, timeoutMs: opts.timeoutMs })
+  if (res.finish === 'length')
+    throw new Error('Output AI terpotong (batas token model gratis). Sederhanakan brief atau pilih model dengan keluaran lebih panjang.')
+
+  let raw: any
+  try {
+    raw = normalizeRaw(extractJson(res.text))
+  }
+  catch {
+    return { ok: false, errors: ['Jawaban AI bukan JSON yang valid.'], warnings: [], classes: [], css: '', meta: null, attempts: attempt, model: res.model, raw: null, rawText: res.text.slice(0, 60_000) }
+  }
+  const compiled = await compileTheme(toDefinition(raw))
+  return {
+    ...compiled,
+    meta: { name: String(raw?.name ?? ''), description: String(raw?.description ?? ''), category: String(raw?.category ?? '') },
+    attempts: attempt,
+    model: res.model,
+    raw,
+    rawText: res.text,
+  }
 }

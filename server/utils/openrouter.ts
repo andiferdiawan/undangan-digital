@@ -55,52 +55,69 @@ export async function listFreeModels(): Promise<FreeModel[]> {
 
 export type ChatMessage = { role: 'system' | 'user' | 'assistant', content: string }
 
-/** Satu panggilan chat completion. Error OpenRouter diterjemahkan ke pesan yang jelas untuk admin. */
+/**
+ * Satu panggilan chat completion. Error OpenRouter diterjemahkan ke pesan yang jelas untuk admin.
+ * Batas waktu (timeoutMs) berlaku sampai seluruh isi jawaban terbaca: OpenRouter mengirim header lebih dulu
+ * lalu menahan body selama model bekerja, jadi timeout biasa (sampai header) tidak cukup.
+ */
 export async function openRouterChat(o: {
   apiKey: string
   model: FreeModel
   messages: ChatMessage[]
   siteUrl: string
   jsonSchema?: Record<string, unknown>
-  timeoutMs?: number
+  timeoutMs: number
 }): Promise<{ text: string, model: string, finish: string }> {
   const maxTokens = Math.min(o.model.maxOutput ?? 32_000, 32_000)
   const responseFormat = o.model.structured && o.jsonSchema
     ? { type: 'json_schema', json_schema: { name: 'tema_undangan', strict: true, schema: o.jsonSchema } }
     : o.model.jsonMode ? { type: 'json_object' } : undefined
 
-  let res: any
+  const ctrl = new AbortController()
+  const timer = setTimeout(() => ctrl.abort(), Math.max(5_000, o.timeoutMs))
+  let status = 0
+  let body = ''
   try {
-    res = await $fetch(`${API}/chat/completions`, {
+    const res = await fetch(`${API}/chat/completions`, {
       method: 'POST',
-      timeout: o.timeoutMs ?? 280_000,
+      signal: ctrl.signal,
       headers: {
+        'Content-Type': 'application/json',
         'Authorization': `Bearer ${o.apiKey}`,
         'HTTP-Referer': o.siteUrl,
         'X-Title': 'Undangan Virtual - Generator Tema',
       },
-      body: {
+      body: JSON.stringify({
         model: o.model.id,
         messages: o.messages,
         max_tokens: maxTokens,
         temperature: 0.6,
         ...(responseFormat ? { response_format: responseFormat } : {}),
-      },
+      }),
     })
+    status = res.status
+    body = await res.text()
   }
   catch (err: any) {
-    const status = err?.response?.status ?? err?.statusCode
-    if (err?.name === 'TimeoutError' || /timeout|aborted/i.test(String(err?.message)))
-      throw new Error('Model gratis terlalu lama merespons. Coba lagi atau pilih model lain.')
-    const detail = err?.data?.error?.message || err?.message || 'tidak diketahui'
-    if (status === 401) throw new Error('API key OpenRouter tidak valid. Periksa di Admin → Pengaturan.')
-    if (status === 402) throw new Error('Kredit OpenRouter tidak cukup untuk model ini. Pilih model berlabel gratis.')
-    if (status === 429) throw new Error('Batas pemakaian gratis OpenRouter tercapai atau model sedang ramai. Tunggu sebentar atau pilih model lain.')
-    throw new Error(`OpenRouter gagal (${status ?? 'jaringan'}): ${detail}`)
+    if (ctrl.signal.aborted)
+      throw new Error('Model gratis terlalu lama merespons (melebihi batas waktu server). Coba lagi, atau pilih model lain yang lebih cepat.')
+    throw new Error(`OpenRouter gagal (jaringan): ${err?.message ?? 'tidak diketahui'}`)
   }
-  if (res?.error) throw new Error(`OpenRouter: ${res.error.message ?? 'error tidak diketahui'}`)
-  const choice = res?.choices?.[0]
-  return { text: String(choice?.message?.content ?? ''), model: String(res?.model ?? o.model.id), finish: String(choice?.finish_reason ?? '') }
+  finally {
+    clearTimeout(timer)
+  }
+
+  let res: any = null
+  try { res = JSON.parse(body) }
+  catch { /* ditangani di bawah */ }
+  const detail = res?.error?.message || body.trim().slice(0, 200) || 'tidak diketahui'
+  if (status === 401) throw new Error('API key OpenRouter tidak valid. Periksa di Admin → Pengaturan.')
+  if (status === 402) throw new Error('Kredit OpenRouter tidak cukup untuk model ini. Pilih model berlabel gratis.')
+  if (status === 429) throw new Error('Batas pemakaian gratis OpenRouter tercapai atau model sedang ramai. Tunggu sebentar atau pilih model lain.')
+  if (status >= 400 || !res) throw new Error(`OpenRouter gagal (${status}): ${detail}`)
+  if (res.error) throw new Error(`OpenRouter: ${detail}`)
+  const choice = res.choices?.[0]
+  return { text: String(choice?.message?.content ?? ''), model: String(res.model ?? o.model.id), finish: String(choice?.finish_reason ?? '') }
 }
 
 /** Ambil objek JSON dari jawaban model (buang blok <think>, pagar ```json, dan teks di luar kurung kurawal). */

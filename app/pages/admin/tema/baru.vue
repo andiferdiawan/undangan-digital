@@ -46,15 +46,30 @@ const attempts = ref(0)
 const meta = reactive({ name: '', slug: '', description: '', category_id: 0, status: 'draft' as 'draft' | 'published' })
 watch(() => meta.name, (n) => { meta.slug = slugify(n) })
 
+const genStage = ref('')
 async function generate() {
   genError.value = ''
   generating.value = true
+  genStage.value = 'AI sedang mendesain… (1–3 menit)'
   try {
-    const r = await $fetch<any>('/api/admin/themes/generate', {
-      method: 'POST',
-      body: { prompt: prompt.value, provider: provider.value ?? undefined, model: provider.value === 'openrouter' ? model.value || undefined : undefined },
-      timeout: 300_000,
-    })
+    const body = { prompt: prompt.value, provider: provider.value ?? undefined, model: provider.value === 'openrouter' ? model.value || undefined : undefined }
+    let r = await $fetch<any>('/api/admin/themes/generate', { method: 'POST', body, timeout: 310_000 })
+    // OpenRouter: tiap request satu panggilan model; bila belum valid, minta AI memperbaiki (maks. 2 putaran)
+    while (!r.ok && r.raw_text && r.attempts < 3) {
+      genStage.value = `Memperbaiki hasil AI… (percobaan ${r.attempts + 1}/3)`
+      try {
+        r = await $fetch<any>('/api/admin/themes/generate', {
+          method: 'POST',
+          body: { ...body, previous: { text: r.raw_text, errors: r.errors, attempt: r.attempts } },
+          timeout: 310_000,
+        })
+      }
+      catch (e: any) {
+        // Putaran perbaikan gagal: tetap tampilkan hasil terakhir beserta error-nya
+        genError.value = `Perbaikan otomatis gagal: ${e?.data?.statusMessage || e?.message || 'tidak diketahui'}`
+        break
+      }
+    }
     usedModel.value = r.model ?? ''
     definition.value = r.definition
     css.value = r.css
@@ -143,7 +158,7 @@ async function save() {
           </div>
           <p v-if="genError" class="text-sm text-red-600">{{ genError }}</p>
           <button class="btn-accent" :disabled="generating || prompt.trim().length < 10">
-            {{ generating ? 'AI sedang mendesain… (1–3 menit)' : '✦ Generate Tema' }}
+            {{ generating ? genStage : '✦ Generate Tema' }}
           </button>
         </form>
 

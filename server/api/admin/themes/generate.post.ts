@@ -5,9 +5,17 @@ const Body = z.object({
   prompt: z.string().trim().min(10).max(2000),
   provider: z.enum(['anthropic', 'openrouter']).optional(),
   model: z.string().trim().max(200).optional(),
+  // Putaran perbaikan OpenRouter: jawaban model sebelumnya + error validator
+  previous: z.object({
+    text: z.string().max(200_000),
+    errors: z.array(z.string().max(500)).max(50),
+    attempt: z.number().int().min(1).max(2),
+  }).optional(),
 })
 
 export default defineEventHandler(async (event) => {
+  // Batas fungsi Vercel 300 dtk: sisakan waktu untuk validasi, kompilasi CSS & log
+  const deadline = Date.now() + 275_000
   const { client, uid } = await requireAdmin(event)
   const body = await readValidatedBody(event, Body.parse)
   const config = useRuntimeConfig(event)
@@ -25,6 +33,7 @@ export default defineEventHandler(async (event) => {
 
   try {
     let result: AiThemeResult
+    let rawText = ''
     if (provider === 'openrouter') {
       // Hanya model gratis yang boleh dipakai (cegah tagihan tak terduga)
       const models = await listFreeModels()
@@ -33,7 +42,12 @@ export default defineEventHandler(async (event) => {
       if (!model) throw new Error('Tidak ada model gratis OpenRouter yang tersedia saat ini.')
       if (body.model && model.id !== body.model) throw new Error(`Model "${body.model}" bukan model gratis OpenRouter.`)
       modelLabel = model.id
-      result = await generateThemeOpenRouter({ apiKey: or.apiKey, model, prompt: body.prompt, categories, siteUrl: config.public.siteUrl })
+      const r = await generateThemeOpenRouter({
+        apiKey: or.apiKey, model, prompt: body.prompt, categories, siteUrl: config.public.siteUrl,
+        timeoutMs: deadline - Date.now() - 15_000, previous: body.previous,
+      })
+      rawText = r.rawText
+      result = r
     }
     else {
       result = await generateTheme({ apiKey: config.anthropicApiKey, model: config.anthropicModel, prompt: body.prompt, categories })
@@ -53,6 +67,8 @@ export default defineEventHandler(async (event) => {
       meta: result.meta,
       attempts: result.attempts,
       model: result.model,
+      // Untuk putaran perbaikan berikutnya (OpenRouter), dikirim balik oleh browser
+      raw_text: !result.ok && provider === 'openrouter' ? rawText : undefined,
       generation_id: (log as { id?: string } | null)?.id ?? null,
     }
   }
