@@ -5,6 +5,7 @@ import {
 } from '../../shared/theme/constants'
 import { ASSET_LIBRARY } from '../../shared/theme/asset-library'
 import { compileTheme, type CompileResult } from './theme-compiler'
+import { type ChatMessage, extractJson, type FreeModel, openRouterChat } from './openrouter'
 
 /**
  * Structured outputs tidak mendukung skema rekursif, jadi pohon node "dibuka"
@@ -236,4 +237,80 @@ export async function generateTheme(opts: {
     })
   }
   return last!
+}
+
+/** Panduan format JSON eksplisit untuk model tanpa structured outputs (mis. sebagian model gratis OpenRouter). */
+function jsonFormatGuide(categories: string[]) {
+  return `
+
+# Format jawaban (WAJIB)
+Balas HANYA dengan SATU objek JSON valid — tanpa penjelasan, tanpa markdown, tanpa \`\`\`. Strukturnya:
+{
+  "name": "Nama Tema 2-3 kata",
+  "description": "Deskripsi 1 kalimat bahasa Indonesia",
+  "category": "salah satu dari: ${categories.join(', ')}",
+  "globals": { "primary_color": "#xxxxxx", "secondary_color": "#xxxxxx", "accent_color": "#xxxxxx", "background_color": "#xxxxxx", "surface_color": "#xxxxxx", "text_color": "#xxxxxx", "muted_color": "#xxxxxx", "font_heading": "…", "font_body": "…", "font_script": "…" },
+  "root_class": "text-[15px] leading-relaxed",
+  "assets": [ { "key": "pattern", "path": "path dari pustaka aset" } ],
+  "sections": [
+    { "type": "cover", "class": "…", "children": [ { "tag": "p", "class": "…", "text": "…" }, { "component": "guest_name", "class": "…", "props": { "fallback": "Tamu Undangan" } }, { "component": "open_button", "class": "…", "props": { "label": "Buka Undangan" } } ] },
+    { "type": "hero", "class": "…", "children": [ … ] }
+  ]
+}
+Font WAJIB salah satu dari: ${ALLOWED_FONTS.join(', ')}.
+Setiap node hanya boleh berisi kunci: tag, class, text, attrs, bg, if, repeat, component, props, children.`
+}
+
+/**
+ * Pipeline sama seperti generateTheme, tetapi lewat OpenRouter (model gratis). Model tanpa structured outputs
+ * diberi panduan format JSON di prompt; jawaban diurai dengan toleran (buang <think>/```), lalu divalidasi.
+ */
+export async function generateThemeOpenRouter(opts: {
+  apiKey: string
+  model: FreeModel
+  prompt: string
+  categories: string[]
+  siteUrl: string
+}): Promise<AiThemeResult> {
+  const schema = buildSchema(opts.categories)
+  const messages: ChatMessage[] = [
+    { role: 'system', content: systemPrompt() + (opts.model.structured ? '' : jsonFormatGuide(opts.categories)) },
+    { role: 'user', content: `Buatkan satu tema undangan pernikahan lengkap berdasarkan brief berikut:\n\n${opts.prompt}` },
+  ]
+
+  let last: AiThemeResult | null = null
+  for (let attempt = 1; attempt <= 2; attempt++) {
+    const res = await openRouterChat({ apiKey: opts.apiKey, model: opts.model, messages, siteUrl: opts.siteUrl, jsonSchema: schema })
+    if (res.finish === 'length')
+      throw new Error('Output AI terpotong (batas token model gratis). Sederhanakan brief atau pilih model dengan keluaran lebih panjang.')
+
+    let raw: any
+    try {
+      raw = extractJson(res.text)
+    }
+    catch {
+      if (attempt === 2) throw new Error('Jawaban AI bukan JSON yang valid. Coba lagi atau pilih model lain.')
+      messages.push({ role: 'assistant', content: res.text.slice(0, 4000) })
+      messages.push({ role: 'user', content: 'Jawaban tadi bukan JSON valid. Kirim ulang HANYA objek JSON tema lengkap, tanpa teks lain.' })
+      continue
+    }
+
+    const compiled = await compileTheme(toDefinition(raw))
+    last = {
+      ...compiled,
+      meta: { name: String(raw?.name ?? ''), description: String(raw?.description ?? ''), category: String(raw?.category ?? '') },
+      attempts: attempt,
+      model: res.model,
+      raw,
+    }
+    if (compiled.ok) return last
+
+    messages.push({ role: 'assistant', content: res.text })
+    messages.push({
+      role: 'user',
+      content: `Validator menolak tema tersebut dengan error berikut. Perbaiki SEMUA error dan kirim ulang tema lengkap (hanya JSON):\n${compiled.errors.map(e => `- ${e}`).join('\n')}`,
+    })
+  }
+  if (!last) throw new Error('AI tidak menghasilkan tema.')
+  return last
 }

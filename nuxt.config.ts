@@ -45,6 +45,9 @@ export default defineNuxtConfig({
     // Server-only (diisi via env NUXT_ANTHROPIC_API_KEY)
     anthropicApiKey: '',
     anthropicModel: 'claude-opus-5',
+    // Alternatif generator tema AI via OpenRouter (model gratis): NUXT_OPENROUTER_API_KEY,
+    // NUXT_OPENROUTER_MODEL (kosong = router otomatis openrouter/free)
+    openrouter: { apiKey: '', model: '' },
     // Payment gateway Tripay (server-only): NUXT_TRIPAY_MODE, NUXT_TRIPAY_API_KEY,
     // NUXT_TRIPAY_PRIVATE_KEY, NUXT_TRIPAY_MERCHANT_CODE
     tripay: { mode: 'sandbox', apiKey: '', privateKey: '', merchantCode: '' },

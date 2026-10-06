@@ -28,6 +28,63 @@ async function save() {
   msg.value = error ? { ok: false, text: friendlyError(error) } : { ok: true, text: 'Pengaturan tersimpan.' }
   if (!error) form.days = days.join(', ')
 }
+
+// ── Integrasi AI (OpenRouter). Key disimpan terenkripsi di Supabase Vault; halaman ini hanya melihat petunjuk tersamar.
+type AiSettings = { openrouter_set: boolean, openrouter_hint: string | null, openrouter_model: string, updated_at: string }
+type FreeModel = { id: string, name: string, context: number, structured: boolean }
+const ai = ref<AiSettings | null>(null)
+const aiModels = ref<FreeModel[]>([])
+const aiKey = ref('')
+const aiModel = ref('')
+const aiBusy = ref(false)
+const aiMsg = ref<{ ok: boolean, text: string } | null>(null)
+
+async function loadAi() {
+  const { data, error } = await supabase.rpc('admin_ai_settings' as never)
+  if (error) {
+    aiMsg.value = { ok: false, text: friendlyError(error) }
+    return
+  }
+  ai.value = data as unknown as AiSettings
+  aiModel.value = ai.value.openrouter_model
+}
+onMounted(async () => {
+  await loadAi()
+  try {
+    const r = await $fetch<{ openrouter: { models: FreeModel[] } }>('/api/admin/themes/ai-models')
+    aiModels.value = r.openrouter.models
+  }
+  catch { /* daftar model opsional */ }
+})
+
+async function aiCall(fn: string, args: Record<string, unknown>, ok: string) {
+  aiBusy.value = true
+  aiMsg.value = null
+  const { data, error } = await supabase.rpc(fn as never, args as never)
+  aiBusy.value = false
+  if (error) {
+    aiMsg.value = { ok: false, text: friendlyError(error) }
+    return
+  }
+  ai.value = data as unknown as AiSettings
+  aiMsg.value = { ok: true, text: ok }
+}
+async function saveKey() {
+  const k = aiKey.value.trim()
+  if (!/^[A-Za-z0-9_.-]{20,300}$/.test(k)) {
+    aiMsg.value = { ok: false, text: 'Format API key tidak valid. Salin key dari openrouter.ai/keys (diawali sk-or-).' }
+    return
+  }
+  await aiCall('admin_set_openrouter_key', { p_key: k }, 'API key OpenRouter tersimpan (terenkripsi).')
+  if (aiMsg.value?.ok) aiKey.value = ''
+}
+async function removeKey() {
+  if (!confirm('Hapus API key OpenRouter? Generator tema AI tidak bisa dipakai sampai key diisi lagi.')) return
+  await aiCall('admin_set_openrouter_key', { p_key: '' }, 'API key OpenRouter dihapus.')
+}
+async function saveModel() {
+  await aiCall('admin_set_openrouter_model', { p_model: aiModel.value }, 'Model default tersimpan.')
+}
 </script>
 
 <template>
@@ -61,5 +118,45 @@ async function save() {
       <p v-if="msg" class="text-sm" :class="msg.ok ? 'text-green-700' : 'text-red-600'">{{ msg.text }}</p>
       <button class="btn-primary">Simpan</button>
     </form>
+
+    <section class="mx-auto grid max-w-xl gap-4 px-4 pb-10">
+      <div class="card grid gap-4 p-5">
+        <div>
+          <h2 class="font-semibold text-brand-900">Integrasi AI (OpenRouter)</h2>
+          <p class="mt-1 text-xs text-brand-500">
+            Dipakai generator tema AI di menu Tema → Buat baru. Buat key gratis di
+            <a href="https://openrouter.ai/keys" target="_blank" rel="noopener noreferrer" class="underline">openrouter.ai/keys</a>;
+            hanya model gratis (<code>:free</code>) yang dipakai, jadi tidak ada tagihan.
+          </p>
+        </div>
+        <div v-if="ai" class="flex flex-wrap items-center gap-2 text-sm">
+          <span class="chip" :class="ai.openrouter_set ? 'bg-green-100 text-green-800' : 'bg-amber-100 text-amber-800'">
+            {{ ai.openrouter_set ? 'Terpasang' : 'Belum diisi' }}
+          </span>
+          <code v-if="ai.openrouter_hint" class="text-brand-700">{{ ai.openrouter_hint }}</code>
+          <button v-if="ai.openrouter_set" type="button" class="ml-auto text-xs text-red-600 underline" :disabled="aiBusy" @click="removeKey">Hapus key</button>
+        </div>
+        <form class="grid gap-2" @submit.prevent="saveKey">
+          <label class="label">{{ ai?.openrouter_set ? 'Ganti API key' : 'API key' }}
+            <input v-model="aiKey" type="password" class="input" placeholder="sk-or-v1-…" autocomplete="off" spellcheck="false">
+            <span class="text-xs font-normal text-brand-500">Disimpan terenkripsi di Supabase Vault dan tidak bisa dilihat lagi dari browser; hanya server yang membacanya saat generate.</span>
+          </label>
+          <button class="btn-primary justify-self-start" :disabled="aiBusy || !aiKey.trim()">Simpan key</button>
+        </form>
+        <form class="grid gap-2" @submit.prevent="saveModel">
+          <label class="label">Model default
+            <select v-model="aiModel" class="input">
+              <option value="">Otomatis (router model gratis OpenRouter)</option>
+              <option v-for="m in aiModels.filter(m => m.id !== 'openrouter/free')" :key="m.id" :value="m.id">
+                {{ m.name }}{{ m.structured ? ' · JSON terstruktur' : '' }}
+              </option>
+              <option v-if="aiModel && !aiModels.some(m => m.id === aiModel)" :value="aiModel">{{ aiModel }}</option>
+            </select>
+          </label>
+          <button class="btn-ghost justify-self-start" :disabled="aiBusy || aiModel === (ai?.openrouter_model ?? '')">Simpan model</button>
+        </form>
+        <p v-if="aiMsg" class="text-sm" :class="aiMsg.ok ? 'text-green-700' : 'text-red-600'">{{ aiMsg.text }}</p>
+      </div>
+    </section>
   </div>
 </template>

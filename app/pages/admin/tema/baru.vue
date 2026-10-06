@@ -16,6 +16,23 @@ const EXAMPLES = [
   'Tema elegan navy dan emas lembut bergaya art deco, kartu acara berbentuk kubah, cocok untuk resepsi malam.',
 ]
 
+// Penyedia AI & model gratis OpenRouter
+interface FreeModel { id: string, name: string, context: number, maxOutput: number | null, structured: boolean }
+const { data: ai } = await useAsyncData('admin-ai-models', () => $fetch<{
+  providers: { anthropic: boolean, openrouter: boolean }
+  defaultProvider: 'anthropic' | 'openrouter' | null
+  openrouter: { defaultModel: string, models: FreeModel[], error: string }
+}>('/api/admin/themes/ai-models'), { server: false })
+const provider = ref<'anthropic' | 'openrouter' | null>(null)
+const model = ref('')
+watch(ai, (v) => {
+  if (!v) return
+  provider.value ??= v.defaultProvider
+  model.value ||= v.openrouter.defaultModel
+}, { immediate: true })
+const usedModel = ref('')
+const fmtCtx = (n: number) => n >= 1000 ? `${Math.round(n / 1000)}K` : String(n)
+
 const prompt = ref('')
 const generating = ref(false)
 const genError = ref('')
@@ -33,7 +50,12 @@ async function generate() {
   genError.value = ''
   generating.value = true
   try {
-    const r = await $fetch<any>('/api/admin/themes/generate', { method: 'POST', body: { prompt: prompt.value }, timeout: 300_000 })
+    const r = await $fetch<any>('/api/admin/themes/generate', {
+      method: 'POST',
+      body: { prompt: prompt.value, provider: provider.value ?? undefined, model: provider.value === 'openrouter' ? model.value || undefined : undefined },
+      timeout: 300_000,
+    })
+    usedModel.value = r.model ?? ''
     definition.value = r.definition
     css.value = r.css
     errors.value = r.errors
@@ -90,6 +112,31 @@ async function save() {
             Tulis brief desain. AI menghasilkan tema dalam format standar (section bertag, placeholder, variabel warna/font),
             lalu sistem memvalidasi dan mengompilasi CSS-nya secara otomatis.
           </p>
+          <div v-if="ai" class="grid gap-2 rounded-xl bg-brand-50/60 p-3 text-sm">
+            <p v-if="!ai.providers.anthropic && !ai.providers.openrouter" class="text-red-600">
+              Belum ada API key AI. Isi API key OpenRouter (gratis) di <NuxtLink to="/admin/pengaturan" class="underline">Pengaturan</NuxtLink>.
+            </p>
+            <div v-else class="flex flex-wrap items-center gap-3">
+              <label v-if="ai.providers.anthropic && ai.providers.openrouter" class="label !flex-row items-center gap-2">Penyedia
+                <select v-model="provider" class="input !py-1.5">
+                  <option value="openrouter">OpenRouter (gratis)</option>
+                  <option value="anthropic">Claude (Anthropic)</option>
+                </select>
+              </label>
+              <span v-else class="chip bg-white text-brand-700">{{ provider === 'openrouter' ? 'OpenRouter · model gratis' : 'Claude (Anthropic)' }}</span>
+            </div>
+            <label v-if="provider === 'openrouter' && ai.openrouter.models.length" class="label">Model gratis
+              <select v-model="model" class="input">
+                <option v-for="m in ai.openrouter.models" :key="m.id" :value="m.id">
+                  {{ m.name }} · konteks {{ fmtCtx(m.context) }}{{ m.structured ? ' · JSON terstruktur' : '' }}
+                </option>
+              </select>
+            </label>
+            <p v-if="provider === 'openrouter' && ai.openrouter.error" class="text-red-600">Gagal memuat daftar model: {{ ai.openrouter.error }}</p>
+            <p v-if="provider === 'openrouter'" class="text-xs text-brand-500">
+              Model gratis punya batas permintaan per menit/hari dan kualitasnya bervariasi. Pilih model berlabel "JSON terstruktur" bila ada; jika gagal, coba model lain.
+            </p>
+          </div>
           <textarea v-model="prompt" rows="5" class="input" placeholder="Buatkan layout undangan pernikahan minimalis dengan aksen warna sage green dan font serif elegan…" maxlength="2000" />
           <div class="flex flex-wrap gap-2">
             <button v-for="ex in EXAMPLES" :key="ex" type="button" class="chip bg-brand-50 text-left text-brand-700 hover:bg-brand-100" @click="prompt = ex">{{ ex.slice(0, 48) }}…</button>
@@ -107,6 +154,7 @@ async function save() {
               {{ errors.length ? 'Belum valid' : `Valid · percobaan ${attempts}` }}
             </span>
           </div>
+          <p v-if="usedModel" class="-mt-1 text-xs text-brand-500">Dibuat dengan model: <span class="font-mono">{{ usedModel }}</span></p>
           <label class="label">Nama tema
             <input v-model="meta.name" class="input" required maxlength="60">
           </label>
