@@ -183,7 +183,9 @@ const bgUrl = (bg?: string) => {
 <style>
 .invite-wrap { min-height: 100%; display: flex; flex-direction: column; }
 .invite-root { min-height: 100%; flex: 1 0 auto; }
-.invite-page { max-width: 480px; margin: 0 auto; min-height: 100vh; box-shadow: 0 0 40px rgb(0 0 0 / 0.08); }
+/* width:100% wajib: margin auto di flex kolom mematikan stretch, sehingga tanpa lebar eksplisit undangan selebar
+   lebar-minimum isinya (elemen tema berlebar tetap mendorong halaman melebihi layar → tamu harus zoom out). */
+.invite-page { width: 100%; max-width: 480px; margin: 0 auto; min-height: 100vh; box-shadow: 0 0 40px rgb(0 0 0 / 0.08); }
 .invite-cover-leave-active { transition: transform 0.8s cubic-bezier(0.7, 0, 0.3, 1), opacity 0.8s; }
 .invite-cover-leave-to { transform: translateY(-100%); opacity: 0; }
 
