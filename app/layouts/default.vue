@@ -74,7 +74,8 @@ watch(() => route.fullPath, () => (menuOpen.value = false))
         <NuxtLink to="/kebijakan-pengembalian" class="hover:text-brand">Kebijakan Pengembalian Dana</NuxtLink>
         <NuxtLink to="/kontak" class="hover:text-brand">Kontak</NuxtLink>
       </nav>
-      <p class="mt-4">© {{ new Date().getFullYear() }} {{ config.public.siteName }} · Undangan digital syar'i & modern untuk semua acara</p>
+      <PaymentLogos />
+      <p class="mt-6">© {{ new Date().getFullYear() }} {{ config.public.siteName }} · Undangan digital syar'i & modern untuk semua acara</p>
     </footer>
   </div>
 </template>

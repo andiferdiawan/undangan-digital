@@ -2,6 +2,7 @@
 const route = useRoute()
 const links = [
   { to: '/admin', label: 'Analitik' },
+  { to: '/admin/trafik', label: 'Trafik' },
   { to: '/admin/pesanan', label: 'Pesanan' },
   { to: '/admin/reseller', label: 'Reseller' },
   { to: '/admin/pencairan', label: 'Pencairan' },
