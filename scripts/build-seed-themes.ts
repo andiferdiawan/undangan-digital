@@ -50,8 +50,9 @@ import * as kotakRahasia from './themes/kotak-rahasia'
 import * as moccaGypsophila from './themes/mocca-gypsophila'
 import * as amplopZaitun from './themes/amplop-zaitun'
 import * as pitaMarun from './themes/pita-marun'
+import * as catatanCinta from './themes/catatan-cinta'
 
-const themes = [sakinah, minimalis, floral, moccaGypsophila, arka, noir, rustic, bugis, makassar, toraja, senja, arunika, lontara, aurelia, doodle, alur, aqBintang, aqBunga, khCeria, khMihrab, utBalon, utEmas, ofPrima, ofAgenda, acSilaturahmi, acKumpul, exPramuka, exPmr, exSeni, kabarCinta, harianBahagia, zoomCinta, pintuHati, suratCinta, piringanRindu, bolaUgi, layarPhinisi, tongkonanRindu, kisahPopUp, terminalCinta, kotakRahasia, amplopZaitun, pitaMarun, bukuNikah, cetakKenangan]
+const themes = [sakinah, minimalis, floral, moccaGypsophila, arka, noir, rustic, bugis, makassar, toraja, senja, arunika, lontara, aurelia, doodle, alur, aqBintang, aqBunga, khCeria, khMihrab, utBalon, utEmas, ofPrima, ofAgenda, acSilaturahmi, acKumpul, exPramuka, exPmr, exSeni, kabarCinta, harianBahagia, zoomCinta, pintuHati, suratCinta, piringanRindu, bolaUgi, layarPhinisi, tongkonanRindu, kisahPopUp, terminalCinta, kotakRahasia, amplopZaitun, pitaMarun, catatanCinta, bukuNikah, cetakKenangan]
 const q = (s: string) => `'${s.replace(/'/g, "''")}'`
 const rows: string[] = []
 const perTheme: { slug: string, row: string }[] = []
