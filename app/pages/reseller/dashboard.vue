@@ -42,6 +42,8 @@ const { data: catalog } = await useCatalog()
 
 const origin = computed(() => useRuntimeConfig().public.siteUrl || (import.meta.client ? window.location.origin : ''))
 const refLink = computed(() => `${origin.value}/r/${summary.value?.reseller.code ?? ''}`)
+// Tampilan link tanpa https:// (yang disalin tetap refLink lengkap)
+const refHost = computed(() => String(origin.value).replace(/^https?:\/\//, ''))
 const orderLink = (o: OrderRow) => `${origin.value}/pesanan/${o.id}?k=${o.access_key}`
 
 const copied = ref('')
@@ -180,14 +182,18 @@ const STATUS: Record<string, [string, string]> = {
         <div class="card p-4"><p class="text-xs text-brand-500">Penjualan lunas</p><p class="mt-1 text-2xl font-semibold text-brand-900">{{ summary.sales_count }}</p><p class="text-xs text-brand-400">{{ rupiah(summary.sales_amount) }}</p></div>
       </div>
 
-      <div class="card mt-4 flex flex-wrap items-center gap-3 p-4">
-        <div class="min-w-0 flex-1">
+      <!-- HP: bertumpuk, tombol analitik selebar kartu; ≥sm: satu baris -->
+      <div class="card mt-4 grid gap-3 p-4 sm:flex sm:items-center sm:gap-4">
+        <div class="min-w-0 sm:flex-1">
           <p class="text-xs font-semibold uppercase tracking-wider text-brand-500">Link referral Anda</p>
-          <p class="truncate font-mono text-sm text-brand-900">{{ refLink }}</p>
-          <p class="text-xs text-brand-500">Pembeli lewat link ini tercatat sebagai penjualan Anda (30 hari).</p>
+          <div class="mt-2 flex items-center gap-2 rounded-xl bg-brand-50 py-1.5 pl-3 pr-1.5 ring-1 ring-brand-100">
+            <!-- <wbr>: bila tidak muat, link terpotong rapi sebelum /r/ (bukan di tengah kode) -->
+            <p class="min-w-0 flex-1 font-mono text-[13px] leading-snug text-brand-900 [overflow-wrap:anywhere] sm:text-sm">{{ refHost }}<wbr>/r/{{ summary.reseller.code }}</p>
+            <button class="btn-ghost btn-sm min-w-20 shrink-0" @click="copy(refLink, 'ref')">{{ copied === 'ref' ? '✓ Disalin' : 'Salin' }}</button>
+          </div>
+          <p class="mt-2 text-xs text-brand-500">Pembeli lewat link ini tercatat sebagai penjualan Anda (30 hari).</p>
         </div>
-        <button class="btn-ghost btn-sm" @click="copy(refLink, 'ref')">{{ copied === 'ref' ? '✓ Disalin' : 'Salin link' }}</button>
-        <NuxtLink to="/reseller/analitik" class="btn-primary btn-sm">Analitik & buat link →</NuxtLink>
+        <NuxtLink to="/reseller/analitik" class="btn-primary btn-sm w-full shrink-0 sm:w-auto">Analitik & buat link →</NuxtLink>
       </div>
 
       <div class="mt-4 grid gap-4 lg:grid-cols-[1fr_380px]">
