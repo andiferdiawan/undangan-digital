@@ -14,7 +14,7 @@ export interface ValidationResult {
   classes: string[]
 }
 
-const CLASS_PROPS = new Set(['item_class', 'number_class', 'label_class', 'input_class', 'button_class', 'name_class', 'text_class', 'image_class', 'dot_class'])
+const CLASS_PROPS = new Set(['item_class', 'number_class', 'label_class', 'input_class', 'button_class', 'name_class', 'text_class', 'image_class', 'dot_class', 'head_class', 'day_class', 'active_class', 'marker_class'])
 const LIST_KEYS = new Set<string>(REPEAT_SOURCES)
 
 /**
@@ -126,6 +126,8 @@ export function validateTheme(input: unknown): ValidationResult {
         errors.push(`${where}: photo_slider.interval harus angka milidetik, mis. 5000`)
       if (node.component === 'copy_button' && !node.props?.value)
         errors.push(`${where}: copy_button wajib punya props.value`)
+      if (node.component === 'month_calendar' && node.props?.marker && !['heart', 'circle', 'none'].includes(node.props.marker))
+        errors.push(`${where}: month_calendar.marker harus heart, circle, atau none`)
     }
     else if (node.props) {
       warnings.push(`${where}: props diabaikan karena node bukan komponen`)

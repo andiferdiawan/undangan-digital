@@ -25,6 +25,22 @@ export function dateParts(iso: string): DateParts | null {
   return { day, num: String(+m[3]!), month, year: m[1]!, full: `${day}, ${+m[3]!} ${month} ${m[1]}`, hijri }
 }
 
+/** Singkatan hari untuk kepala kalender, minggu dimulai Ahad. */
+export const WEEKDAYS_SHORT = ['Ahd', 'Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab'] as const
+
+/** Kalender sebulan penuh untuk tanggal acara: jumlah kotak kosong sebelum tanggal 1, jumlah hari, dan hari H. */
+export function monthGrid(iso: string | null): { blanks: number, days: number, active: number } | null {
+  const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(iso || '')
+  if (!m) return null
+  const y = +m[1]!
+  const mo = +m[2]! - 1
+  return {
+    blanks: new Date(Date.UTC(y, mo, 1, 12)).getUTCDay(),
+    days: new Date(Date.UTC(y, mo + 1, 0, 12)).getUTCDate(),
+    active: +m[3]!,
+  }
+}
+
 /** Tanggal di sekitar hari H (untuk strip kalender): H-2, H-1, H+1, H+2. */
 function nearbyDays(iso: string) {
   const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(iso || '')
@@ -84,6 +100,8 @@ export interface RenderContext {
   calendar: { title: string, start: string, end: string, location: string } | null
   /** Foto slider: Foto Sampul, atau galeri bila kosong. */
   slides: string[]
+  /** Tanggal acara utama (YYYY-MM-DD) untuk kalender bulanan, null bila belum diisi. */
+  eventDate: string | null
 }
 
 /**
@@ -203,6 +221,7 @@ export function buildContext(
           location: [main?.venue, main?.address].filter(Boolean).join(', '),
         }
       : null,
+    eventDate: main && /^\d{4}-\d{2}-\d{2}$/.test(main.date) ? main.date : null,
     slides: (() => {
       const cover = (c.cover_photos ?? []).map(x => safeUrl(x.url)).filter(Boolean)
       return cover.length ? cover : lists.gallery.map(g => g.url ?? '').filter(Boolean)

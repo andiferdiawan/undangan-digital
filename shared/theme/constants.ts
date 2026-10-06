@@ -39,6 +39,8 @@ export const COMPONENTS = {
   photo_slider: { props: ['interval', 'image_class', 'dots', 'dot_class'] },
   /** Galeri digeser satu per satu (swipe, tombol ‹ ›, titik, penanda 1/n) dari daftar galeri. */
   gallery_carousel: { props: ['item_class', 'image_class', 'text_class', 'button_class', 'dot_class'] },
+  /** Kalender sebulan penuh dari tanggal acara utama; hari H diberi penanda (marker: heart | circle | none). */
+  month_calendar: { props: ['head_class', 'day_class', 'active_class', 'marker', 'marker_class'] },
 } as const
 export type ComponentName = keyof typeof COMPONENTS
 
