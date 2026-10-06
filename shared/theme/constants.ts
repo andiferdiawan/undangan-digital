@@ -78,6 +78,8 @@ export const ALLOWED_FONTS = [
   'Great Vibes', 'Alex Brush', 'Parisienne', 'Pinyon Script', 'Allura', 'Dancing Script',
   'Sacramento', 'Tangerine', 'Mea Culpa', 'Ephesis',
   'Caveat', 'Caveat Brush', 'Gochi Hand', 'Permanent Marker', 'Fredoka',
+  // Mesin ketik & tulisan tangan bergaya tanda tangan (tema editorial)
+  'Courier Prime', 'Mr Dafoe',
 ] as const
 
 /**
