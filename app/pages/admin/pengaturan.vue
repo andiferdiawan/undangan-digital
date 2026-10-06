@@ -204,7 +204,7 @@ async function saveAiOptions() {
         </div>
         <form class="grid gap-2" @submit.prevent="saveGeminiKey">
           <label class="label">{{ ai?.gemini_set ? 'Ganti API key' : 'API key' }}
-            <input v-model="gmKey" type="password" class="input" placeholder="AIza…" autocomplete="off" spellcheck="false">
+            <input v-model="gmKey" type="text" name="gemini-api-key" class="input font-mono [-webkit-text-security:disc]" placeholder="AIza…" autocomplete="off" autocapitalize="off" spellcheck="false" data-1p-ignore data-lpignore="true">
             <span class="text-xs font-normal text-brand-500">Disimpan terenkripsi di Supabase Vault; hanya server yang membacanya.</span>
           </label>
           <button class="btn-primary justify-self-start" :disabled="aiBusy || !gmKey.trim()">Simpan key</button>
@@ -229,7 +229,7 @@ async function saveAiOptions() {
         </div>
         <form class="grid gap-2" @submit.prevent="saveKey">
           <label class="label">{{ ai?.openrouter_set ? 'Ganti API key' : 'API key' }}
-            <input v-model="aiKey" type="password" class="input" placeholder="sk-or-v1-…" autocomplete="off" spellcheck="false">
+            <input v-model="aiKey" type="text" name="openrouter-api-key" class="input font-mono [-webkit-text-security:disc]" placeholder="sk-or-v1-…" autocomplete="off" autocapitalize="off" spellcheck="false" data-1p-ignore data-lpignore="true">
             <span class="text-xs font-normal text-brand-500">Disimpan terenkripsi di Supabase Vault dan tidak bisa dilihat lagi dari browser; hanya server yang membacanya saat generate.</span>
           </label>
           <button class="btn-primary justify-self-start" :disabled="aiBusy || !aiKey.trim()">Simpan key</button>

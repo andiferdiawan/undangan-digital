@@ -33,15 +33,15 @@ async function forgot() {
 
 <template>
   <div class="mx-auto max-w-md px-4 py-12">
-    <form class="card p-6" @submit.prevent="login">
+    <form class="card p-6" method="post" action="/masuk" @submit.prevent="login">
       <h1 class="font-display text-3xl text-brand">Masuk</h1>
       <p class="mt-2 text-sm text-brand-600">Kelola undangan, daftar tamu, dan RSVP Anda.</p>
       <div class="mt-6 grid gap-4">
         <label class="label">Email
-          <input v-model="form.email" type="email" class="input" autocomplete="email" required>
+          <input v-model="form.email" type="email" name="email" class="input" autocomplete="username" required>
         </label>
         <label class="label">Password
-          <input v-model="form.password" type="password" class="input" autocomplete="current-password" required>
+          <input v-model="form.password" type="password" name="password" class="input" autocomplete="current-password" required>
         </label>
       </div>
       <p v-if="error" class="mt-3 text-sm text-red-600" role="alert">{{ error }}</p>

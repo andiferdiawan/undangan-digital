@@ -125,10 +125,10 @@ const days = computed(() => settings.value?.payout_days?.join(' & ') ?? '5 & 25'
           <p v-if="mine?.status === 'rejected'" class="rounded-xl bg-amber-50 p-3 text-xs text-amber-800">Pendaftaran sebelumnya belum disetujui. Anda bisa memperbaiki data dan mengajukan ulang.</p>
           <template v-if="!user">
             <label class="label">Email
-              <input v-model="account.email" type="email" class="input" autocomplete="email" required>
+              <input v-model="account.email" type="email" name="email" class="input" autocomplete="username" required>
             </label>
             <label class="label">Password
-              <input v-model="account.password" type="password" class="input" autocomplete="new-password" minlength="8" required>
+              <input v-model="account.password" type="password" name="new-password" class="input" autocomplete="new-password" minlength="8" required>
             </label>
             <p class="text-xs text-brand-500">Sudah punya akun? <NuxtLink to="/masuk" class="font-semibold text-clay-600">Masuk dulu</NuxtLink></p>
           </template>

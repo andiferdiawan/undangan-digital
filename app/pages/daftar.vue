@@ -151,10 +151,10 @@ async function submit() {
             <input v-model="form.full_name" class="input" autocomplete="name" required>
           </label>
           <label class="label">Email
-            <input v-model="form.email" type="email" class="input" autocomplete="email" required>
+            <input v-model="form.email" type="email" name="email" class="input" autocomplete="username" required>
           </label>
           <label class="label">Password
-            <input v-model="form.password" type="password" class="input" autocomplete="new-password" minlength="8" required>
+            <input v-model="form.password" type="password" name="new-password" class="input" autocomplete="new-password" minlength="8" required>
             <span class="text-xs font-normal text-brand-500">Minimal 8 karakter</span>
           </label>
         </template>
