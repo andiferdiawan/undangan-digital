@@ -119,6 +119,15 @@ Migrasi ada di `supabase/migrations/` (sudah diterapkan ke project Supabase). Ri
 Tema bawaan ditulis di `scripts/themes/*.ts`. Setelah mengubahnya, jalankan `npm run seed:themes` lalu jalankan
 `supabase/seed/themes.sql` di SQL Editor.
 
+Tanpa SQL Editor: set `SUPABASE_ACCESS_TOKEN` (personal access token Supabase) lalu pakai `scripts/db.sh`, yang
+memanggil Supabase Management API (`api.supabase.com`):
+
+```bash
+scripts/db.sh "select slug, status from public.blog_posts"
+scripts/db.sh -f supabase/seed/themes.sql
+scripts/db.sh -m supabase/migrations/20261006000027_reseller_links.sql   # terapkan + catat di riwayat migrasi
+```
+
 ## Struktur
 
 ```
