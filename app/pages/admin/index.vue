@@ -120,7 +120,7 @@ const maxSold = computed(() => Math.max(1, ...(stats.value?.leaderboard ?? []).m
             <NuxtLink to="/admin/reseller" class="text-xs font-semibold text-brand">Kelola reseller →</NuxtLink>
           </div>
           <div class="overflow-x-auto">
-            <table class="w-full min-w-[560px] text-sm">
+            <table class="table-cards w-full text-sm sm:min-w-[560px]">
               <thead>
                 <tr class="border-y border-brand-50 bg-brand-50/50 text-left text-xs text-brand-500">
                   <th class="px-4 py-2 font-medium">Reseller</th>
@@ -132,11 +132,11 @@ const maxSold = computed(() => Math.max(1, ...(stats.value?.leaderboard ?? []).m
               </thead>
               <tbody>
                 <tr v-for="r in stats.resellers" :key="r.id" class="border-b border-brand-50 last:border-0">
-                  <td class="px-4 py-2.5"><p class="font-medium text-brand-900">{{ r.business_name }}</p><p class="font-mono text-xs text-brand-500">{{ r.code }}</p></td>
-                  <td class="px-4 py-2.5 text-right">{{ r.sold }}</td>
-                  <td class="px-4 py-2.5 text-right">{{ rupiah(r.revenue) }}</td>
-                  <td class="px-4 py-2.5 text-right">{{ rupiah(r.commission) }}</td>
-                  <td class="px-4 py-2.5 text-right font-medium">{{ rupiah(r.balance) }}</td>
+                  <td class="tc-title px-4 py-2.5"><p class="font-medium text-brand-900">{{ r.business_name }}</p><p class="font-mono text-xs text-brand-500">{{ r.code }}</p></td>
+                  <td data-label="Terjual" class="px-4 py-2.5 text-right">{{ r.sold }}</td>
+                  <td data-label="Penjualan" class="px-4 py-2.5 text-right">{{ rupiah(r.revenue) }}</td>
+                  <td data-label="Komisi" class="px-4 py-2.5 text-right">{{ rupiah(r.commission) }}</td>
+                  <td data-label="Saldo" class="px-4 py-2.5 text-right font-medium">{{ rupiah(r.balance) }}</td>
                 </tr>
                 <tr v-if="!stats.resellers.length"><td colspan="5" class="p-6 text-center text-brand-500">Belum ada reseller aktif.</td></tr>
               </tbody>
@@ -151,7 +151,7 @@ const maxSold = computed(() => Math.max(1, ...(stats.value?.leaderboard ?? []).m
             <span class="text-xs text-brand-500">berdasarkan token terjual</span>
           </div>
           <div class="overflow-x-auto">
-            <table class="w-full min-w-[560px] text-sm">
+            <table class="table-cards w-full text-sm sm:min-w-[560px]">
               <thead>
                 <tr class="border-y border-brand-50 bg-brand-50/50 text-left text-xs text-brand-500">
                   <th class="px-4 py-2 font-medium">#</th>
@@ -163,12 +163,12 @@ const maxSold = computed(() => Math.max(1, ...(stats.value?.leaderboard ?? []).m
               </thead>
               <tbody>
                 <tr v-for="(l, i) in stats.leaderboard" :key="l.theme_id" class="border-b border-brand-50 last:border-0">
-                  <td class="px-4 py-2.5 text-brand-400">{{ i + 1 }}</td>
-                  <td class="px-4 py-2.5">
+                  <td data-label="Peringkat" class="px-4 py-2.5 text-brand-400">{{ i + 1 }}</td>
+                  <td class="tc-title px-4 py-2.5 max-sm:order-first">
                     <p class="font-medium text-brand-900">{{ l.name }}</p>
                     <p class="text-xs text-brand-500">{{ l.code }} · {{ l.category ?? '-' }}</p>
                   </td>
-                  <td class="px-4 py-2.5">
+                  <td data-label="Terjual" class="px-4 py-2.5">
                     <div class="flex items-center gap-2">
                       <div class="h-2 w-24 overflow-hidden rounded-full bg-brand-50">
                         <div class="h-full rounded-full bg-brand-500" :style="{ width: `${(l.sold / maxSold) * 100}%` }" />
@@ -176,8 +176,8 @@ const maxSold = computed(() => Math.max(1, ...(stats.value?.leaderboard ?? []).m
                       <span class="font-medium text-brand-900">{{ l.sold }}</span>
                     </div>
                   </td>
-                  <td class="px-4 py-2.5 text-right text-brand-700">{{ l.redeemed }}</td>
-                  <td class="px-4 py-2.5 text-right font-medium text-brand-900">{{ rupiah(l.revenue) }}</td>
+                  <td data-label="Diaktifkan" class="px-4 py-2.5 text-right text-brand-700">{{ l.redeemed }}</td>
+                  <td data-label="Pendapatan" class="px-4 py-2.5 text-right font-medium text-brand-900">{{ rupiah(l.revenue) }}</td>
                 </tr>
               </tbody>
             </table>

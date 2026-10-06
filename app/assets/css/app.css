@@ -19,3 +19,23 @@ body { font-family: "Plus Jakarta Sans", system-ui, sans-serif; color: #243a2d; 
 .prose-page blockquote { margin: 1em 0; padding: .7em 1em; border-left: 3px solid #b8623f; background: #f6f1ea; border-radius: 0 12px 12px 0; font-style: italic; }
 .prose-page blockquote p { margin: .35em 0; }
 .prose-page h2[id], .prose-page h3[id] { scroll-margin-top: 80px; }
+
+/*
+ * Tabel admin di HP: tiap baris jadi kartu, tiap sel menampilkan label kolom dari data-label.
+ * Sel tanpa data-label (judul baris) tampil penuh di atas; sel .tc-actions di bawah kartu.
+ */
+@media (max-width: 639.98px) {
+  table.table-cards { min-width: 0 !important; display: block; }
+  table.table-cards thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+  table.table-cards tbody { display: grid; gap: .625rem; padding: .625rem; }
+  table.table-cards tr { display: grid; gap: .35rem; padding: .8rem .9rem; border: 1px solid #e6ede4 !important; border-radius: 14px; background: #fff; }
+  table.table-cards td { display: block; position: relative; padding: 0 !important; text-align: right !important; white-space: normal !important; min-width: 0; overflow-wrap: anywhere; }
+  table.table-cards td[data-label] { padding-left: 40% !important; min-height: 1.4em; }
+  table.table-cards td[data-label]::before { content: attr(data-label); position: absolute; left: 0; top: .1rem; width: 38%; text-align: left; font-size: .72rem; font-weight: 500; color: #6f8a73; }
+  table.table-cards td[data-label] > div { justify-content: flex-end; }
+  table.table-cards td:not([data-label]) { display: block; text-align: left !important; }
+  table.table-cards td.tc-title { padding-bottom: .35rem !important; margin-bottom: .1rem; border-bottom: 1px dashed #e6ede4; }
+  table.table-cards td.tc-actions { display: flex; justify-content: flex-end; gap: 1rem; padding-top: .45rem !important; border-top: 1px dashed #e6ede4; }
+  table.table-cards td[colspan] { display: block; text-align: center !important; }
+  table.table-cards tr:has(> td[colspan]) { border-style: dashed !important; }
+}

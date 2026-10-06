@@ -196,17 +196,17 @@ const devices = computed(() => Object.entries(data.value?.devices ?? {}).sort((a
         <!-- Jenis halaman -->
         <section class="card mt-5 overflow-x-auto p-5">
           <h2 class="font-semibold text-brand">Per jenis halaman</h2>
-          <table class="mt-3 w-full min-w-[520px] text-sm">
+          <table class="table-cards mt-3 w-full text-sm sm:min-w-[520px]">
             <thead class="text-left text-xs text-brand-500">
               <tr><th class="py-2 font-medium">Jenis</th><th class="py-2 text-right font-medium">Dilihat</th><th class="py-2 text-right font-medium">Pengunjung</th><th class="py-2 text-right font-medium">Organik</th><th class="py-2 text-right font-medium">Iklan</th></tr>
             </thead>
             <tbody class="divide-y divide-brand-100">
               <tr v-for="r in data.types" :key="r.page_type" class="cursor-pointer hover:bg-brand-50/60" @click="typeFilter = r.page_type">
-                <td class="py-2 font-medium text-brand-900">{{ TYPES[r.page_type] }}</td>
-                <td class="py-2 text-right tabular-nums">{{ num(r.views) }}</td>
-                <td class="py-2 text-right tabular-nums">{{ num(r.visitors) }}</td>
-                <td class="py-2 text-right tabular-nums">{{ num(r.organik) }} <span class="text-xs text-brand-400">{{ pct(r.organik, r.views) }}%</span></td>
-                <td class="py-2 text-right tabular-nums">{{ num(r.iklan) }}</td>
+                <td class="tc-title py-2 font-medium text-brand-900">{{ TYPES[r.page_type] }}</td>
+                <td data-label="Dilihat" class="py-2 text-right tabular-nums">{{ num(r.views) }}</td>
+                <td data-label="Pengunjung" class="py-2 text-right tabular-nums">{{ num(r.visitors) }}</td>
+                <td data-label="Organik" class="py-2 text-right tabular-nums">{{ num(r.organik) }} <span class="text-xs text-brand-400">{{ pct(r.organik, r.views) }}%</span></td>
+                <td data-label="Iklan" class="py-2 text-right tabular-nums">{{ num(r.iklan) }}</td>
               </tr>
               <tr v-if="!data.types.length"><td colspan="5" class="py-4 text-brand-500">Belum ada kunjungan tercatat di rentang ini.</td></tr>
             </tbody>
@@ -233,7 +233,7 @@ const devices = computed(() => Object.entries(data.value?.devices ?? {}).sort((a
             </div>
           </div>
           <div class="mt-3 overflow-x-auto">
-            <table class="w-full min-w-[760px] text-sm">
+            <table class="table-cards w-full text-sm sm:min-w-[760px]">
               <thead class="text-left text-xs text-brand-500">
                 <tr>
                   <th class="py-2 font-medium">Halaman</th>
@@ -247,14 +247,14 @@ const devices = computed(() => Object.entries(data.value?.devices ?? {}).sort((a
               </thead>
               <tbody class="divide-y divide-brand-100">
                 <tr v-for="p in pages" :key="p.path">
-                  <td class="max-w-[280px] py-2">
+                  <td class="tc-title py-2 sm:max-w-[280px]">
                     <a :href="p.path" target="_blank" rel="noopener" class="block truncate font-medium text-brand-900 hover:underline">{{ p.title || p.path }}</a>
                     <span class="block truncate text-xs text-brand-500">{{ TYPES[p.page_type] }} · {{ p.path }}</span>
                   </td>
-                  <td class="py-2 text-right font-semibold tabular-nums">{{ num(p.views) }}</td>
-                  <td class="py-2 text-right tabular-nums">{{ num(p.visitors) }}</td>
-                  <td class="py-2 text-right tabular-nums">{{ num(p.entries) }}</td>
-                  <td v-for="s in SOURCES" :key="s.key" class="py-2 text-right tabular-nums" :class="p[s.key] ? 'text-brand-900' : 'text-brand-300'">{{ num(p[s.key]) }}</td>
+                  <td data-label="Dilihat" class="py-2 text-right font-semibold tabular-nums">{{ num(p.views) }}</td>
+                  <td data-label="Pengunjung" class="py-2 text-right tabular-nums">{{ num(p.visitors) }}</td>
+                  <td data-label="Halaman masuk" class="py-2 text-right tabular-nums">{{ num(p.entries) }}</td>
+                  <td v-for="s in SOURCES" :key="s.key" :data-label="s.label" class="py-2 text-right tabular-nums" :class="p[s.key] ? 'text-brand-900' : 'text-brand-300'">{{ num(p[s.key]) }}</td>
                 </tr>
                 <tr v-if="!pages.length"><td colspan="9" class="py-4 text-brand-500">Tidak ada data.</td></tr>
               </tbody>
@@ -275,7 +275,7 @@ const devices = computed(() => Object.entries(data.value?.devices ?? {}).sort((a
           <section class="card min-w-0 p-5">
             <h2 class="text-sm font-semibold text-brand">Situs perujuk</h2>
             <ul class="mt-3 grid gap-1.5 text-sm">
-              <li v-for="r in data.referrers.slice(0, 12)" :key="r.host" class="flex justify-between gap-2"><span class="truncate">{{ r.host }}</span><b class="tabular-nums">{{ num(r.sessions) }}</b></li>
+              <li v-for="r in data.referrers.slice(0, 12)" :key="r.host" class="flex min-w-0 justify-between gap-2"><span class="min-w-0 truncate" :title="r.host">{{ r.host }}</span><b class="tabular-nums">{{ num(r.sessions) }}</b></li>
               <li v-if="!data.referrers.length" class="text-brand-500">Belum ada.</li>
             </ul>
           </section>

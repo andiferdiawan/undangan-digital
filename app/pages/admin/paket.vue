@@ -126,8 +126,8 @@ async function remove(p: PackageRow) {
             </p>
             <p class="text-xs text-brand-500"><span class="font-mono">{{ p.code }}</span> · {{ p.guest_limit }} tamu · urutan {{ p.sort }}</p>
           </div>
-          <div class="flex items-center gap-2">
-            <p class="font-display text-xl text-brand">{{ rupiah(p.price) }}</p>
+          <div class="flex flex-wrap items-center gap-2 max-sm:w-full">
+            <p class="font-display text-xl text-brand max-sm:w-full">{{ rupiah(p.price) }}</p>
             <button class="btn-ghost btn-sm" @click="startEdit(p)">Ubah</button>
             <button class="btn-ghost btn-sm" @click="toggleActive(p)">{{ p.is_active ? 'Nonaktifkan' : 'Aktifkan' }}</button>
             <button class="btn-ghost btn-sm text-red-600" @click="remove(p)">Hapus</button>

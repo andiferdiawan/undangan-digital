@@ -103,15 +103,15 @@ const STATUS: Record<string, string> = { paid: 'bg-green-50 text-green-700', rej
       </template>
 
       <div v-else class="card mt-4 overflow-x-auto">
-        <table class="w-full min-w-[640px] text-sm">
+        <table class="table-cards w-full text-sm sm:min-w-[640px]">
           <thead><tr class="border-b border-brand-50 bg-brand-50/50 text-left text-xs text-brand-500"><th class="px-4 py-2">Reseller</th><th class="px-4 py-2">Nominal</th><th class="px-4 py-2">Status</th><th class="px-4 py-2">Referensi / catatan</th><th class="px-4 py-2">Diproses</th></tr></thead>
           <tbody>
             <tr v-for="p in history" :key="p.id" class="border-b border-brand-50 last:border-0">
-              <td class="px-4 py-2.5">{{ p.reseller?.business_name }}</td>
-              <td class="px-4 py-2.5 font-medium">{{ rupiah(p.amount) }}</td>
-              <td class="px-4 py-2.5"><span class="chip" :class="STATUS[p.status]">{{ p.status }}</span></td>
-              <td class="px-4 py-2.5 text-xs">{{ p.transfer_reference || '' }} {{ p.admin_note || '' }}</td>
-              <td class="px-4 py-2.5 text-xs">{{ tanggal(p.processed_at, true) }}</td>
+              <td class="tc-title px-4 py-2.5 font-medium">{{ p.reseller?.business_name }}</td>
+              <td data-label="Nominal" class="px-4 py-2.5 font-medium">{{ rupiah(p.amount) }}</td>
+              <td data-label="Status" class="px-4 py-2.5"><span class="chip" :class="STATUS[p.status]">{{ p.status }}</span></td>
+              <td data-label="Referensi" class="px-4 py-2.5 text-xs">{{ p.transfer_reference || '' }} {{ p.admin_note || '' }}</td>
+              <td data-label="Diproses" class="px-4 py-2.5 text-xs">{{ tanggal(p.processed_at, true) }}</td>
             </tr>
             <tr v-if="!history.length"><td colspan="5" class="p-8 text-center text-brand-500">Belum ada riwayat.</td></tr>
           </tbody>

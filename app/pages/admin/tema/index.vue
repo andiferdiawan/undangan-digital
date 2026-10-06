@@ -39,7 +39,7 @@ async function setStatus(id: string, status: 'draft' | 'published' | 'archived')
         <NuxtLink to="/admin/tema/baru" class="btn-accent btn-sm">✦ Generate dengan AI</NuxtLink>
       </div>
       <div class="card mt-5 overflow-x-auto">
-        <table class="w-full min-w-[640px] text-sm">
+        <table class="table-cards w-full text-sm sm:min-w-[640px]">
           <thead>
             <tr class="border-b border-brand-50 bg-brand-50/50 text-left text-xs text-brand-500">
               <th class="px-4 py-2 font-medium">Kode</th>
@@ -52,12 +52,12 @@ async function setStatus(id: string, status: 'draft' | 'published' | 'archived')
           </thead>
           <tbody>
             <tr v-for="t in data?.themes" :key="t.id" class="border-b border-brand-50 last:border-0">
-              <td class="px-4 py-3 font-mono text-xs text-brand-600">{{ t.code }}</td>
-              <td class="px-4 py-3 font-medium text-brand-900">{{ t.name }}</td>
-              <td class="px-4 py-3 text-brand-700">{{ catName(t.category_id) }}</td>
-              <td class="px-4 py-3"><span class="chip" :class="t.source === 'ai' ? 'bg-clay-50 text-clay-700' : 'bg-brand-50 text-brand-700'">{{ t.source === 'ai' ? 'AI' : 'Manual' }}</span></td>
-              <td class="px-4 py-3"><span class="chip" :class="STATUS[t.status]">{{ t.status }}</span></td>
-              <td class="whitespace-nowrap px-4 py-3 text-right text-xs">
+              <td data-label="Kode" class="px-4 py-3 font-mono text-xs text-brand-600">{{ t.code }}</td>
+              <td class="tc-title px-4 py-3 font-medium text-brand-900 max-sm:order-first">{{ t.name }}</td>
+              <td data-label="Kategori" class="px-4 py-3 text-brand-700">{{ catName(t.category_id) }}</td>
+              <td data-label="Sumber" class="px-4 py-3"><span class="chip" :class="t.source === 'ai' ? 'bg-clay-50 text-clay-700' : 'bg-brand-50 text-brand-700'">{{ t.source === 'ai' ? 'AI' : 'Manual' }}</span></td>
+              <td data-label="Status" class="px-4 py-3"><span class="chip" :class="STATUS[t.status]">{{ t.status }}</span></td>
+              <td class="tc-actions whitespace-nowrap px-4 py-3 text-right text-xs max-sm:!flex max-sm:gap-4">
                 <button v-if="t.status !== 'published'" class="font-semibold text-green-700" @click="setStatus(t.id, 'published')">Tayangkan</button>
                 <button v-else class="text-brand-500" @click="setStatus(t.id, 'draft')">Jadikan draf</button>
                 <NuxtLink :to="`/admin/tema/${t.id}`" class="ml-3 font-semibold text-brand">Edit</NuxtLink>

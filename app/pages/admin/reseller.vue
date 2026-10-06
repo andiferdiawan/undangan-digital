@@ -111,7 +111,7 @@ const STATUS: Record<string, string> = { pending: 'bg-amber-50 text-amber-700', 
       </div>
 
       <div class="card mt-5 overflow-x-auto">
-        <table class="w-full min-w-[900px] text-sm">
+        <table class="table-cards w-full text-sm sm:min-w-[900px]">
           <thead>
             <tr class="border-b border-brand-50 bg-brand-50/50 text-left text-xs text-brand-500">
               <th class="px-4 py-2 font-medium">Reseller</th>
@@ -126,19 +126,19 @@ const STATUS: Record<string, string> = { pending: 'bg-amber-50 text-amber-700', 
           </thead>
           <tbody>
             <tr v-for="r in shown" :key="r.id" class="border-b border-brand-50 last:border-0">
-              <td class="px-4 py-3">
+              <td class="tc-title px-4 py-3">
                 <p class="font-medium text-brand-900">{{ r.business_name }} <span class="font-mono text-xs text-brand-500">{{ r.code }}</span></p>
                 <p class="text-xs text-brand-500">{{ r.email }} · {{ r.whatsapp }}</p>
                 <p v-if="r.bank_account_number" class="text-xs text-brand-400">{{ r.bank_name }} {{ r.bank_account_number }} a.n. {{ r.bank_account_holder }}</p>
                 <p v-else class="text-xs text-amber-700">Rekening belum diisi</p>
               </td>
-              <td class="px-4 py-3"><span class="chip" :class="STATUS[r.status]">{{ r.status }}</span></td>
-              <td class="px-4 py-3">{{ Number(r.effective_rate) }}% <span v-if="r.commission_rate !== null" class="chip bg-clay-50 text-clay-700">khusus</span></td>
-              <td class="px-4 py-3 text-right">{{ r.sales_count }}<br><span class="text-xs text-brand-500">{{ rupiah(r.sales_amount) }}</span></td>
-              <td class="px-4 py-3 text-right">{{ rupiah(r.commission_total) }}</td>
-              <td class="px-4 py-3 text-right font-medium">{{ rupiah(r.balance) }}<br><span v-if="r.pending_payout" class="text-xs text-amber-700">+{{ rupiah(r.pending_payout) }} diajukan</span></td>
-              <td class="px-4 py-3 text-right">{{ rupiah(r.paid_out) }}</td>
-              <td class="px-4 py-3 text-right"><button class="text-xs font-semibold text-brand" @click="edit(r)">{{ r.status === 'pending' ? 'Tinjau' : 'Atur' }}</button></td>
+              <td data-label="Status" class="px-4 py-3"><span class="chip" :class="STATUS[r.status]">{{ r.status }}</span></td>
+              <td data-label="Tarif" class="px-4 py-3">{{ Number(r.effective_rate) }}% <span v-if="r.commission_rate !== null" class="chip bg-clay-50 text-clay-700">khusus</span></td>
+              <td data-label="Penjualan" class="px-4 py-3 text-right"><span>{{ r.sales_count }}<br><span class="text-xs text-brand-500">{{ rupiah(r.sales_amount) }}</span></span></td>
+              <td data-label="Komisi" class="px-4 py-3 text-right">{{ rupiah(r.commission_total) }}</td>
+              <td data-label="Saldo" class="px-4 py-3 text-right font-medium"><span>{{ rupiah(r.balance) }}<br><span v-if="r.pending_payout" class="text-xs text-amber-700">+{{ rupiah(r.pending_payout) }} diajukan</span></span></td>
+              <td data-label="Sudah cair" class="px-4 py-3 text-right">{{ rupiah(r.paid_out) }}</td>
+              <td class="tc-actions px-4 py-3 text-right"><button class="text-xs font-semibold text-brand" @click="edit(r)">{{ r.status === 'pending' ? 'Tinjau' : 'Atur' }}</button></td>
             </tr>
             <tr v-if="!shown.length"><td colspan="8" class="p-8 text-center text-brand-500">Belum ada reseller.</td></tr>
           </tbody>
