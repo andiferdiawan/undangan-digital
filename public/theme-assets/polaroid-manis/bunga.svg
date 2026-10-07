@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 170">
+  <!-- Rangkaian bunga: daun sage, dua mawar pink, kuncup, bunga kecil & baby's breath -->
+  <g fill="#a9b99c">
+    <path d="M118 96c-26-22-62-26-92-8 22 20 58 26 92 8z"/>
+    <path d="M128 90c10-34 38-56 76-58-6 34-36 56-76 58z"/>
+    <path d="M110 110c-14 22-36 34-66 34 8-26 32-38 66-34z"/>
+    <path d="M140 108c24 4 44 20 54 46-28 0-48-16-54-46z"/>
+  </g>
+  <g fill="none" stroke="#8c9f7f" stroke-width="1.6" stroke-linecap="round">
+    <path d="M114 94C88 84 60 84 34 90"/><path d="M130 88c18-22 40-40 68-52"/><path d="M108 112c-18 12-36 22-58 28"/><path d="M142 110c18 10 32 22 46 40"/>
+  </g>
+  <g transform="translate(96 78)">
+    <circle r="30" fill="#efc0c1"/>
+    <path d="M-22 6c6 16 38 16 44 0M-16-10c8-12 26-12 32 0M-8 18c4 6 12 6 16 0" fill="none" stroke="#d6939a" stroke-width="2.6" stroke-linecap="round"/>
+    <path d="M-10-2c4-8 16-8 20 0-4 8-16 8-20 0z" fill="#d6939a"/>
+  </g>
+  <g transform="translate(146 88)">
+    <circle r="22" fill="#f6d4d3"/>
+    <path d="M-16 4c4 12 28 12 32 0M-11-8c6-9 18-9 22 0" fill="none" stroke="#dea3a7" stroke-width="2.2" stroke-linecap="round"/>
+    <circle r="6" fill="#dea3a7"/>
+  </g>
+  <g transform="translate(62 112) rotate(-20)">
+    <path d="M0 10C-10 4-10-10 0-16 10-10 10 4 0 10z" fill="#e7a9ad"/><path d="M-6 8 0 22 6 8" fill="#a9b99c"/>
+  </g>
+  <g fill="#fff" stroke="#ecc4c4" stroke-width="1.2">
+    <g transform="translate(176 62)"><circle cx="0" cy="-6" r="5"/><circle cx="6" cy="-1" r="5"/><circle cx="4" cy="6" r="5"/><circle cx="-4" cy="6" r="5"/><circle cx="-6" cy="-1" r="5"/></g>
+    <g transform="translate(56 66) scale(.8)"><circle cx="0" cy="-6" r="5"/><circle cx="6" cy="-1" r="5"/><circle cx="4" cy="6" r="5"/><circle cx="-4" cy="6" r="5"/><circle cx="-6" cy="-1" r="5"/></g>
+  </g>
+  <circle cx="176" cy="62" r="2.6" fill="#e2b06f"/><circle cx="56" cy="66" r="2.2" fill="#e2b06f"/>
+  <g fill="#f3dede"><circle cx="38" cy="50" r="3"/><circle cx="46" cy="40" r="2.4"/><circle cx="200" cy="96" r="3"/><circle cx="210" cy="86" r="2.4"/><circle cx="128" cy="40" r="2.6"/><circle cx="138" cy="34" r="2"/></g>
+</svg>

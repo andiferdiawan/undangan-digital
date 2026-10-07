@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120">
+  <!-- Lencana bergerigi untuk angka usia -->
+  <path fill="#fbe4e3" stroke="#e3a5aa" stroke-width="2" d="M60 4l8 7 10-3 5 9 10 1 1 10 9 5-3 10 7 8-7 8 3 10-9 5-1 10-10 1-5 9-10-3-8 7-8-7-10 3-5-9-10-1-1-10-9-5 3-10-7-8 7-8-3-10 9-5 1-10 10-1 5-9 10 3z"/>
+  <circle cx="60" cy="60" r="40" fill="none" stroke="#e3a5aa" stroke-width="1.6" stroke-dasharray="3 4"/>
+</svg>
