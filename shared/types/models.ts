@@ -43,6 +43,8 @@ export interface GuestRow {
   phone: string | null
   group_name: string | null
   opened_at: string | null
+  /** Kapan undangan dikirim lewat tombol WhatsApp di Buku Tamu; null = belum */
+  sent_at: string | null
   created_at: string
 }
 
