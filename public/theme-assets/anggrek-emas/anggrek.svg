@@ -1,0 +1,53 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 190">
+  <!-- Rangkaian anggrek bulan pink untuk sudut: tangkai melengkung, kuncup, daun lebar -->
+  <path d="M8 18C70 10 130 30 168 78s52 92 54 108" fill="none" stroke="#8fa27f" stroke-width="2.4" stroke-linecap="round"/>
+  <path d="M30 150c22-26 58-36 92-26-20 30-58 40-92 26z" fill="#a9b99c"/>
+  <path d="M30 150c30-14 60-20 92-26" stroke="#8c9f7f" stroke-width="1.4" fill="none"/>
+  <path d="M-6 120c28-8 58 0 76 22-30 10-58 4-76-22z" fill="#b6c4a8"/>
+  <g transform="translate(40 30) rotate(-10) scale(1.05)">
+  <ellipse cx="0" cy="-15" rx="7.5" ry="12" fill="#f4cdd2"/>
+  <ellipse cx="-9" cy="12" rx="6" ry="11" transform="rotate(32 -9 12)" fill="#f4cdd2"/>
+  <ellipse cx="9" cy="12" rx="6" ry="11" transform="rotate(-32 9 12)" fill="#f4cdd2"/>
+  <ellipse cx="-13" cy="-1" rx="13" ry="11" transform="rotate(-18 -13 -1)" fill="#f7d9dc"/>
+  <ellipse cx="13" cy="-1" rx="13" ry="11" transform="rotate(18 13 -1)" fill="#f7d9dc"/>
+  <path d="M-20-3c5 2 10 3 14 2M20-3c-5 2-10 3-14 2M0-24v10" stroke="#e8adb5" stroke-width="1.2" fill="none" stroke-linecap="round"/>
+  <path d="M-6 3c-1 9 13 9 12 0-2-3-10-3-12 0z" fill="#c9707f"/>
+  <path d="M-3 2c2 2 4 2 6 0" stroke="#f9e2a8" stroke-width="1.4" fill="none" stroke-linecap="round"/>
+  <ellipse cx="0" cy="-2" rx="3" ry="4" fill="#fffaf5"/>
+</g>
+  <g transform="translate(96 40) rotate(8) scale(1.15)">
+  <ellipse cx="0" cy="-15" rx="7.5" ry="12" fill="#f4cdd2"/>
+  <ellipse cx="-9" cy="12" rx="6" ry="11" transform="rotate(32 -9 12)" fill="#f4cdd2"/>
+  <ellipse cx="9" cy="12" rx="6" ry="11" transform="rotate(-32 9 12)" fill="#f4cdd2"/>
+  <ellipse cx="-13" cy="-1" rx="13" ry="11" transform="rotate(-18 -13 -1)" fill="#f7d9dc"/>
+  <ellipse cx="13" cy="-1" rx="13" ry="11" transform="rotate(18 13 -1)" fill="#f7d9dc"/>
+  <path d="M-20-3c5 2 10 3 14 2M20-3c-5 2-10 3-14 2M0-24v10" stroke="#e8adb5" stroke-width="1.2" fill="none" stroke-linecap="round"/>
+  <path d="M-6 3c-1 9 13 9 12 0-2-3-10-3-12 0z" fill="#c9707f"/>
+  <path d="M-3 2c2 2 4 2 6 0" stroke="#f9e2a8" stroke-width="1.4" fill="none" stroke-linecap="round"/>
+  <ellipse cx="0" cy="-2" rx="3" ry="4" fill="#fffaf5"/>
+</g>
+  <g transform="translate(146 74) rotate(22) scale(1.0)">
+  <ellipse cx="0" cy="-15" rx="7.5" ry="12" fill="#f4cdd2"/>
+  <ellipse cx="-9" cy="12" rx="6" ry="11" transform="rotate(32 -9 12)" fill="#f4cdd2"/>
+  <ellipse cx="9" cy="12" rx="6" ry="11" transform="rotate(-32 9 12)" fill="#f4cdd2"/>
+  <ellipse cx="-13" cy="-1" rx="13" ry="11" transform="rotate(-18 -13 -1)" fill="#f7d9dc"/>
+  <ellipse cx="13" cy="-1" rx="13" ry="11" transform="rotate(18 13 -1)" fill="#f7d9dc"/>
+  <path d="M-20-3c5 2 10 3 14 2M20-3c-5 2-10 3-14 2M0-24v10" stroke="#e8adb5" stroke-width="1.2" fill="none" stroke-linecap="round"/>
+  <path d="M-6 3c-1 9 13 9 12 0-2-3-10-3-12 0z" fill="#c9707f"/>
+  <path d="M-3 2c2 2 4 2 6 0" stroke="#f9e2a8" stroke-width="1.4" fill="none" stroke-linecap="round"/>
+  <ellipse cx="0" cy="-2" rx="3" ry="4" fill="#fffaf5"/>
+</g>
+  <g transform="translate(66 86) rotate(-20) scale(0.85)">
+  <ellipse cx="0" cy="-15" rx="7.5" ry="12" fill="#f4cdd2"/>
+  <ellipse cx="-9" cy="12" rx="6" ry="11" transform="rotate(32 -9 12)" fill="#f4cdd2"/>
+  <ellipse cx="9" cy="12" rx="6" ry="11" transform="rotate(-32 9 12)" fill="#f4cdd2"/>
+  <ellipse cx="-13" cy="-1" rx="13" ry="11" transform="rotate(-18 -13 -1)" fill="#f7d9dc"/>
+  <ellipse cx="13" cy="-1" rx="13" ry="11" transform="rotate(18 13 -1)" fill="#f7d9dc"/>
+  <path d="M-20-3c5 2 10 3 14 2M20-3c-5 2-10 3-14 2M0-24v10" stroke="#e8adb5" stroke-width="1.2" fill="none" stroke-linecap="round"/>
+  <path d="M-6 3c-1 9 13 9 12 0-2-3-10-3-12 0z" fill="#c9707f"/>
+  <path d="M-3 2c2 2 4 2 6 0" stroke="#f9e2a8" stroke-width="1.4" fill="none" stroke-linecap="round"/>
+  <ellipse cx="0" cy="-2" rx="3" ry="4" fill="#fffaf5"/>
+</g>
+  <g fill="#f2c2c8"><ellipse cx="184" cy="114" rx="5" ry="8" transform="rotate(30 184 114)"/><ellipse cx="200" cy="140" rx="4" ry="7" transform="rotate(20 200 140)"/><ellipse cx="212" cy="164" rx="3.4" ry="6" transform="rotate(10 212 164)"/></g>
+  <g fill="#f8e6e8"><circle cx="122" cy="18" r="2.6"/><circle cx="130" cy="10" r="2"/><circle cx="18" cy="66" r="2.4"/><circle cx="180" cy="40" r="2.2"/></g>
+</svg>
