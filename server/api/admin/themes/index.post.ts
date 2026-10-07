@@ -37,5 +37,7 @@ export default defineEventHandler(async (event) => {
   if (body.generation_id)
     await client.from('ai_generations').update({ theme_id: (data as { id: string }).id } as never).eq('id', body.generation_id)
 
+  if (body.status === 'published')
+    await submitIndexNow(event, await themeIndexPaths(event, { slug: body.slug, category_id: body.category_id }))
   return { ...(data as object), warnings: compiled.warnings }
 })

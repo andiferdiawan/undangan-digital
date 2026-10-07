@@ -5,7 +5,10 @@ const supabase = useSupabaseClient()
 
 const { data } = await useAsyncData('admin-settings', async () => {
   const { data } = await supabase.from('app_settings').select('*').single()
-  return data as unknown as { default_reseller_rate: number, payout_days: number[], min_payout: number, order_expiry_hours: number } | null
+  return data as unknown as {
+    default_reseller_rate: number, payout_days: number[], min_payout: number, order_expiry_hours: number
+    bing_site_verification: string | null, google_site_verification: string | null
+  } | null
 })
 const form = reactive({
   rate: Number(data.value?.default_reseller_rate ?? 30),
@@ -27,6 +30,51 @@ async function save() {
   } as never).eq('id', true)
   msg.value = error ? { ok: false, text: friendlyError(error) } : { ok: true, text: 'Pengaturan tersimpan.' }
   if (!error) form.days = days.join(', ')
+}
+
+// ── Mesin pencari: kode verifikasi Bing/Google (dipasang sebagai meta di beranda) & IndexNow
+const seo = reactive({ bing: data.value?.bing_site_verification ?? '', google: data.value?.google_site_verification ?? '' })
+const seoMsg = ref<{ ok: boolean, text: string } | null>(null)
+const seoBusy = ref(false)
+const pinging = ref(false)
+/** Terima kode saja atau seluruh tag meta yang ditempel dari Bing/Google, ambil isi atribut content-nya. */
+function verificationCode(v: string) {
+  const s = v.trim()
+  return (s.match(/content\s*=\s*["']([^"']*)["']/i)?.[1] ?? s).trim()
+}
+async function saveSeo() {
+  seoMsg.value = null
+  const bing = verificationCode(seo.bing)
+  const google = verificationCode(seo.google)
+  if ([bing, google].some(c => c && !/^[A-Za-z0-9_-]{1,100}$/.test(c))) {
+    seoMsg.value = { ok: false, text: 'Kode verifikasi hanya berisi huruf, angka, - dan _. Tempel kodenya saja atau seluruh tag meta.' }
+    return
+  }
+  seoBusy.value = true
+  const { error } = await supabase.from('app_settings').update({
+    bing_site_verification: bing || null, google_site_verification: google || null,
+  } as never).eq('id', true)
+  seoBusy.value = false
+  if (error) {
+    seoMsg.value = { ok: false, text: friendlyError(error) }
+    return
+  }
+  Object.assign(seo, { bing, google })
+  seoMsg.value = { ok: true, text: 'Kode verifikasi tersimpan dan langsung terpasang di beranda. Silakan klik Verify di Bing Webmaster.' }
+}
+async function pingIndexNow() {
+  seoMsg.value = null
+  seoBusy.value = pinging.value = true
+  try {
+    const r = await $fetch<{ sent: number, status: number | null, skipped?: string, error?: string }>('/api/admin/indexnow', { method: 'POST', body: { all: true } })
+    seoMsg.value = r.status === 200 || r.status === 202
+      ? { ok: true, text: `${r.sent} URL terkirim ke Bing lewat IndexNow (status ${r.status}). Bing akan merayapi halaman-halaman ini dalam beberapa hari.` }
+      : { ok: false, text: r.skipped || r.error || `IndexNow menolak (status ${r.status}). Coba lagi beberapa menit lagi.` }
+  }
+  catch (e: any) {
+    seoMsg.value = { ok: false, text: e?.data?.statusMessage || 'Gagal menghubungi IndexNow.' }
+  }
+  seoBusy.value = pinging.value = false
 }
 
 // ── Integrasi AI (Gemini & OpenRouter). Key disimpan terenkripsi di Supabase Vault; halaman ini hanya melihat petunjuk tersamar.
@@ -157,6 +205,38 @@ async function saveAiOptions() {
       <p v-if="msg" class="text-sm" :class="msg.ok ? 'text-green-700' : 'text-red-600'">{{ msg.text }}</p>
       <button class="btn-primary">Simpan</button>
     </form>
+
+    <section class="mx-auto grid max-w-xl gap-4 px-4 pb-4">
+      <form class="card grid gap-4 p-5" @submit.prevent="saveSeo">
+        <div>
+          <h2 class="font-semibold text-brand-900">Mesin pencari (SEO)</h2>
+          <p class="mt-1 text-xs text-brand-500">
+            Daftarkan situs di
+            <a href="https://www.bing.com/webmasters" target="_blank" rel="noopener noreferrer" class="underline">Bing Webmaster Tools</a>
+            dan <a href="https://search.google.com/search-console" target="_blank" rel="noopener noreferrer" class="underline">Google Search Console</a>,
+            pilih verifikasi lewat <b>meta tag</b>, lalu tempel kodenya di sini (boleh seluruh tag). Setelah terverifikasi, kirim sitemap
+            <code class="text-brand-700">/sitemap.xml</code> dari dashboard masing-masing.
+          </p>
+        </div>
+        <label class="label">Kode verifikasi Bing (msvalidate.01)
+          <input v-model="seo.bing" class="input font-mono" placeholder="mis. 1A2B3C4D5E6F…" autocomplete="off" spellcheck="false">
+        </label>
+        <label class="label">Kode verifikasi Google (google-site-verification)
+          <input v-model="seo.google" class="input font-mono" placeholder="mis. abcDEF123…" autocomplete="off" spellcheck="false">
+        </label>
+        <button class="btn-primary justify-self-start" :disabled="seoBusy">Simpan kode verifikasi</button>
+        <div class="grid gap-2 border-t border-brand-100 pt-4">
+          <p class="text-xs text-brand-500">
+            <b>IndexNow</b> memberi tahu Bing (juga Yandex, Seznam, Naver) semua halaman publik sekaligus: katalog, tema, dan artikel blog.
+            Tema yang ditayangkan dan artikel yang diterbitkan dikirim otomatis; tombol ini untuk dorongan awal atau setelah perubahan besar.
+          </p>
+          <button type="button" class="btn-ghost justify-self-start" :disabled="seoBusy" @click="pingIndexNow">
+            {{ pinging ? 'Mengirim…' : 'Kirim semua URL ke Bing (IndexNow)' }}
+          </button>
+        </div>
+        <p v-if="seoMsg" class="text-sm" :class="seoMsg.ok ? 'text-green-700' : 'text-red-600'">{{ seoMsg.text }}</p>
+      </form>
+    </section>
 
     <section class="mx-auto grid max-w-xl gap-4 px-4 pb-10">
       <p v-if="aiMsg" class="rounded-xl px-4 py-3 text-sm" :class="aiMsg.ok ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-600'">{{ aiMsg.text }}</p>

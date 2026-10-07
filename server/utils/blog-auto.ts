@@ -52,6 +52,7 @@ export async function runDailyArticle(event: H3Event, o: { force?: boolean, prov
     })
     const { stats, ...post } = a
     const saved = await serverRpc<{ id: string, slug: string, status: string }>(event, 'server_blog_save', { p_post: post, p_topic_id: t.id })
+    if (saved.status === 'published') await submitIndexNow(event, [`/blog/${saved.slug}`, '/blog'])
     return { ...saved, title: a.title, stats, provider }
   }
   catch (e) {

@@ -25,7 +25,14 @@ export default defineEventHandler(async (event) => {
     warnings = compiled.warnings
   }
 
-  const { error } = await client.from('themes').update(patch as never).eq('id', id!)
+  const { data: before } = await client.from('themes').select('status').eq('id', id!).maybeSingle()
+  const { data: after, error } = await client.from('themes').update(patch as never).eq('id', id!).select('slug, status, category_id').single()
   if (error) throw createError({ statusCode: 400, statusMessage: error.message })
+
+  // Beri tahu Bing (IndexNow) bila halaman tema publik berubah: baru tayang, isinya diperbarui, atau ditarik dari katalog
+  const t = after as { slug: string, status: string, category_id: number | null }
+  const wasPublished = (before as { status: string } | null)?.status === 'published'
+  if (t.status === 'published' || wasPublished)
+    await submitIndexNow(event, await themeIndexPaths(event, t))
   return { ok: true, warnings }
 })

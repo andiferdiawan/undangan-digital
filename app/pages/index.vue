@@ -9,6 +9,18 @@ useSeoMeta({
   ogDescription: BRAND.description,
 })
 
+// Kode verifikasi Bing Webmaster / Google Search Console (diisi di Admin → Pengaturan); cukup ada di beranda
+const { data: verify } = await useAsyncData('site-verification', async () => {
+  const { data } = await useSupabaseClient().from('app_settings').select('bing_site_verification, google_site_verification').maybeSingle()
+  return data as { bing_site_verification: string | null, google_site_verification: string | null } | null
+})
+useHead({
+  meta: [
+    ...(verify.value?.bing_site_verification ? [{ name: 'msvalidate.01', content: verify.value.bing_site_verification }] : []),
+    ...(verify.value?.google_site_verification ? [{ name: 'google-site-verification', content: verify.value.google_site_verification }] : []),
+  ],
+})
+
 // Tautan lama /?jenis=…&kategori=… → halaman katalog permanen
 const route = useRoute()
 if (typeof route.query.jenis === 'string' && /^[a-z0-9-]+$/.test(route.query.jenis)) {

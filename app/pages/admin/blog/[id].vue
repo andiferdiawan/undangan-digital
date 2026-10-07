@@ -121,6 +121,9 @@ async function save(status?: Status) {
   }
   form.status = row.status
   msg.value = { ok: true, text: row.status === 'published' ? 'Tersimpan & tayang.' : 'Tersimpan.' }
+  // Beri tahu Bing (IndexNow) bahwa artikel ini baru/berubah; gagal pun tidak mengganggu penyimpanan
+  if (row.status === 'published')
+    $fetch('/api/admin/indexnow', { method: 'POST', body: { paths: [`/blog/${row.slug}`, '/blog'] } }).catch(() => {})
   if (isNew.value) await navigateTo(`/admin/blog/${(res.data as { id: string }).id}`, { replace: true })
 }
 async function remove() {
