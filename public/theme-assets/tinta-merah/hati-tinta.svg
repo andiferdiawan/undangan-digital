@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 220 200" fill="none" stroke="#c41e2a" stroke-linecap="round" stroke-linejoin="round">
+  <!-- Hati coretan pena: satu tarikan yang saling melewati di puncak & ujung bawah, tebal-tipis seperti tinta -->
+  <path d="M104 52C96 26 66 10 40 22 12 36 10 76 38 108c18 21 44 40 66 74 3 5 6 9 9 13" stroke-width="6.5"/>
+  <path d="M103 186c18-33 46-52 70-78 30-33 30-76 2-90-26-13-58 0-72 34-3 8-5 16-6 24" stroke-width="5.5"/>
+  <path d="M40 24c-24 12-26 46-6 74" stroke-width="2.2" opacity=".55" transform="translate(3 2)"/>
+  <path d="M176 20c22 13 24 47 0 78" stroke-width="2" opacity=".5" transform="translate(-3 3)"/>
+</svg>
