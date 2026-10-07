@@ -3,7 +3,7 @@ import type { Category, EventGroup, ThemeRow } from '#shared/types/models'
 
 /**
  * Daftar tema admin, dimuat per halaman dari database (range + count) agar tetap ringan saat tema bertambah.
- *   ?q=kata (nama/kode)  ?kategori=<id>  ?halaman=N
+ *   ?q=kata (nama/kode)  ?kategori=<id>  ?status=tayang|draf|arsip  ?halaman=N
  * Filter & halaman ada di URL, jadi tetap sama saat kembali dari halaman Edit.
  */
 definePageMeta({ middleware: 'admin' })
@@ -17,6 +17,15 @@ type Row = Pick<ThemeRow, 'id' | 'code' | 'slug' | 'name' | 'status' | 'source' 
 
 const q = computed(() => String(route.query.q ?? '').trim())
 const cat = computed(() => Number.parseInt(String(route.query.kategori ?? '')) || null)
+type Status = Row['status']
+const STATUS_PARAM: Record<string, Status> = { tayang: 'published', draf: 'draft', arsip: 'archived' }
+const STATUS_TABS = [
+  { param: '', status: null, label: 'Semua' },
+  { param: 'tayang', status: 'published', label: 'Tayang' },
+  { param: 'draf', status: 'draft', label: 'Draf' },
+  { param: 'arsip', status: 'archived', label: 'Arsip' },
+] as const
+const statusParam = computed(() => (Object.hasOwn(STATUS_PARAM, String(route.query.status ?? '')) ? String(route.query.status) : ''))
 const page = computed(() => Math.max(1, Number.parseInt(String(route.query.halaman ?? '1')) || 1))
 
 const { data: meta } = await useAsyncData('admin-theme-categories', async () => {
@@ -36,21 +45,35 @@ const groupedCats = computed(() => (meta.value?.groups ?? [])
 
 const { data, refresh, pending, error } = await useAsyncData('admin-themes', async () => {
   const from = (page.value - 1) * PER_PAGE
-  let query = supabase.from('themes')
-    .select('id, code, slug, name, status, source, category_id, updated_at', { count: 'exact' })
-    .order('code')
-    .range(from, from + PER_PAGE - 1)
-  if (cat.value) query = query.eq('category_id', cat.value)
   // Hanya huruf, angka, spasi & strip: aman disisipkan ke filter or() PostgREST
   const term = q.value.replace(/[^\p{L}\p{N}\s-]/gu, ' ').replace(/\s+/g, ' ').trim()
-  if (term) query = query.or(`name.ilike.%${term}%,code.ilike.%${term}%`)
-  const { data, count, error } = await query
+  /** Filter kategori & pencarian (dipakai daftar dan penghitung per status) */
+  const filtered = <T extends { eq: (c: string, v: number) => T, or: (f: string) => T }>(qb: T) => {
+    let x = qb
+    if (cat.value) x = x.eq('category_id', cat.value)
+    if (term) x = x.or(`name.ilike.%${term}%,code.ilike.%${term}%`)
+    return x
+  }
+  let query = filtered(supabase.from('themes')
+    .select('id, code, slug, name, status, source, category_id, updated_at', { count: 'exact' })
+    .order('code')
+    .range(from, from + PER_PAGE - 1))
+  const status = STATUS_PARAM[statusParam.value]
+  if (status) query = query.eq('status', status)
+  // Jumlah per status (mengikuti kategori & pencarian) untuk label tab
+  const counts = (['published', 'draft', 'archived'] as const).map(st => filtered(supabase.from('themes').select('id', { count: 'exact', head: true })).eq('status', st))
+  const [{ data, count, error }, ...c] = await Promise.all([query, ...counts])
+  const byStatus = { published: c[0]?.count ?? 0, draft: c[1]?.count ?? 0, archived: c[2]?.count ?? 0 }
   // Halaman melewati jumlah hasil (mis. ?halaman= lama setelah tema berkurang): kembali ke halaman 1
   if (error?.code === 'PGRST103' || (!error && !data?.length && (count ?? 0) > 0))
-    return { themes: [] as Row[], total: 0, outOfRange: true }
+    return { themes: [] as Row[], total: 0, byStatus, outOfRange: true }
   if (error) throw createError({ statusCode: 500, statusMessage: error.message })
-  return { themes: (data ?? []) as Row[], total: count ?? 0, outOfRange: false }
-}, { watch: [q, cat, page] })
+  return { themes: (data ?? []) as Row[], total: count ?? 0, byStatus, outOfRange: false }
+}, { watch: [q, cat, statusParam, page] })
+const tabCount = (st: Status | null) => {
+  const b = data.value?.byStatus
+  return b ? (st ? b[st] : b.published + b.draft + b.archived) : 0
+}
 
 const total = computed(() => data.value?.total ?? 0)
 const pages = computed(() => Math.max(1, Math.ceil(total.value / PER_PAGE)))
@@ -63,7 +86,7 @@ const rangeText = computed(() => {
 // ---------- URL ----------
 function withQuery(over: Record<string, string | number | undefined> = {}) {
   const params = new URLSearchParams()
-  const merged: Record<string, string | number | undefined> = { q: q.value || undefined, kategori: cat.value ?? undefined, halaman: page.value, ...over }
+  const merged: Record<string, string | number | undefined> = { q: q.value || undefined, kategori: cat.value ?? undefined, status: statusParam.value || undefined, halaman: page.value, ...over }
   for (const [k, v] of Object.entries(merged)) if (v !== undefined && v !== '' && !(k === 'halaman' && Number(v) <= 1)) params.set(k, String(v))
   const s = params.toString()
   return s ? `${route.path}?${s}` : route.path
@@ -132,8 +155,18 @@ async function setStatus(id: string, status: 'draft' | 'published' | 'archived')
             <option v-for="c in g.cats" :key="c.id" :value="c.id">{{ c.name }}</option>
           </optgroup>
         </select>
-        <button v-if="q || cat" type="button" class="self-start text-sm font-semibold text-brand-600 underline sm:self-center" @click="resetFilter">Reset filter</button>
+        <button v-if="q || cat || statusParam" type="button" class="self-start text-sm font-semibold text-brand-600 underline sm:self-center" @click="resetFilter">Reset filter</button>
         <p class="text-xs text-brand-500 sm:ml-auto">{{ rangeText }}</p>
+      </div>
+
+      <div class="mt-3 flex gap-1 overflow-x-auto rounded-full bg-brand-50 p-1 text-xs font-semibold [scrollbar-width:none] sm:w-max" role="tablist" aria-label="Filter status">
+        <NuxtLink
+          v-for="t in STATUS_TABS" :key="t.param" :to="withQuery({ status: t.param || undefined, halaman: undefined })" replace
+          role="tab" :aria-selected="statusParam === t.param"
+          class="shrink-0 whitespace-nowrap rounded-full px-4 py-1.5" :class="statusParam === t.param ? 'bg-white text-brand shadow-sm' : 'text-brand-600'"
+        >
+          {{ t.label }} <span class="font-normal opacity-70">{{ tabCount(t.status) }}</span>
+        </NuxtLink>
       </div>
 
       <div class="card mt-4 overflow-x-auto transition-opacity" :class="{ 'opacity-60': pending }">
@@ -165,7 +198,7 @@ async function setStatus(id: string, status: 'draft' | 'published' | 'archived')
               <td colspan="6" class="p-8 text-center text-red-600">Gagal memuat tema: {{ error.statusMessage || error.message }}</td>
             </tr>
             <tr v-else-if="!pending && !data?.themes.length">
-              <td colspan="6" class="p-8 text-center text-brand-500">{{ q || cat ? 'Tidak ada tema yang cocok dengan filter ini.' : 'Belum ada tema.' }}</td>
+              <td colspan="6" class="p-8 text-center text-brand-500">{{ q || cat || statusParam ? 'Tidak ada tema yang cocok dengan filter ini.' : 'Belum ada tema.' }}</td>
             </tr>
           </tbody>
         </table>
