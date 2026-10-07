@@ -125,7 +125,6 @@ useJsonLd('blog-post', () => {
 })
 
 const updated = computed(() => !!post.value && blogDate(post.value.content_updated_at) !== blogDate(post.value.published_at))
-const shareText = computed(() => `${post.value?.title} ${url}`)
 </script>
 
 <template>
@@ -181,6 +180,12 @@ const shareText = computed(() => `${post.value?.title} ${url}`)
           <span v-for="t in post.tags" :key="t" class="chip bg-white text-brand-600 ring-1 ring-brand-100">#{{ t }}</span>
         </div>
 
+        <!-- Di layar besar tombol bagikan ada di sidebar -->
+        <div class="mt-8 flex flex-wrap items-center gap-3 lg:hidden">
+          <p class="text-sm font-semibold text-brand">Bagikan artikel ini</p>
+          <BlogShare :url="url" :title="post.title" />
+        </div>
+
         <!-- CTA konversi -->
         <section class="mt-10 overflow-hidden rounded-3xl bg-brand p-6 text-white md:p-8">
           <p class="text-xs font-semibold uppercase tracking-widest text-clay-200">{{ BRAND.name }}</p>
@@ -224,11 +229,7 @@ const shareText = computed(() => `${post.value?.title} ${url}`)
           </nav>
           <div class="card p-4 text-sm">
             <p class="font-semibold text-brand">Bagikan</p>
-            <div class="mt-2 flex gap-3">
-              <a :href="`https://wa.me/?text=${encodeURIComponent(shareText)}`" target="_blank" rel="noopener nofollow" class="text-clay-700 underline">WhatsApp</a>
-              <a :href="`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`" target="_blank" rel="noopener nofollow" class="text-clay-700 underline">Facebook</a>
-              <a :href="`https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}`" target="_blank" rel="noopener nofollow" class="text-clay-700 underline">X</a>
-            </div>
+            <BlogShare class="mt-3" :url="url" :title="post.title" />
           </div>
         </div>
       </aside>
