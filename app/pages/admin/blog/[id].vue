@@ -16,17 +16,26 @@ const route = useRoute()
 const supabase = useSupabaseClient()
 const isNew = computed(() => route.params.id === 'baru')
 const { data } = await useAsyncData(`admin-blog-${route.params.id}`, async () => {
-  const [p, c, a, s] = await Promise.all([
+  const [p, c, a, s, l, g] = await Promise.all([
     isNew.value ? Promise.resolve({ data: null }) : supabase.from('blog_posts').select('*').eq('id', String(route.params.id)).maybeSingle(),
     supabase.from('blog_categories').select('slug, name').order('sort'),
     supabase.from('blog_authors').select('id, name').order('created_at'),
     supabase.from('blog_settings').select('default_author_id, default_editor_id').maybeSingle(),
+    supabase.from('blog_posts').select('slug, title').eq('status', 'published').order('published_at', { ascending: false }).limit(300),
+    supabase.from('event_groups').select('slug, name').eq('is_active', true).order('sort'),
   ])
   return {
     post: p.data as Post | null,
     categories: (c.data ?? []) as { slug: string, name: string }[],
     authors: (a.data ?? []) as { id: string, name: string }[],
     settings: s.data as { default_author_id: string | null, default_editor_id: string | null } | null,
+    // Saran tautan internal di editor (kotak tautan): katalog, harga & artikel lain
+    links: [
+      { url: '/katalog', title: 'Katalog semua tema' },
+      { url: '/#harga', title: 'Harga paket' },
+      ...((g.data ?? []) as { slug: string, name: string }[]).map(x => ({ url: `/katalog/${x.slug}`, title: `Katalog ${x.name}` })),
+      ...((l.data ?? []) as { slug: string, title: string }[]).map(x => ({ url: `/blog/${x.slug}`, title: x.title })),
+    ],
   }
 })
 if (!isNew.value && !data.value?.post) throw createError({ statusCode: 404, statusMessage: 'Artikel tidak ditemukan', fatal: true })
@@ -50,11 +59,16 @@ function load(p: Post | null) {
   })
 }
 load(data.value?.post ?? null)
+// Kembali ke daftar dengan filter & halaman yang sama (bila datang dari daftar artikel)
+const backTo = ref('/admin/blog')
+onMounted(() => {
+  const b = window.history.state?.back
+  if (typeof b === 'string' && /^\/admin\/blog(\?|#|$)/.test(b)) backTo.value = b
+})
 const slugTouched = ref(!isNew.value)
 watch(() => form.title, (t) => { if (!slugTouched.value) form.slug = slugify(t).slice(0, 80) })
 
 const rendered = computed(() => renderArticle(form.body))
-const view = ref<'edit' | 'preview'>('edit')
 
 // ── Pemeriksaan SEO ──
 const words = computed(() => form.body.split(/\s+/).filter(Boolean).length)
@@ -113,7 +127,7 @@ async function remove() {
   if (!confirm('Hapus artikel ini secara permanen?')) return
   const { error } = await supabase.from('blog_posts').delete().eq('id', String(route.params.id))
   if (error) { msg.value = { ok: false, text: friendlyError(error) }; return }
-  await navigateTo('/admin/blog')
+  await navigateTo(backTo.value)
 }
 </script>
 
@@ -122,7 +136,7 @@ async function remove() {
     <AdminNav />
     <div class="mx-auto max-w-6xl px-4 py-6">
       <div class="flex flex-wrap items-center justify-between gap-2">
-        <NuxtLink to="/admin/blog" class="text-sm text-brand-600 underline">← Semua artikel</NuxtLink>
+        <NuxtLink :to="backTo" class="text-sm text-brand-600 underline">← Semua artikel</NuxtLink>
         <a v-if="!isNew && form.status === 'published'" :href="`/blog/${form.slug}`" target="_blank" rel="noopener" class="text-sm text-brand-600 underline">Lihat artikel ↗</a>
       </div>
       <p v-if="route.query.baru" class="mt-3 rounded-xl bg-green-50 px-4 py-3 text-sm text-green-800">Artikel AI selesai ditulis ({{ data?.post?.ai_model }}). Tinjau isi & fakta, lalu klik <b>Tayangkan</b>.</p>
@@ -180,21 +194,14 @@ async function remove() {
             </label>
           </div>
 
-          <div class="flex gap-1 rounded-full bg-brand-50 p-1 text-xs font-semibold lg:hidden">
-            <button type="button" class="flex-1 rounded-full py-1.5" :class="view === 'edit' ? 'bg-white text-brand shadow-sm' : 'text-brand-600'" @click="view = 'edit'">Tulis</button>
-            <button type="button" class="flex-1 rounded-full py-1.5" :class="view === 'preview' ? 'bg-white text-brand shadow-sm' : 'text-brand-600'" @click="view = 'preview'">Pratinjau</button>
-          </div>
-          <div class="grid gap-3 xl:grid-cols-2">
-            <label class="label" :class="view === 'preview' && 'hidden lg:grid'">Isi artikel (Markdown) <span class="text-xs font-normal text-brand-500">{{ words }} kata</span>
-              <textarea v-model="form.body" rows="28" class="input font-mono text-[13px] leading-relaxed" />
-            </label>
-            <div :class="view === 'edit' && 'hidden lg:block'">
-              <p class="mb-1.5 text-sm font-medium text-brand-800">Pratinjau</p>
-              <div class="max-h-[680px] overflow-y-auto rounded-xl border border-brand-100 bg-white p-4">
-                <h1 class="font-display text-2xl text-brand">{{ form.title }}</h1>
-                <div class="prose-page" v-html="rendered.html" />
-              </div>
-            </div>
+          <div class="grid gap-1.5">
+            <p class="text-sm font-medium text-brand-800">Isi artikel</p>
+            <ClientOnly>
+              <BlogEditor v-model="form.body" :links="data?.links" />
+              <template #fallback>
+                <div class="h-[60vh] animate-pulse rounded-xl border border-brand-100 bg-white" />
+              </template>
+            </ClientOnly>
           </div>
 
           <fieldset class="grid gap-2 rounded-xl bg-brand-50 p-4">
@@ -245,14 +252,15 @@ async function remove() {
             <p class="mt-1 line-clamp-2 text-brand-700">{{ form.meta_description || form.excerpt }}</p>
           </div>
           <details class="card p-4 text-xs text-brand-700">
-            <summary class="cursor-pointer font-semibold">Panduan format</summary>
-            <ul class="mt-2 grid gap-1 font-mono">
-              <li>## Subjudul (H2) · ### H3</li>
-              <li>- daftar · 1. bernomor</li>
-              <li>**tebal** · *miring*</li>
-              <li>&gt; kutipan / contoh teks</li>
-              <li>[anchor](/katalog/pernikahan)</li>
-              <li>[sumber](https://kemenag.go.id)</li>
+            <summary class="cursor-pointer font-semibold">Pintasan editor</summary>
+            <ul class="mt-2 grid gap-1">
+              <li><kbd class="font-mono">Ctrl+B</kbd> tebal · <kbd class="font-mono">Ctrl+I</kbd> miring</li>
+              <li><kbd class="font-mono">Ctrl+K</kbd> sisipkan tautan</li>
+              <li><kbd class="font-mono">Ctrl+Z</kbd> urungkan · <kbd class="font-mono">Ctrl+Shift+Z</kbd> ulangi</li>
+              <li>Ketik <kbd class="font-mono">## </kbd> subjudul H2, <kbd class="font-mono">### </kbd> H3</li>
+              <li>Ketik <kbd class="font-mono">- </kbd> daftar, <kbd class="font-mono">1. </kbd> bernomor</li>
+              <li>Ketik <kbd class="font-mono">&gt; </kbd> kutipan / contoh teks undangan</li>
+              <li>Tempel dari Word/Google Docs: format otomatis dirapikan</li>
             </ul>
           </details>
         </aside>

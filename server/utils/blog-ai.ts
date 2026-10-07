@@ -122,6 +122,7 @@ export function sanitizeBody(md: string, allowed: Set<string>, siteHost: string)
     .replace(/^#{4,6}\s+/gm, '### ')
     .replace(/!\[[^\]]*\]\([^)]*\)/g, '')
     .replace(/<[^>]+>/g, '')
+    .replace(/\\(['"])/g, '$1') // sisa escape JSON dari model, mis. Assalamu\'alaikum
   body = body.replace(/\[([^\]]+)\]\(([^)\s]+)\)/g, (_, label: string, rawUrl: string) => {
     const url = rawUrl.trim()
     if (url.startsWith('/')) {
