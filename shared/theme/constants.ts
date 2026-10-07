@@ -80,6 +80,8 @@ export const ALLOWED_FONTS = [
   'Caveat', 'Caveat Brush', 'Gochi Hand', 'Permanent Marker', 'Fredoka',
   // Mesin ketik & tulisan tangan bergaya tanda tangan (tema editorial)
   'Courier Prime', 'Mr Dafoe',
+  // Sans ramping tebal untuk judul besar bergaya poster
+  'Oswald',
 ] as const
 
 /**
@@ -107,6 +109,9 @@ export const PLACEHOLDERS = {
   event_day_plus_two: 'Tanggal (angka) 2 hari setelah acara',
   event_weekday_minus_one: 'Nama hari 1 hari sebelum acara, mis. "Jum\'at" (strip kalender)',
   event_weekday_plus_one: 'Nama hari 1 hari setelah acara, mis. "Ahad"',
+  event_dd: 'Tanggal acara 2 digit, mis. "06" (tanggal bertumpuk 06 / 08 / 26)',
+  event_mm: 'Bulan acara 2 digit, mis. "08"',
+  event_yy: 'Tahun acara 2 digit, mis. "26"',
   event_month: 'Bulan acara utama',
   event_year: 'Tahun acara utama',
   event_hijri: 'Tanggal Hijriah acara utama',

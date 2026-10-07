@@ -50,6 +50,8 @@ function nearbyDays(iso: string) {
   return {
     event_day_minus_two: at(-2), event_day_minus_one: at(-1), event_day_plus_one: at(1), event_day_plus_two: at(2),
     event_weekday_minus_one: name(-1), event_weekday_plus_one: name(1),
+    // tanggal bertumpuk gaya "06 / 08 / 26"
+    event_dd: m ? m[3]! : '', event_mm: m ? m[2]! : '', event_yy: m ? m[1]!.slice(2) : '',
   }
 }
 
