@@ -41,11 +41,16 @@ export function monthGrid(iso: string | null): { blanks: number, days: number, a
   }
 }
 
-/** Tanggal di sekitar hari H (untuk strip kalender): H-2, H-1, H+1, H+2. */
+/** Tanggal di sekitar hari H (untuk strip kalender): H-2, H-1, H+1, H+2, plus nama hari H-1 & H+1. */
 function nearbyDays(iso: string) {
   const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(iso || '')
-  const at = (delta: number) => m ? String(new Date(Date.UTC(+m[1]!, +m[2]! - 1, +m[3]! + delta, 12)).getUTCDate()) : ''
-  return { event_day_minus_two: at(-2), event_day_minus_one: at(-1), event_day_plus_one: at(1), event_day_plus_two: at(2) }
+  const day = (delta: number) => m ? new Date(Date.UTC(+m[1]!, +m[2]! - 1, +m[3]! + delta, 12)) : null
+  const at = (delta: number) => String(day(delta)?.getUTCDate() ?? '')
+  const name = (delta: number) => { const d = day(delta); return d ? DAYS[d.getUTCDay()]! : '' }
+  return {
+    event_day_minus_two: at(-2), event_day_minus_one: at(-1), event_day_plus_one: at(1), event_day_plus_two: at(2),
+    event_weekday_minus_one: name(-1), event_weekday_plus_one: name(1),
+  }
 }
 
 /** Usia (tahun penuh) dari tanggal lahir sampai tanggal acara, mis. "7 tahun". */

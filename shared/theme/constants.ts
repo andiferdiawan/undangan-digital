@@ -105,6 +105,8 @@ export const PLACEHOLDERS = {
   event_day_minus_one: 'Tanggal (angka) 1 hari sebelum acara',
   event_day_plus_one: 'Tanggal (angka) 1 hari setelah acara',
   event_day_plus_two: 'Tanggal (angka) 2 hari setelah acara',
+  event_weekday_minus_one: 'Nama hari 1 hari sebelum acara, mis. "Jum\'at" (strip kalender)',
+  event_weekday_plus_one: 'Nama hari 1 hari setelah acara, mis. "Ahad"',
   event_month: 'Bulan acara utama',
   event_year: 'Tahun acara utama',
   event_hijri: 'Tanggal Hijriah acara utama',
