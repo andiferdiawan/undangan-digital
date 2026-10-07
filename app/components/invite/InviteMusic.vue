@@ -8,6 +8,16 @@ const props = defineProps<{ src: string, color: string, surface: string, show: b
 
 const audio = ref<HTMLAudioElement | null>(null)
 const playing = ref(false)
+// Posisi lagu untuk kartu pemutar (komponen tema music_player)
+const time = ref(0)
+const duration = ref(0)
+const progress = computed(() => (duration.value > 0 ? Math.min(1, time.value / duration.value) : 0))
+function onTime() {
+  const el = audio.value
+  if (!el) return
+  time.value = el.currentTime
+  duration.value = Number.isFinite(el.duration) ? el.duration : 0
+}
 let resumeOnVisible = false
 
 function play() {
@@ -37,12 +47,12 @@ onBeforeUnmount(() => {
 })
 watch(() => props.src, () => pause())
 
-defineExpose({ play, pause })
+defineExpose({ play, pause, toggle, playing, progress, time, duration })
 </script>
 
 <template>
   <div v-if="src" class="invite-music">
-    <audio ref="audio" :src="src" loop preload="none" @pause="playing = false" @play="playing = true" />
+    <audio ref="audio" :src="src" loop preload="none" @pause="playing = false" @play="playing = true" @timeupdate="onTime" @loadedmetadata="onTime" />
     <button
       v-if="show"
       type="button"

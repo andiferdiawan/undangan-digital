@@ -41,6 +41,8 @@ export const COMPONENTS = {
   gallery_carousel: { props: ['item_class', 'image_class', 'text_class', 'button_class', 'dot_class'] },
   /** Kalender sebulan penuh dari tanggal acara utama; hari H diberi penanda (marker: heart | circle | none). */
   month_calendar: { props: ['head_class', 'day_class', 'active_class', 'marker', 'marker_class'] },
+  // Kartu pemutar musik latar (putar/jeda + progres); tidak tampil bila musik undangan nonaktif
+  music_player: { props: ['label', 'item_class', 'button_class', 'text_class', 'label_class', 'bar_class', 'fill_class'] },
 } as const
 export type ComponentName = keyof typeof COMPONENTS
 

@@ -1,4 +1,4 @@
-import type { InjectionKey, Ref } from 'vue'
+import type { ComputedRef, InjectionKey, Ref } from 'vue'
 import type { RenderContext } from '#shared/theme/context'
 import type { EventKind } from '#shared/theme/constants'
 
@@ -14,6 +14,16 @@ export interface InviteRuntime {
   wishesVersion: Ref<number>
   /** Jenis acara tema (untuk contoh ucapan di pratinjau) */
   kind: EventKind
+  /** Musik latar untuk kartu pemutar (music_player); enabled=false bila musik nonaktif/thumbnail */
+  music: {
+    enabled: ComputedRef<boolean>
+    playing: ComputedRef<boolean>
+    progress: ComputedRef<number>
+    time: ComputedRef<number>
+    duration: ComputedRef<number>
+    title: ComputedRef<string>
+    toggle: () => void
+  }
 }
 
 export const INVITE_KEY: InjectionKey<InviteRuntime> = Symbol('invite')

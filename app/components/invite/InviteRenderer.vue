@@ -79,7 +79,7 @@ const musicSrc = computed(() => {
   if (!m.enabled) return ''
   return safeUrl(m.url) || safeUrl(props.themeMusic) || ''
 })
-const music = ref<{ play: () => void } | null>(null)
+const music = ref<{ play: () => void, toggle: () => void, playing: boolean, progress: number, time: number, duration: number } | null>(null)
 
 // ---------- Motion (reveal saat scroll, kartu 3D) ----------
 const rootEl = ref<HTMLElement | null>(null)
@@ -115,6 +115,15 @@ provide(INVITE_KEY, {
   openCover,
   wishesVersion,
   kind: kind.value,
+  music: {
+    enabled: computed(() => !!musicSrc.value),
+    playing: computed(() => !!music.value?.playing),
+    progress: computed(() => music.value?.progress ?? 0),
+    time: computed(() => music.value?.time ?? 0),
+    duration: computed(() => music.value?.duration ?? 0),
+    title: computed(() => contentWithDefaults(props.content, kind.value).music.title || ''),
+    toggle: () => music.value?.toggle(),
+  },
 })
 
 // CSS hasil kompilasi dibuat server dari kelas Tailwind yang sudah divalidasi

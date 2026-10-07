@@ -14,7 +14,7 @@ export interface ValidationResult {
   classes: string[]
 }
 
-const CLASS_PROPS = new Set(['item_class', 'number_class', 'label_class', 'input_class', 'button_class', 'name_class', 'text_class', 'image_class', 'dot_class', 'head_class', 'day_class', 'active_class', 'marker_class'])
+const CLASS_PROPS = new Set(['item_class', 'number_class', 'label_class', 'input_class', 'button_class', 'name_class', 'text_class', 'image_class', 'dot_class', 'head_class', 'day_class', 'active_class', 'marker_class', 'bar_class', 'fill_class'])
 const LIST_KEYS = new Set<string>(REPEAT_SOURCES)
 
 /**
