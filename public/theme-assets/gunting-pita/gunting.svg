@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 80">
+  <!-- Gunting peresmian: bilah perak, gagang emas, menghadap kanan -->
+  <defs><linearGradient id="g" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f0dca2"/><stop offset="1" stop-color="#b8893d"/></linearGradient>
+  <linearGradient id="s" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#9aa0a8"/><stop offset=".5" stop-color="#eef1f4"/><stop offset="1" stop-color="#b9bec6"/></linearGradient></defs>
+  <path d="M46 36 114 22 52 44z" fill="url(#s)" stroke="#8a9098" stroke-width="1"/>
+  <path d="M46 44 114 58 52 36z" fill="url(#s)" stroke="#8a9098" stroke-width="1"/>
+  <circle cx="22" cy="24" r="14" fill="none" stroke="url(#g)" stroke-width="7"/>
+  <circle cx="22" cy="56" r="14" fill="none" stroke="url(#g)" stroke-width="7"/>
+  <path d="M34 30 50 38M34 50l16-8" stroke="url(#g)" stroke-width="7" stroke-linecap="round"/>
+  <circle cx="50" cy="40" r="3.4" fill="#6e1a26"/>
+</svg>

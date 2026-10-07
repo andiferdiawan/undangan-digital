@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none" stroke="#6e1a26" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+  <!-- Lambang toko (cadangan bila logo belum diunggah) -->
+  <rect x="6" y="6" width="52" height="52"/><rect x="9" y="9" width="46" height="46" stroke-width=".8"/>
+  <path d="M16 28h32l-3-9H19zM18 28v20h28V28M27 48V36h10v12"/><path d="M16 28c0 3 3 4 5.3 4s5.4-1 5.4-4c0 3 3 4 5.3 4s5.4-1 5.4-4c0 3 3 4 5.3 4s5.3-1 5.3-4"/>
+</svg>

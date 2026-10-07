@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 270">
+  <!-- Pita simpul satin marun besar (pita melintang dibuat dari CSS agar selebar layar) -->
+  <defs>
+    <linearGradient id="loopL" x1="1" y1="0.5" x2="0" y2="0.3"><stop offset="0" stop-color="#3a0911"/><stop offset=".35" stop-color="#6e1a26"/><stop offset=".62" stop-color="#a8434f"/><stop offset=".8" stop-color="#7c1f2d"/><stop offset="1" stop-color="#4a0f18"/></linearGradient>
+    <linearGradient id="loopR" x1="0" y1="0.5" x2="1" y2="0.3"><stop offset="0" stop-color="#3a0911"/><stop offset=".35" stop-color="#6e1a26"/><stop offset=".62" stop-color="#a8434f"/><stop offset=".8" stop-color="#7c1f2d"/><stop offset="1" stop-color="#4a0f18"/></linearGradient>
+    <linearGradient id="tail" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#4a0f18"/><stop offset=".45" stop-color="#8e2a38"/><stop offset=".7" stop-color="#5e1520"/><stop offset="1" stop-color="#3a0911"/></linearGradient>
+    <linearGradient id="knot" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#8e2a38"/><stop offset=".45" stop-color="#b24d59"/><stop offset="1" stop-color="#4a0f18"/></linearGradient>
+  </defs>
+  <path d="M186 140 104 258l30-6 16 18 54-120z" fill="url(#tail)"/>
+  <path d="M214 140l82 118-30-6-16 18-54-120z" fill="url(#tail)"/>
+  <path d="M194 120C150 54 52 30 26 86c-20 46 58 78 168 46z" fill="url(#loopL)"/>
+  <path d="M206 120C250 54 348 30 374 86c20 46-58 78-168 46z" fill="url(#loopR)"/>
+  <path d="M194 122C160 96 96 84 70 100c44 4 86 14 124 24z" fill="#2c060c" opacity=".55"/>
+  <path d="M206 122c34-26 98-38 124-22-44 4-86 14-124 24z" fill="#2c060c" opacity=".55"/>
+  <path d="M60 70c30-22 80-16 116 18" stroke="#c46a74" stroke-width="3" fill="none" stroke-linecap="round" opacity=".55"/>
+  <path d="M340 70c-30-22-80-16-116 18" stroke="#c46a74" stroke-width="3" fill="none" stroke-linecap="round" opacity=".55"/>
+  <rect x="172" y="100" width="56" height="50" rx="16" fill="url(#knot)"/>
+  <path d="M182 110c10-4 26-4 36 0" stroke="#d17b85" stroke-width="2.4" fill="none" stroke-linecap="round" opacity=".7"/>
+</svg>
