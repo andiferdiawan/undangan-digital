@@ -11,16 +11,16 @@ interface Author { id: string, slug: string, name: string, job_title: string, bi
 interface Settings { auto_enabled: boolean, auto_publish: boolean, default_author_id: string | null, default_editor_id: string | null, last_auto_at: string | null, last_auto_status: string | null }
 
 const supabase = useSupabaseClient()
-const { data, refresh } = await useAsyncData('admin-blog', async () => {
-  const [p, t, c, a, s] = await Promise.all([
-    supabase.from('blog_posts').select('id, slug, title, status, category_slug, published_at, updated_at, word_count, origin, focus_keyword').order('created_at', { ascending: false }).limit(500),
+const route = useRoute()
+const router = useRouter()
+const { data, refresh: refreshMeta } = await useAsyncData('admin-blog', async () => {
+  const [t, c, a, s] = await Promise.all([
     supabase.from('blog_topics').select('*').order('id'),
     supabase.from('blog_categories').select('slug, name').order('sort'),
     supabase.from('blog_authors').select('*').order('created_at'),
     supabase.from('blog_settings').select('*').maybeSingle(),
   ])
   return {
-    posts: (p.data ?? []) as PostRow[],
     topics: (t.data ?? []) as TopicRow[],
     categories: (c.data ?? []) as Cat[],
     authors: (a.data ?? []) as Author[],
@@ -56,7 +56,7 @@ async function run<T>(key: string, fn: () => Promise<T>, ok?: (r: T) => string) 
   try {
     const r = await fn()
     if (ok) msg.value = { ok: true, text: ok(r) }
-    await refresh()
+    await Promise.all([refreshMeta(), refreshPosts()])
     return r
   }
   catch (e) {
@@ -135,10 +135,90 @@ const saveAuthor = () => run('author', async () => {
   authorOpen.value = false
 }, () => 'Profil penulis tersimpan.')
 
-// ── Daftar artikel ──
-const filter = ref<'all' | 'published' | 'draft' | 'archived'>('all')
-const posts = computed(() => (data.value?.posts ?? []).filter(p => filter.value === 'all' || p.status === filter.value))
-const count = (s: string) => (data.value?.posts ?? []).filter(p => p.status === s).length
+// ── Daftar artikel: dimuat per halaman dari database (range + count) ──
+//   ?q=kata (judul/slug/kata kunci)  ?status=tayang|draf|arsip  ?halaman=N — tetap sama saat kembali dari editor
+const PER_PAGE = 20
+type Status = PostRow['status']
+const STATUS_PARAM: Record<string, Status> = { tayang: 'published', draf: 'draft', arsip: 'archived' }
+const STATUS_TABS = [
+  { param: '', status: null, label: 'Semua' },
+  { param: 'tayang', status: 'published', label: 'Tayang' },
+  { param: 'draf', status: 'draft', label: 'Draf' },
+  { param: 'arsip', status: 'archived', label: 'Arsip' },
+] as const
+const q = computed(() => String(route.query.q ?? '').trim())
+const statusParam = computed(() => (Object.hasOwn(STATUS_PARAM, String(route.query.status ?? '')) ? String(route.query.status) : ''))
+const page = computed(() => Math.max(1, Number.parseInt(String(route.query.halaman ?? '1')) || 1))
+
+const { data: list, refresh: refreshPosts, pending: postsPending, error: postsError } = await useAsyncData('admin-blog-posts', async () => {
+  // Hanya huruf, angka, spasi & strip: aman disisipkan ke filter or() PostgREST
+  const term = q.value.replace(/[^\p{L}\p{N}\s-]/gu, ' ').replace(/\s+/g, ' ').trim()
+  const search = <T extends { or: (f: string) => T }>(query: T) => term ? query.or(`title.ilike.%${term}%,slug.ilike.%${term}%,focus_keyword.ilike.%${term}%`) : query
+  const from = (page.value - 1) * PER_PAGE
+  let rows = search(supabase.from('blog_posts')
+    .select('id, slug, title, status, category_slug, published_at, updated_at, word_count, origin, focus_keyword', { count: 'exact' })
+    .order('created_at', { ascending: false })
+    .range(from, from + PER_PAGE - 1))
+  const status = STATUS_PARAM[statusParam.value]
+  if (status) rows = rows.eq('status', status)
+  // Jumlah per status (mengikuti kata pencarian) untuk label tab
+  const counts = (['published', 'draft', 'archived'] as const).map(st => search(supabase.from('blog_posts').select('id', { count: 'exact', head: true })).eq('status', st))
+  const [r, ...c] = await Promise.all([rows, ...counts])
+  const byStatus = { published: c[0]?.count ?? 0, draft: c[1]?.count ?? 0, archived: c[2]?.count ?? 0 }
+  // Halaman melewati jumlah hasil (mis. ?halaman= lama setelah artikel berkurang): kembali ke halaman 1
+  if (r.error?.code === 'PGRST103' || (!r.error && !r.data?.length && (r.count ?? 0) > 0))
+    return { posts: [] as PostRow[], total: 0, byStatus, outOfRange: true }
+  if (r.error) throw createError({ statusCode: 500, statusMessage: r.error.message })
+  return { posts: (r.data ?? []) as PostRow[], total: r.count ?? 0, byStatus, outOfRange: false }
+}, { watch: [q, statusParam, page] })
+
+const total = computed(() => list.value?.total ?? 0)
+const pages = computed(() => Math.max(1, Math.ceil(total.value / PER_PAGE)))
+const rangeText = computed(() => {
+  if (!total.value) return ''
+  const from = (page.value - 1) * PER_PAGE + 1
+  return `${from}–${Math.min(total.value, from + PER_PAGE - 1)} dari ${total.value} artikel`
+})
+const tabCount = (st: Status | null) => {
+  const b = list.value?.byStatus
+  return b ? (st ? b[st] : b.published + b.draft + b.archived) : 0
+}
+
+function withQuery(over: Record<string, string | number | undefined> = {}) {
+  const params = new URLSearchParams()
+  const merged: Record<string, string | number | undefined> = { q: q.value || undefined, status: statusParam.value || undefined, halaman: page.value, ...over }
+  for (const [k, v] of Object.entries(merged)) if (v !== undefined && v !== '' && !(k === 'halaman' && Number(v) <= 1)) params.set(k, String(v))
+  return { path: route.path, query: Object.fromEntries(params), hash: '#artikel' }
+}
+const pageLink = (n: number) => withQuery({ halaman: n })
+const pageItems = computed(() => {
+  const n = pages.value
+  const cur = page.value
+  const set = new Set([1, n, cur - 1, cur, cur + 1].filter(i => i >= 1 && i <= n))
+  const sorted = [...set].sort((a, b) => a - b)
+  const out: (number | '…')[] = []
+  sorted.forEach((i, idx) => {
+    if (idx && i - sorted[idx - 1]! > 1) out.push('…')
+    out.push(i)
+  })
+  return out
+})
+const go = (over: Record<string, string | number | undefined>) => router.replace(withQuery({ ...over, halaman: undefined }))
+watch(() => list.value?.outOfRange, (out) => { if (out && import.meta.client) go({}) }, { immediate: true })
+
+// Pencarian: perbarui URL setelah berhenti mengetik
+const searchInput = ref(q.value)
+let debounce: ReturnType<typeof setTimeout> | undefined
+watch(searchInput, (v) => {
+  clearTimeout(debounce)
+  debounce = setTimeout(() => go({ q: v.trim() || undefined }), 350)
+})
+watch(q, (v) => { if (v !== searchInput.value.trim()) searchInput.value = v })
+function resetFilter() {
+  clearTimeout(debounce)
+  searchInput.value = ''
+  router.replace({ path: route.path, hash: '#artikel' })
+}
 const fmt = (d: string | null) => d ? new Date(d).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' }) : '—'
 </script>
 
@@ -272,17 +352,26 @@ const fmt = (d: string | null) => d ? new Date(d).toLocaleDateString('id-ID', { 
       </section>
 
       <!-- Artikel -->
-      <section class="card mt-5 p-5">
+      <section id="artikel" class="card mt-5 scroll-mt-20 p-5">
         <div class="flex flex-wrap items-center justify-between gap-2">
-          <h2 class="font-semibold text-brand">Artikel</h2>
-          <div class="flex gap-1 rounded-full bg-brand-50 p-1 text-xs font-semibold">
-            <button v-for="f in (['all', 'published', 'draft', 'archived'] as const)" :key="f" class="rounded-full px-3 py-1.5" :class="filter === f ? 'bg-white text-brand shadow-sm' : 'text-brand-600'" @click="filter = f">
-              {{ { all: 'Semua', published: `Tayang (${count('published')})`, draft: `Draf (${count('draft')})`, archived: 'Arsip' }[f] }}
-            </button>
-          </div>
+          <h2 class="font-semibold text-brand">Artikel <span class="font-normal text-brand-500">({{ tabCount(null) }})</span></h2>
+          <p class="text-xs text-brand-500">{{ rangeText }}</p>
         </div>
-        <ul class="mt-3 divide-y divide-brand-100 text-sm">
-          <li v-for="p in posts" :key="p.id">
+        <div class="mt-3 flex flex-col gap-2 md:flex-row md:items-center">
+          <input v-model="searchInput" type="search" class="input py-2 text-sm md:max-w-xs" placeholder="Cari judul, slug, atau kata kunci…" aria-label="Cari artikel">
+          <div class="flex gap-1 overflow-x-auto rounded-full bg-brand-50 p-1 text-xs font-semibold [scrollbar-width:none] md:w-max" role="tablist" aria-label="Filter status">
+            <NuxtLink
+              v-for="t in STATUS_TABS" :key="t.param" :to="withQuery({ status: t.param || undefined, halaman: undefined })" replace
+              role="tab" :aria-selected="statusParam === t.param"
+              class="shrink-0 whitespace-nowrap rounded-full px-3 py-1.5" :class="statusParam === t.param ? 'bg-white text-brand shadow-sm' : 'text-brand-600'"
+            >
+              {{ t.label }} <span class="font-normal opacity-70">{{ tabCount(t.status) }}</span>
+            </NuxtLink>
+          </div>
+          <button v-if="q || statusParam" type="button" class="self-start text-sm font-semibold text-brand-600 underline md:self-center" @click="resetFilter">Reset</button>
+        </div>
+        <ul class="mt-3 divide-y divide-brand-100 text-sm transition-opacity" :class="{ 'opacity-60': postsPending }">
+          <li v-for="p in list?.posts" :key="p.id">
             <NuxtLink :to="`/admin/blog/${p.id}`" class="flex flex-wrap items-center gap-2 py-2.5 hover:bg-brand-50/60">
               <span class="chip" :class="p.status === 'published' ? 'bg-green-50 text-green-700' : p.status === 'draft' ? 'bg-amber-50 text-amber-800' : 'bg-gray-100 text-gray-600'">{{ { published: 'tayang', draft: 'draf', archived: 'arsip' }[p.status] }}</span>
               <span class="min-w-0 flex-1">
@@ -291,8 +380,24 @@ const fmt = (d: string | null) => d ? new Date(d).toLocaleDateString('id-ID', { 
               </span>
             </NuxtLink>
           </li>
-          <li v-if="!posts.length" class="py-3 text-brand-500">Belum ada artikel.</li>
+          <li v-if="postsError" class="py-3 text-red-600">Gagal memuat artikel: {{ postsError.statusMessage || postsError.message }}</li>
+          <li v-else-if="!postsPending && !list?.posts.length" class="py-3 text-brand-500">{{ q || statusParam ? 'Tidak ada artikel yang cocok dengan filter ini.' : 'Belum ada artikel.' }}</li>
         </ul>
+        <nav v-if="pages > 1" class="mt-4 flex flex-wrap items-center justify-center gap-1.5" aria-label="Halaman artikel">
+          <NuxtLink v-if="page > 1" :to="pageLink(page - 1)" class="btn-ghost btn-sm px-3">‹ <span class="hidden sm:inline">Sebelumnya</span></NuxtLink>
+          <template v-for="(it, i) in pageItems" :key="i">
+            <span v-if="it === '…'" class="px-1.5 text-brand-400">…</span>
+            <NuxtLink
+              v-else :to="pageLink(it)"
+              class="grid h-9 min-w-9 place-items-center rounded-xl px-2 text-sm font-semibold ring-1 transition"
+              :class="it === page ? 'bg-brand text-white ring-brand' : 'bg-white text-brand-700 ring-brand-100 hover:ring-brand-300'"
+              :aria-current="it === page ? 'page' : undefined"
+            >
+              {{ it }}
+            </NuxtLink>
+          </template>
+          <NuxtLink v-if="page < pages" :to="pageLink(page + 1)" class="btn-ghost btn-sm px-3"><span class="hidden sm:inline">Berikutnya</span> ›</NuxtLink>
+        </nav>
       </section>
 
       <!-- Penulis -->
