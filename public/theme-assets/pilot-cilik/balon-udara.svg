@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 180">
+  <!-- Balon udara bergaris biru-putih dengan beruang di keranjang -->
+  <defs><clipPath id="b"><path d="M60 4c30 0 54 22 54 52 0 26-20 44-34 60H40C26 100 6 82 6 56 6 26 30 4 60 4z"/></clipPath></defs>
+  <g clip-path="url(#b)"><rect x="8" y="0" width="13" height="130" fill="#bcd1f4"/><rect x="21" y="0" width="13" height="130" fill="#ffffff"/><rect x="34" y="0" width="13" height="130" fill="#bcd1f4"/><rect x="47" y="0" width="13" height="130" fill="#ffffff"/><rect x="60" y="0" width="13" height="130" fill="#bcd1f4"/><rect x="73" y="0" width="13" height="130" fill="#ffffff"/><rect x="86" y="0" width="13" height="130" fill="#bcd1f4"/><rect x="99" y="0" width="13" height="130" fill="#ffffff"/><rect x="112" y="0" width="13" height="130" fill="#bcd1f4"/></g>
+  <path d="M60 4c30 0 54 22 54 52 0 26-20 44-34 60H40C26 100 6 82 6 56 6 26 30 4 60 4z" fill="none" stroke="#8fb0e6" stroke-width="2"/>
+  <path d="M40 116h40v6H40z" fill="#f4c4a2"/>
+  <path d="M42 122l-2 18M78 122l2 18" stroke="#9a7a5a" stroke-width="1.6"/>
+  <g transform="translate(60 140) scale(.62)">
+  <circle cx="-17" cy="-15" r="8" fill="#c99a6e"/><circle cx="17" cy="-15" r="8" fill="#c99a6e"/>
+  <circle cx="-17" cy="-15" r="4" fill="#ebc8a3"/><circle cx="17" cy="-15" r="4" fill="#ebc8a3"/>
+  <circle r="21" fill="#d4a97d"/>
+  <ellipse cx="0" cy="8" rx="9" ry="7" fill="#f2dfc7"/>
+  <ellipse cx="0" cy="4.5" rx="3.2" ry="2.3" fill="#4a3426"/>
+  <path d="M-3 10c2 2 4 2 6 0" stroke="#4a3426" stroke-width="1.4" fill="none" stroke-linecap="round"/>
+  <circle cx="-8" cy="0" r="2.1" fill="#3b2a20"/><circle cx="8" cy="0" r="2.1" fill="#3b2a20"/>
+  <circle cx="-13" cy="7" r="3.4" fill="#f3a9a0" opacity=".7"/><circle cx="13" cy="7" r="3.4" fill="#f3a9a0" opacity=".7"/></g>
+  <path d="M36 146h48l-4 26H40z" fill="#c8945f"/>
+  <path d="M38 154h44M39 162h42" stroke="#a87545" stroke-width="1.6"/>
+</svg>

@@ -57,8 +57,9 @@ import * as tintaMerah from './themes/tinta-merah'
 import * as hatiTerakota from './themes/hati-terakota'
 import * as polaroidManis from './themes/polaroid-manis'
 import * as anggrekEmas from './themes/anggrek-emas'
+import * as pilotCilik from './themes/pilot-cilik'
 
-const themes = [sakinah, minimalis, floral, moccaGypsophila, lengkungMawar, arka, noir, rustic, bugis, makassar, toraja, senja, arunika, lontara, aurelia, doodle, alur, aqBintang, aqBunga, anggrekEmas, khCeria, khMihrab, utBalon, utEmas, polaroidManis, ofPrima, ofAgenda, acSilaturahmi, acKumpul, exPramuka, exPmr, exSeni, kabarCinta, harianBahagia, zoomCinta, pintuHati, suratCinta, piringanRindu, bolaUgi, layarPhinisi, tongkonanRindu, kisahPopUp, terminalCinta, kotakRahasia, amplopZaitun, pitaMarun, catatanCinta, perangkoCinta, tintaMerah, hatiTerakota, bukuNikah, cetakKenangan]
+const themes = [sakinah, minimalis, floral, moccaGypsophila, lengkungMawar, arka, noir, rustic, bugis, makassar, toraja, senja, arunika, lontara, aurelia, doodle, alur, aqBintang, aqBunga, anggrekEmas, khCeria, khMihrab, utBalon, utEmas, polaroidManis, pilotCilik, ofPrima, ofAgenda, acSilaturahmi, acKumpul, exPramuka, exPmr, exSeni, kabarCinta, harianBahagia, zoomCinta, pintuHati, suratCinta, piringanRindu, bolaUgi, layarPhinisi, tongkonanRindu, kisahPopUp, terminalCinta, kotakRahasia, amplopZaitun, pitaMarun, catatanCinta, perangkoCinta, tintaMerah, hatiTerakota, bukuNikah, cetakKenangan]
 const q = (s: string) => `'${s.replace(/'/g, "''")}'`
 const rows: string[] = []
 const perTheme: { slug: string, row: string }[] = []
