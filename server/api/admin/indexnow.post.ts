@@ -6,7 +6,7 @@ import { z } from 'zod'
  */
 const Body = z.union([
   z.object({ all: z.literal(true) }),
-  z.object({ paths: z.array(z.string().trim().startsWith('/').max(500)).min(1).max(100) }),
+  z.object({ paths: z.array(z.string().trim().startsWith('/').max(500)).min(1).max(10_000) }),
 ])
 
 export default defineEventHandler(async (event) => {

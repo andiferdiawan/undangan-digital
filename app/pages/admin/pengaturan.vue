@@ -77,6 +77,105 @@ async function pingIndexNow() {
   seoBusy.value = pinging.value = false
 }
 
+// ── Koneksi API mesin pencari: Bing Webmaster & Google Search Console (kredensial di Supabase Vault).
+//    Dipakai halaman Admin → Indeks SEO; halaman ini hanya melihat petunjuk tersamar & email service account.
+type SeoApi = { bing_api_set: boolean, bing_api_hint: string | null, google_set: boolean, google_email: string | null, gsc_property: string | null }
+const seoApi = ref<SeoApi | null>(null)
+const apiMsg = ref<{ ok: boolean, text: string } | null>(null)
+const apiBusy = ref(false)
+const bingKey = ref('')
+const saJson = ref('')
+const saFile = ref('')
+const saInput = ref(0)
+const gscSites = ref<{ siteUrl: string, permissionLevel: string }[] | null>(null)
+const gscChecking = ref(false)
+const gscProperty = ref('')
+const PERMISSION: Record<string, string> = { siteOwner: 'Pemilik', siteFullUser: 'Penuh', siteRestrictedUser: 'Terbatas', siteUnverifiedUser: 'Belum terverifikasi' }
+
+function setSeoApi(v: SeoApi) {
+  seoApi.value = v
+  gscProperty.value = v.gsc_property ?? ''
+}
+async function loadSeoApi() {
+  const { data, error } = await supabase.rpc('admin_seo_settings' as never)
+  if (error) apiMsg.value = { ok: false, text: friendlyError(error) }
+  else setSeoApi(data as unknown as SeoApi)
+}
+async function seoRpc(fn: string, args: Record<string, unknown>, ok: string) {
+  apiBusy.value = true
+  apiMsg.value = null
+  const { data, error } = await supabase.rpc(fn as never, args as never)
+  apiBusy.value = false
+  if (error) {
+    apiMsg.value = { ok: false, text: friendlyError(error) }
+    return false
+  }
+  setSeoApi(data as unknown as SeoApi)
+  apiMsg.value = { ok: true, text: ok }
+  return true
+}
+async function saveBingKey() {
+  const k = bingKey.value.trim()
+  if (!/^[A-Za-z0-9]{16,100}$/.test(k)) {
+    apiMsg.value = { ok: false, text: 'API key Bing hanya berisi huruf dan angka. Salin dari Bing Webmaster > Settings > API Access.' }
+    return
+  }
+  if (await seoRpc('admin_set_bing_api_key', { p_key: k }, 'API key Bing tersimpan (terenkripsi).')) bingKey.value = ''
+}
+async function removeBingKey() {
+  if (confirm('Hapus API key Bing Webmaster?')) await seoRpc('admin_set_bing_api_key', { p_key: '' }, 'API key Bing dihapus.')
+}
+async function readSaFile(e: Event) {
+  const f = (e.target as HTMLInputElement).files?.[0]
+  if (!f) return
+  saJson.value = await f.text()
+  saFile.value = f.name
+}
+async function saveSa() {
+  let email = ''
+  try {
+    const j = JSON.parse(saJson.value)
+    if (j?.type !== 'service_account' || !j.client_email || !j.private_key) throw new Error('bukan service account')
+    email = j.client_email
+  }
+  catch {
+    apiMsg.value = { ok: false, text: 'Bukan file kunci service account Google. Unduh dari Google Cloud > IAM & Admin > Service Accounts > Keys > Add key > JSON.' }
+    return
+  }
+  const ok = await seoRpc('admin_set_google_service_account', { p_json: saJson.value },
+    `Service account tersimpan. Tambahkan ${email} di Search Console > Setelan > Pengguna dan izin (izin Pemilik atau Penuh), lalu klik "Cek koneksi".`)
+  if (ok) {
+    saJson.value = ''
+    saFile.value = ''
+    saInput.value++
+    gscSites.value = null
+  }
+}
+async function removeSa() {
+  if (!confirm('Hapus service account Google? Cek status indeks Google tidak bisa dipakai sampai diisi lagi.')) return
+  if (await seoRpc('admin_set_google_service_account', { p_json: '' }, 'Service account Google dihapus.')) gscSites.value = null
+}
+async function checkGsc() {
+  apiBusy.value = gscChecking.value = true
+  apiMsg.value = null
+  try {
+    const r = await $fetch<{ sites: { siteUrl: string, permissionLevel: string }[], suggested: string | null }>('/api/admin/seo/google/sites')
+    gscSites.value = r.sites
+    if (r.suggested && !r.sites.some(s => s.siteUrl === gscProperty.value)) gscProperty.value = r.suggested
+    apiMsg.value = r.sites.length
+      ? { ok: true, text: `Terhubung ke Search Console: ${r.sites.length} properti bisa diakses. Pilih properti situs ini lalu simpan.` }
+      : { ok: false, text: `Belum ada properti yang bisa diakses. Tambahkan ${seoApi.value?.google_email} di Search Console > Setelan > Pengguna dan izin, tunggu 1-2 menit, lalu cek lagi.` }
+  }
+  catch (e) {
+    apiMsg.value = { ok: false, text: friendlyError(apiError(e)) }
+  }
+  apiBusy.value = gscChecking.value = false
+}
+async function saveProperty() {
+  await seoRpc('admin_set_gsc_property', { p_property: gscProperty.value.trim() }, 'Properti Search Console tersimpan. Buka Indeks SEO untuk cek status & kirim sitemap.')
+}
+onMounted(loadSeoApi)
+
 // ── Integrasi AI (Gemini & OpenRouter). Key disimpan terenkripsi di Supabase Vault; halaman ini hanya melihat petunjuk tersamar.
 type AiSettings = {
   openrouter_set: boolean, openrouter_hint: string | null, openrouter_model: string
@@ -229,6 +328,7 @@ async function saveAiOptions() {
           <p class="text-xs text-brand-500">
             <b>IndexNow</b> memberi tahu Bing (juga Yandex, Seznam, Naver) semua halaman publik sekaligus: katalog, tema, dan artikel blog.
             Tema yang ditayangkan dan artikel yang diterbitkan dikirim otomatis; tombol ini untuk dorongan awal atau setelah perubahan besar.
+            Untuk memilih URL tertentu dan memantau statusnya, buka <NuxtLink to="/admin/indeks" class="font-semibold underline">Indeks SEO</NuxtLink>.
           </p>
           <button type="button" class="btn-ghost justify-self-start" :disabled="seoBusy" @click="pingIndexNow">
             {{ pinging ? 'Mengirim…' : 'Kirim semua URL ke Bing (IndexNow)' }}
@@ -236,6 +336,80 @@ async function saveAiOptions() {
         </div>
         <p v-if="seoMsg" class="text-sm" :class="seoMsg.ok ? 'text-green-700' : 'text-red-600'">{{ seoMsg.text }}</p>
       </form>
+
+      <div id="seo" class="card grid scroll-mt-20 gap-4 p-5">
+        <div>
+          <h2 class="font-semibold text-brand-900">Koneksi API mesin pencari</h2>
+          <p class="mt-1 text-xs text-brand-500">
+            Dipakai halaman <NuxtLink to="/admin/indeks" class="font-semibold underline">Indeks SEO</NuxtLink> untuk mengirim URL massal ke Bing,
+            mengecek status indeks Google, dan mengirim sitemap ke Google. Kunci disimpan terenkripsi di Supabase Vault.
+          </p>
+        </div>
+        <p v-if="apiMsg" class="rounded-xl px-4 py-3 text-sm" :class="apiMsg.ok ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-600'" role="status">{{ apiMsg.text }}</p>
+
+        <form class="grid gap-2 border-t border-brand-100 pt-4" @submit.prevent="saveBingKey">
+          <div class="flex flex-wrap items-center gap-2">
+            <h3 class="text-sm font-semibold text-brand-900">Bing Webmaster API</h3>
+            <span v-if="seoApi" class="chip" :class="seoApi.bing_api_set ? 'bg-green-100 text-green-800' : 'bg-amber-100 text-amber-800'">{{ seoApi.bing_api_set ? 'Terpasang' : 'Belum diisi' }}</span>
+            <code v-if="seoApi?.bing_api_hint" class="text-xs text-brand-700">{{ seoApi.bing_api_hint }}</code>
+            <button v-if="seoApi?.bing_api_set" type="button" class="ml-auto text-xs text-red-600 underline" :disabled="apiBusy" @click="removeBingKey">Hapus key</button>
+          </div>
+          <p class="text-xs text-brand-500">
+            Di <a href="https://www.bing.com/webmasters" target="_blank" rel="noopener noreferrer" class="underline">Bing Webmaster Tools</a>: Settings (ikon gerigi) > API Access > API Key > Generate.
+            Situs harus sudah terverifikasi di akun yang sama. IndexNow tetap jalan tanpa key ini.
+          </p>
+          <input v-model="bingKey" type="text" name="bing-api-key" class="input font-mono [-webkit-text-security:disc]" :placeholder="seoApi?.bing_api_set ? 'Ganti API key…' : 'API key Bing Webmaster'" autocomplete="off" autocapitalize="off" spellcheck="false" data-1p-ignore data-lpignore="true" aria-label="API key Bing Webmaster">
+          <button class="btn-primary btn-sm justify-self-start" :disabled="apiBusy || !bingKey.trim()">Simpan key</button>
+        </form>
+
+        <div class="grid gap-2 border-t border-brand-100 pt-4">
+          <div class="flex flex-wrap items-center gap-2">
+            <h3 class="text-sm font-semibold text-brand-900">Google Search Console</h3>
+            <span v-if="seoApi" class="chip" :class="seoApi.google_set && seoApi.gsc_property ? 'bg-green-100 text-green-800' : 'bg-amber-100 text-amber-800'">
+              {{ !seoApi.google_set ? 'Belum diisi' : seoApi.gsc_property ? 'Terhubung' : 'Pilih properti' }}
+            </span>
+            <button v-if="seoApi?.google_set" type="button" class="ml-auto text-xs text-red-600 underline" :disabled="apiBusy" @click="removeSa">Hapus service account</button>
+          </div>
+          <details class="text-xs text-brand-600" :open="!seoApi?.google_set">
+            <summary class="cursor-pointer font-semibold text-brand-700">Cara menyiapkan (sekali saja, ±5 menit)</summary>
+            <ol class="mt-2 grid list-decimal gap-1 pl-5">
+              <li>Buka <a href="https://console.cloud.google.com/apis/library/searchconsole.googleapis.com" target="_blank" rel="noopener noreferrer" class="underline">Google Cloud Console</a>, buat/pilih project, lalu aktifkan <b>Google Search Console API</b>.</li>
+              <li>IAM &amp; Admin > Service Accounts > <b>Create service account</b> (nama bebas, tanpa peran).</li>
+              <li>Buka service account itu > Keys > Add key > Create new key > <b>JSON</b>. File .json akan terunduh.</li>
+              <li>Unggah file itu di bawah dan simpan.</li>
+              <li>Di Search Console > Setelan > <b>Pengguna dan izin</b> > Tambahkan pengguna: email service account, izin <b>Pemilik</b> atau <b>Penuh</b>.</li>
+              <li>Klik <b>Cek koneksi &amp; pilih properti</b>.</li>
+            </ol>
+          </details>
+          <form class="grid gap-2" @submit.prevent="saveSa">
+            <label class="label">{{ seoApi?.google_set ? 'Ganti file kunci service account (.json)' : 'File kunci service account (.json)' }}
+              <input :key="saInput" type="file" accept=".json,application/json" class="input py-2 text-sm" @change="readSaFile">
+            </label>
+            <details class="text-xs text-brand-600">
+              <summary class="cursor-pointer">atau tempel isi file JSON</summary>
+              <textarea v-model="saJson" rows="4" class="input mt-2 font-mono text-xs" placeholder="{&quot;type&quot;: &quot;service_account&quot;, …}" autocomplete="off" spellcheck="false" aria-label="Isi JSON service account" />
+            </details>
+            <p v-if="saFile" class="text-xs text-brand-600">File dimuat: {{ saFile }}</p>
+            <button class="btn-primary btn-sm justify-self-start" :disabled="apiBusy || !saJson.trim()">Simpan service account</button>
+          </form>
+          <div v-if="seoApi?.google_set" class="grid gap-2 rounded-xl bg-brand-50 p-3">
+            <p class="text-xs text-brand-700">Email service account (tambahkan di Search Console):</p>
+            <code class="break-all text-xs font-semibold text-brand-900">{{ seoApi.google_email }}</code>
+            <button type="button" class="btn-ghost btn-sm justify-self-start" :disabled="apiBusy" @click="checkGsc">{{ gscChecking ? 'Memeriksa…' : 'Cek koneksi & pilih properti' }}</button>
+            <form v-if="gscSites?.length || seoApi.gsc_property" class="grid gap-2" @submit.prevent="saveProperty">
+              <label class="label">Properti Search Console
+                <select v-if="gscSites?.length" v-model="gscProperty" class="input">
+                  <option v-for="s in gscSites" :key="s.siteUrl" :value="s.siteUrl" :disabled="s.permissionLevel === 'siteUnverifiedUser'">
+                    {{ s.siteUrl }} · {{ PERMISSION[s.permissionLevel] ?? s.permissionLevel }}
+                  </option>
+                </select>
+                <input v-else v-model="gscProperty" class="input font-mono" placeholder="sc-domain:undanganvirtual.com">
+              </label>
+              <button class="btn-primary btn-sm justify-self-start" :disabled="apiBusy || !gscProperty.trim() || gscProperty.trim() === (seoApi.gsc_property ?? '')">Simpan properti</button>
+            </form>
+          </div>
+        </div>
+      </div>
     </section>
 
     <section class="mx-auto grid max-w-xl gap-4 px-4 pb-10">

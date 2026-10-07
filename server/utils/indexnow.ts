@@ -41,8 +41,12 @@ export async function submitIndexNow(event: H3Event, paths: string[], o: { timeo
       signal: AbortSignal.timeout(o.timeoutMs ?? 5000),
     })
     // 200 = diterima, 202 = diterima (kunci sedang diverifikasi); selain itu catat untuk diperiksa
-    if (res.status !== 200 && res.status !== 202)
+    if (res.status !== 200 && res.status !== 202) {
       console.warn(`[indexnow] status ${res.status} untuk ${urlList.length} URL:`, (await res.text().catch(() => '')).slice(0, 300))
+      return { sent: urlList.length, status: res.status }
+    }
+    const at = new Date().toISOString()
+    await recordSeo(event, urlList.map(u => ({ path: sitePath(origin, u)!, indexnow_at: at })))
     return { sent: urlList.length, status: res.status }
   }
   catch (e) {
