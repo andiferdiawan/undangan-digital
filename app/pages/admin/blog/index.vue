@@ -97,7 +97,33 @@ async function removeTopic(id: number) {
 async function requeue(id: number) {
   await run(`rq-${id}`, async () => { const { error } = await supabase.from('blog_topics').update({ status: 'queued', note: null } as never).eq('id', id); if (error) throw error })
 }
-const suggest = () => run('suggest', () => $fetch<{ added: number }>('/api/admin/blog/topics/suggest', { method: 'POST', timeout: 120_000, body: { count: 10, provider: provider.value ?? undefined } }), r => `${r.added} topik baru ditambahkan ke antrean.`)
+// Porsi maksud pencarian untuk usulan topik AI (persen, total 100). Disimpan per browser.
+const MIX_DEFAULT: Record<Intent, number> = { informasional: 50, transaksional: 20, navigasional: 10, komersial: 20 }
+const MIX_ORDER: Intent[] = ['informasional', 'transaksional', 'navigasional', 'komersial']
+const suggestCount = ref(10)
+const mix = reactive<Record<Intent, number>>({ ...MIX_DEFAULT })
+const mixTotal = computed(() => MIX_ORDER.reduce((n, i) => n + (Number(mix[i]) || 0), 0))
+/** Pratinjau jumlah per intent (sisa terbesar, sama dengan perhitungan server). */
+const mixQuota = computed(() => {
+  const exact = MIX_ORDER.map(i => ({ i, v: ((Number(mix[i]) || 0) / (mixTotal.value || 100)) * suggestCount.value }))
+  const q = Object.fromEntries(exact.map(e => [e.i, Math.floor(e.v)])) as Record<Intent, number>
+  let left = suggestCount.value - MIX_ORDER.reduce((n, i) => n + q[i], 0)
+  for (const e of [...exact].sort((a, b) => (b.v % 1) - (a.v % 1))) { if (left <= 0) break; if (e.v > 0) { q[e.i]++; left-- } }
+  return q
+})
+onMounted(() => {
+  try {
+    const saved = JSON.parse(localStorage.getItem('uv-topic-mix') ?? 'null')
+    if (saved && MIX_ORDER.every(i => Number.isInteger(saved[i]))) Object.assign(mix, saved)
+  }
+  catch { /* abaikan */ }
+})
+watch(mix, (m) => { try { localStorage.setItem('uv-topic-mix', JSON.stringify(m)) } catch { /* abaikan */ } })
+const suggest = () => run('suggest', () => $fetch<{ added: number, got: Record<Intent, number> }>('/api/admin/blog/topics/suggest', {
+  method: 'POST',
+  timeout: 240_000,
+  body: { count: suggestCount.value, provider: provider.value ?? undefined, mix: { ...mix } },
+}), r => `${r.added} topik baru ditambahkan ke antrean (${MIX_ORDER.map(i => `${i} ${r.got?.[i] ?? 0}`).join(' · ')}).`)
 
 // ── Otomatisasi ──
 const auto = reactive({ auto_enabled: false, auto_publish: false, default_author_id: '', default_editor_id: '' })
@@ -313,7 +339,23 @@ const fmt = (d: string | null) => d ? new Date(d).toLocaleDateString('id-ID', { 
       <section class="card mt-5 p-5">
         <div class="flex flex-wrap items-center justify-between gap-2">
           <h2 class="font-semibold text-brand">Antrean topik <span class="font-normal text-brand-500">({{ queued.length }})</span></h2>
-          <button class="btn-ghost btn-sm" :disabled="!!busy || !provider" @click="suggest">{{ busy === 'suggest' ? 'Mencari topik…' : '✦ Usulkan 10 topik (AI)' }}</button>
+          <button class="btn-ghost btn-sm" :disabled="!!busy || !provider || mixTotal !== 100" @click="suggest">{{ busy === 'suggest' ? 'Mencari topik…' : `✦ Usulkan ${suggestCount} topik (AI)` }}</button>
+        </div>
+        <div class="mt-3 rounded-xl bg-brand-50/60 p-3">
+          <p class="text-xs font-semibold text-brand-800">Porsi maksud pencarian untuk usulan topik AI</p>
+          <div class="mt-2 grid grid-cols-2 gap-2 sm:grid-cols-5">
+            <label class="label !text-xs">Jumlah topik
+              <input v-model.number="suggestCount" type="number" min="1" max="20" class="input !py-1.5">
+            </label>
+            <label v-for="i in MIX_ORDER" :key="i" class="label !text-xs capitalize">{{ i }} (%)
+              <input v-model.number="mix[i]" type="number" min="0" max="100" step="5" class="input !py-1.5">
+              <span class="font-normal text-brand-500">= {{ mixQuota[i] }} topik</span>
+            </label>
+          </div>
+          <p class="mt-1 text-xs" :class="mixTotal === 100 ? 'text-brand-500' : 'font-semibold text-red-600'">
+            Total {{ mixTotal }}%{{ mixTotal === 100 ? '' : ' — harus 100%' }}.
+            <button v-if="MIX_ORDER.some(i => mix[i] !== MIX_DEFAULT[i])" type="button" class="ml-1 underline" @click="Object.assign(mix, MIX_DEFAULT)">Kembalikan 50/20/10/20</button>
+          </p>
         </div>
         <form class="mt-3 grid gap-2 sm:grid-cols-[2fr_1fr_1fr_1fr_auto]" @submit.prevent="addTopic">
           <input v-model="newTopic.topic" class="input" minlength="5" maxlength="200" required placeholder="Topik baru">

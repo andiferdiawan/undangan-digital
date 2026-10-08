@@ -241,7 +241,37 @@ export async function generateArticle(o: {
   }
 }
 
-/** Usulan topik baru (untuk antrean artikel harian) yang belum pernah ditulis. */
+/** Porsi maksud pencarian (search intent) default untuk usulan topik, dalam persen. */
+export const DEFAULT_INTENT_MIX: Record<Intent, number> = { informasional: 50, transaksional: 20, navigasional: 10, komersial: 20 }
+
+const INTENT_GUIDE: Record<Intent, string> = {
+  informasional: 'pembaca ingin tahu/belajar: contoh kalimat & teks undangan, etika, tata cara, adat & tradisi, tips persiapan acara',
+  transaksional: 'pembaca siap bertindak/membeli: cara membuat/memesan undangan digital, langkah membuat undangan online dari HP, pesan undangan aqiqah/khitanan/nikah digital',
+  navigasional: 'pembaca mencari situs/halaman/fitur tertentu dari merek Undangan Virtual: katalog tema, fitur RSVP & buku tamu, amplop digital, dashboard, program reseller, cara memakai fiturnya',
+  komersial: 'pembaca membandingkan sebelum membeli: undangan cetak vs digital, rekomendasi tema, fitur yang wajib ada, kelebihan & kekurangan, memilih layanan undangan digital',
+}
+
+/** Bagi jumlah topik ke tiap intent sesuai porsi (metode sisa terbesar; total selalu = count). */
+export function intentQuota(count: number, mix: Record<Intent, number> = DEFAULT_INTENT_MIX): Record<Intent, number> {
+  const total = INTENTS.reduce((n, i) => n + Math.max(0, mix[i] ?? 0), 0) || 100
+  const exact = INTENTS.map(i => ({ i, v: (Math.max(0, mix[i] ?? 0) / total) * count }))
+  const quota = Object.fromEntries(exact.map(e => [e.i, Math.floor(e.v)])) as Record<Intent, number>
+  let left = count - INTENTS.reduce((n, i) => n + quota[i], 0)
+  for (const e of [...exact].sort((a, b) => (b.v % 1) - (a.v % 1))) {
+    if (left <= 0) break
+    if (e.v > 0) { quota[e.i]++; left-- }
+  }
+  return quota
+}
+
+type SuggestedTopic = { topic: string, focus_keyword: string, category_slug: string | null, intent: Intent }
+
+/**
+ * Usulan topik baru (untuk antrean artikel harian) yang belum pernah ditulis, dengan porsi intent yang ditentukan
+ * (default 50% informasional, 20% transaksional, 10% navigasional, 20% komersial). Model diminta mengelompokkan
+ * per intent; server mengambil tepat sesuai kuota, meminta tambahan sekali bila ada kelompok yang kurang, lalu
+ * menyelang-nyeling urutannya agar artikel harian bergantian intent.
+ */
 export async function suggestTopics(o: {
   event: H3Event
   cfg: AiConfig
@@ -250,32 +280,70 @@ export async function suggestTopics(o: {
   ctx: BlogContext
   existing: string[]
   count: number
+  mix?: Record<Intent, number>
   timeoutMs: number
-}): Promise<{ topic: string, focus_keyword: string, category_slug: string | null, intent: Intent }[]> {
-  const res = await aiText({
-    cfg: o.cfg, provider: o.provider, model: o.model, json: true, temperature: 0.9,
-    system: `Anda adalah ahli riset kata kunci SEO untuk situs undangan digital Indonesia (pernikahan, aqiqah, khitanan, ulang tahun, acara kantor & umum).
-Usulkan topik artikel blog yang banyak dicari di Google Indonesia, campuran intent informasional (contoh kalimat, etika, tata cara, adat) dan komersial/transaksional (perbandingan, cara membuat undangan digital) yang bisa membawa pembaca membeli undangan digital.
-Balas HANYA JSON: {"topics":[{"topic":"judul kerja","focus_keyword":"kata kunci 2-5 kata","category_slug":"...","intent":"informasional|komersial|transaksional|navigasional"}]}`,
-    turns: [{
-      role: 'user',
-      content: `Buat ${o.count} topik baru. Kategori yang tersedia: ${o.ctx.categories.map(c => `${c.slug} (${c.name})`).join(', ')}.
-Jangan mengulang atau terlalu mirip dengan topik yang sudah ada berikut:
-${o.existing.slice(0, 200).map(t => `- ${t}`).join('\n') || '- (belum ada)'}`,
-    }],
-    siteUrl: siteOrigin(o.event), timeoutMs: o.timeoutMs,
-  })
-  let raw: any
-  try { raw = extractJson(res.text) }
-  catch { throw new Error('Usulan topik dari AI bukan JSON yang valid.') }
+}): Promise<SuggestedTopic[]> {
+  const deadline = Date.now() + o.timeoutMs
+  const quota = intentQuota(o.count, o.mix)
   const seen = new Set(o.existing.map(t => t.toLowerCase().trim()))
-  return ((Array.isArray(raw?.topics) ? raw.topics : []) as any[])
-    .map(t => ({
-      topic: clip(t?.topic, 200),
-      focus_keyword: clip(t?.focus_keyword, 80),
-      category_slug: o.ctx.categories.some(c => c.slug === t?.category_slug) ? String(t.category_slug) : null,
-      intent: (INTENTS.includes(t?.intent) ? t.intent : 'informasional') as Intent,
-    }))
-    .filter(t => t.topic.length >= 5 && !seen.has(t.topic.toLowerCase()))
-    .slice(0, o.count)
+  const picked: Record<Intent, SuggestedTopic[]> = { informasional: [], transaksional: [], navigasional: [], komersial: [] }
+  const missing = () => INTENTS.filter(i => picked[i].length < quota[i])
+
+  for (let round = 1; round <= 2; round++) {
+    const need = missing()
+    if (!need.length) break
+    const left = deadline - Date.now()
+    if (round > 1 && left < 25_000) break
+    const res = await aiText({
+      cfg: o.cfg, provider: o.provider, model: o.model, json: true, temperature: 0.9,
+      system: `Anda adalah ahli riset kata kunci SEO untuk situs undangan digital Indonesia "Undangan Virtual" (pernikahan, aqiqah, khitanan, ulang tahun, acara kantor & umum; nuansa syar'i & modern).
+Usulkan topik artikel blog yang benar-benar dicari orang Indonesia di Google, bermanfaat, dan bisa mengarahkan pembaca ke pembelian undangan digital secara wajar.
+Satu topik = satu kebutuhan pembaca yang jelas; jangan membuat variasi kata kunci dari topik yang sama. Hindari topik yang butuh angka regulasi/hukum.
+Arti tiap maksud pencarian (search intent):
+${INTENTS.map(i => `- ${i}: ${INTENT_GUIDE[i]}`).join('\n')}
+Balas HANYA JSON berkelompok per intent, dengan JUMLAH PERSIS sesuai permintaan:
+{"informasional":[{"topic":"judul kerja","focus_keyword":"kata kunci 2-5 kata","category_slug":"..."}],"transaksional":[...],"navigasional":[...],"komersial":[...]}`,
+      turns: [{
+        role: 'user',
+        content: `Jumlah topik yang diminta per intent: ${need.map(i => `${i} = ${quota[i] - picked[i].length}`).join(', ')}.
+Kategori yang tersedia (isi category_slug dengan slug): ${o.ctx.categories.map(c => `${c.slug} (${c.name})`).join(', ')}.
+Jangan mengulang atau terlalu mirip dengan topik yang sudah ada berikut:
+${[...o.existing.slice(0, 200), ...INTENTS.flatMap(i => picked[i].map(t => t.topic))].map(t => `- ${t}`).join('\n') || '- (belum ada)'}`,
+      }],
+      siteUrl: siteOrigin(o.event), timeoutMs: Math.max(15_000, (round > 1 ? left : deadline - Date.now()) - 5_000),
+    })
+    let raw: any
+    try { raw = extractJson(res.text) }
+    catch {
+      if (round === 1) continue
+      break
+    }
+    // Terima juga format lama {"topics":[{..., "intent"}]}
+    const buckets: Record<string, any[]> = Array.isArray(raw?.topics)
+      ? (raw.topics as any[]).reduce((m: Record<string, any[]>, t) => ((m[t?.intent] ??= []).push(t), m), {})
+      : raw ?? {}
+    for (const i of need) {
+      for (const t of (Array.isArray(buckets[i]) ? buckets[i] : [])) {
+        if (picked[i].length >= quota[i]) break
+        const topic = clip(t?.topic, 200)
+        const key = topic.toLowerCase()
+        if (topic.length < 5 || seen.has(key)) continue
+        seen.add(key)
+        picked[i].push({
+          topic,
+          focus_keyword: clip(t?.focus_keyword, 80),
+          category_slug: o.ctx.categories.some(c => c.slug === t?.category_slug) ? String(t.category_slug) : null,
+          intent: i,
+        })
+      }
+    }
+  }
+
+  const all = INTENTS.flatMap(i => picked[i])
+  if (!all.length) throw new Error('AI tidak menghasilkan usulan topik yang valid. Coba lagi atau pilih model lain.')
+  // Selang-seling intent: posisi relatif tiap topik di kelompoknya → urutan antrean tersebar merata
+  return INTENTS
+    .flatMap(i => picked[i].map((t, k) => ({ t, key: (k + 0.5) / picked[i].length + INTENTS.indexOf(i) * 1e-3 })))
+    .sort((a, b) => a.key - b.key)
+    .map(x => x.t)
 }
