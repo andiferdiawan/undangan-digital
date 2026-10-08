@@ -15,7 +15,8 @@ const route = useRoute()
 const router = useRouter()
 const { data, refresh: refreshMeta } = await useAsyncData('admin-blog', async () => {
   const [t, c, a, s] = await Promise.all([
-    supabase.from('blog_topics').select('*').order('id'),
+    // Topik yang sukses sudah jadi artikel di blog → tidak perlu dimuat; cukup antrean + yang gagal
+    supabase.from('blog_topics').select('*').neq('status', 'done').order('id'),
     supabase.from('blog_categories').select('slug, name').order('sort'),
     supabase.from('blog_authors').select('*').order('created_at'),
     supabase.from('blog_settings').select('*').maybeSingle(),
@@ -81,7 +82,7 @@ async function generate(topicId?: number) {
 // ── Antrean topik ──
 const newTopic = reactive({ topic: '', focus_keyword: '', category_slug: '', intent: 'informasional' as Intent })
 const queued = computed(() => (data.value?.topics ?? []).filter(t => t.status === 'queued'))
-const otherTopics = computed(() => (data.value?.topics ?? []).filter(t => t.status !== 'queued').reverse().slice(0, 30))
+const failedTopics = computed(() => (data.value?.topics ?? []).filter(t => t.status === 'failed').reverse())
 async function addTopic() {
   await run('add-topic', async () => {
     const { error } = await supabase.from('blog_topics').insert({
@@ -380,14 +381,14 @@ const fmt = (d: string | null) => d ? new Date(d).toLocaleDateString('id-ID', { 
           </li>
           <li v-if="!queued.length" class="py-3 text-brand-500">Antrean kosong.</li>
         </ul>
-        <details v-if="otherTopics.length" class="mt-2 text-sm">
-          <summary class="cursor-pointer text-brand-600">Riwayat topik</summary>
-          <ul class="mt-2 divide-y divide-brand-100">
-            <li v-for="t in otherTopics" :key="t.id" class="flex flex-wrap items-center gap-2 py-2">
-              <span class="chip" :class="t.status === 'done' ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700'">{{ t.status === 'done' ? 'selesai' : 'gagal' }}</span>
+        <details v-if="failedTopics.length" open class="mt-3 rounded-xl border border-red-100 bg-red-50/40 p-3 text-sm">
+          <summary class="cursor-pointer font-medium text-red-700">Topik gagal ditulis ({{ failedTopics.length }})</summary>
+          <p class="mt-1 text-xs text-brand-500">Topik yang berhasil sudah menjadi artikel di daftar bawah, jadi yang ditampilkan di sini hanya yang gagal.</p>
+          <ul class="mt-2 divide-y divide-red-100">
+            <li v-for="t in failedTopics" :key="t.id" class="flex flex-wrap items-center gap-2 py-2">
               <span class="min-w-0 flex-1 text-brand-800">{{ t.topic }}<span v-if="t.note" class="block text-xs text-red-600">{{ t.note }}</span></span>
-              <NuxtLink v-if="t.post_id" :to="`/admin/blog/${t.post_id}`" class="text-xs underline">artikel</NuxtLink>
-              <button v-if="t.status === 'failed'" class="text-xs underline" @click="requeue(t.id)">antrekan lagi</button>
+              <button class="btn-ghost btn-sm" :disabled="!!busy" @click="requeue(t.id)">{{ busy === `rq-${t.id}` ? '…' : 'Antrekan lagi' }}</button>
+              <button class="text-xs text-red-600 underline" :disabled="!!busy" @click="removeTopic(t.id)">hapus</button>
             </li>
           </ul>
         </details>
