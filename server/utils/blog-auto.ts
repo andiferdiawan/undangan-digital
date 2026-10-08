@@ -42,22 +42,28 @@ export async function runDailyArticle(event: H3Event, o: { force?: boolean, prov
       console.error('[blog] gagal mengisi antrean topik:', e instanceof Error ? e.message : e)
     }
   }
-  const t = ctx.topic
-  if (!t) throw new Error('Antrean topik kosong.')
-  try {
-    const a = await generateArticle({
-      event, cfg, provider, ctx,
-      brief: { topic: t.topic, focus_keyword: t.focus_keyword, category_slug: t.category_slug, intent: t.intent },
-      timeoutMs: Math.max(30_000, o.deadline - Date.now() - 10_000),
-    })
-    const { stats, ...post } = a
-    const saved = await serverRpc<{ id: string, slug: string, status: string }>(event, 'server_blog_save', { p_post: post, p_topic_id: t.id })
-    if (saved.status === 'published') await submitIndexNow(event, [`/blog/${saved.slug}`, '/blog'])
-    return { ...saved, title: a.title, stats, provider }
+  // Topik yang ternyata bersaing dengan artikel lain ditandai gagal (tanpa memanggil AI), lalu lanjut ke topik berikutnya
+  for (let tries = 0; tries < 5; tries++) {
+    const t = ctx.topic
+    if (!t) throw new Error('Antrean topik kosong.')
+    try {
+      const a = await generateArticle({
+        event, cfg, provider, ctx,
+        brief: { topic: t.topic, focus_keyword: t.focus_keyword, category_slug: t.category_slug, intent: t.intent },
+        timeoutMs: Math.max(30_000, o.deadline - Date.now() - 10_000),
+      })
+      const { stats, ...post } = a
+      const saved = await serverRpc<{ id: string, slug: string, status: string }>(event, 'server_blog_save', { p_post: post, p_topic_id: t.id })
+      if (saved.status === 'published') await submitIndexNow(event, [`/blog/${saved.slug}`, '/blog'])
+      return { ...saved, title: a.title, stats, provider }
+    }
+    catch (e) {
+      const msg = e instanceof Error ? e.message : String(e)
+      await serverRpc(event, 'server_blog_fail', { p_topic_id: t.id, p_note: msg }).catch(() => {})
+      const fast = e instanceof BlogOverlapError && o.deadline - Date.now() > 150_000
+      if (!fast) throw e
+      ctx = await serverRpc<Ctx>(event, 'server_blog_context', {})
+    }
   }
-  catch (e) {
-    const msg = e instanceof Error ? e.message : String(e)
-    await serverRpc(event, 'server_blog_fail', { p_topic_id: t.id, p_note: msg }).catch(() => {})
-    throw e
-  }
+  throw new Error('Beberapa topik teratas tumpang tindih dengan artikel yang sudah ada. Periksa antrean topik.')
 }

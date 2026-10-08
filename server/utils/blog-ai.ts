@@ -1,6 +1,7 @@
 import type { H3Event } from 'h3'
 import { extractJson } from './openrouter'
 import { type AiConfig, type AiProvider, aiText } from './ai'
+import { describeOverlap, findOverlap, mostSimilar, type TakenItem } from './blog-overlap'
 
 /**
  * Generator artikel blog SEO (teks saja, tanpa gambar) untuk mendongkrak trafik organik situs undangan.
@@ -13,7 +14,16 @@ export interface BlogLink { url: string, title: string }
 export interface BlogContext {
   categories: { slug: string, name: string }[]
   posts: { slug: string, title: string, category_slug: string | null, focus_keyword: string, tags: string[] }[]
+  /** Semua artikel yang belum diarsip (draf & tayang) untuk cek kanibalisasi judul/kata kunci. */
+  taken?: { slug: string, title: string, focus_keyword: string, status: string }[]
 }
+
+/** Artikel yang sudah ada (draf & tayang) sebagai pembanding anti-kanibalisasi. */
+const takenPosts = (ctx: BlogContext): TakenItem[] =>
+  (ctx.taken ?? ctx.posts).map(p => ({ title: p.title, focus_keyword: p.focus_keyword, slug: p.slug, status: (p as { status?: string }).status ?? 'published', kind: 'artikel' as const }))
+
+/** Topik ditolak karena bersaing dengan artikel yang sudah ada (keyword cannibalization). */
+export class BlogOverlapError extends Error {}
 export interface ArticleBrief {
   topic: string
   focus_keyword?: string
@@ -86,6 +96,10 @@ Balas HANYA satu objek JSON valid (tanpa markdown pembungkus), dengan kunci:
 }
 
 function userPrompt(brief: ArticleBrief, ctx: BlogContext, links: BlogLink[]) {
+  const similar = mostSimilar({ title: brief.topic, focus_keyword: brief.focus_keyword }, takenPosts(ctx), 25)
+  const avoid = similar.length
+    ? `\n\nArtikel yang SUDAH ADA dan paling dekat dengan topik ini (judul — kata kunci). Judul, slug, dan kata kunci utama Anda WAJIB berbeda dan tidak boleh bersaing dengan artikel-artikel ini (hindari kanibalisasi kata kunci). Ambil sudut/kebutuhan pembaca yang berbeda, dan tautkan ke artikel terkait bila relevan:\n${similar.map(p => `- ${p.title} — ${p.focus_keyword || '-'}${p.slug ? ` (/blog/${p.slug})` : ''}`).join('\n')}`
+    : ''
   const posts = ctx.posts.slice(0, 80).map(p => `- /blog/${p.slug} — ${p.title}`).join('\n') || '- (belum ada artikel lain)'
   const pages = links.map(l => `- ${l.url} — ${l.title}`).join('\n')
   const cats = ctx.categories.map(c => `${c.slug} (${c.name})`).join(', ')
@@ -96,7 +110,7 @@ Kategori: ${brief.category_slug || '(pilih yang paling sesuai)'} — pilihan: ${
 
 URL internal yang boleh ditautkan:
 ${posts}
-${pages}`
+${pages}${avoid}`
 }
 
 /** Slug rapi sesuai batasan database. */
@@ -169,21 +183,61 @@ export async function generateArticle(o: {
   const siteHost = new URL(origin).hostname.replace(/^www\./, '')
   const links = await siteLinks(o.event)
   const allowed = new Set<string>([...o.ctx.posts.map(p => `/blog/${p.slug}`), ...links.map(l => l.url), '/blog'])
+  const startedAt = Date.now()
+
+  // Anti kanibalisasi: tolak topik yang bersaing dengan artikel yang sudah ada sebelum memanggil AI
+  const taken = takenPosts(o.ctx)
+  const pre = findOverlap({ title: o.brief.topic, focus_keyword: o.brief.focus_keyword }, taken)
+  if (pre) throw new BlogOverlapError(`Topik tumpang tindih dengan ${describeOverlap(pre)}. Pilih sudut lain atau perbarui artikel tersebut.`)
 
   const res = await aiText({
     cfg: o.cfg, provider: o.provider, model: o.model, json: true, temperature: 0.7,
     system: systemPrompt(String(config.public.siteName || 'Undangan Virtual')),
     turns: [{ role: 'user', content: userPrompt(o.brief, o.ctx, links) }],
-    siteUrl: origin, timeoutMs: o.timeoutMs,
+    // Sisakan waktu untuk putaran perbaikan judul bila ternyata mirip artikel lain
+    siteUrl: origin, timeoutMs: Math.max(30_000, o.timeoutMs - 25_000),
   })
   if (res.finish === 'length') throw new Error('Artikel terpotong (batas token model). Coba lagi atau pilih model lain.')
   let raw: any
   try { raw = extractJson(res.text) }
   catch { throw new Error('Jawaban AI bukan JSON yang valid. Coba lagi.') }
 
-  const title = clip(raw.title || o.brief.topic, 120)
+  let title = clip(raw.title || o.brief.topic, 120)
   if (title.length < 10) throw new Error('Judul artikel dari AI terlalu pendek.')
-  const focus = clip(raw.focus_keyword || o.brief.focus_keyword || o.brief.topic, 80)
+  let focus = clip(raw.focus_keyword || o.brief.focus_keyword || o.brief.topic, 80)
+
+  // Judul/kata kunci hasil AI ternyata bersaing dengan artikel lain → minta judul & kata kunci baru (sekali)
+  let clash = findOverlap({ title, focus_keyword: focus }, taken)
+  if (clash) {
+    const left = o.timeoutMs - (Date.now() - startedAt)
+    if (left < 12_000) throw new BlogOverlapError(`Judul hasil AI tumpang tindih dengan ${describeOverlap(clash)}.`)
+    const fix = await aiText({
+      cfg: o.cfg, provider: o.provider, model: o.model, json: true, temperature: 0.8,
+      system: 'Anda editor SEO. Buat judul & kata kunci utama baru yang tetap sesuai isi artikel, tetapi jelas berbeda dari artikel lain agar tidak terjadi kanibalisasi kata kunci. Balas HANYA JSON {"title","meta_title","slug","focus_keyword"}.',
+      turns: [{
+        role: 'user',
+        content: `Topik artikel: ${o.brief.topic}
+Judul saat ini: ${title}
+Kata kunci saat ini: ${focus}
+Bertabrakan dengan artikel: "${clash.item.title}" (kata kunci: ${clash.item.focus_keyword || '-'})
+Artikel lain yang juga sudah ada (jangan mirip):
+${mostSimilar({ title, focus_keyword: focus }, taken, 15).map(p => `- ${p.title} — ${p.focus_keyword || '-'}`).join('\n')}
+Ringkasan isi artikel: ${clip(raw.excerpt || raw.meta_description || '', 300)}`,
+      }],
+      siteUrl: origin, timeoutMs: left - 2_000,
+    })
+    let fixed: any = null
+    try { fixed = extractJson(fix.text) }
+    catch { /* ditangani di bawah */ }
+    const t2 = clip(fixed?.title, 120)
+    const k2 = clip(fixed?.focus_keyword, 80)
+    clash = t2.length >= 10 ? findOverlap({ title: t2, focus_keyword: k2 || focus }, taken) : clash
+    if (clash || t2.length < 10) throw new BlogOverlapError(`Judul hasil AI tumpang tindih dengan ${describeOverlap(clash!)}. Topik ini sebaiknya diganti sudutnya.`)
+    title = t2
+    focus = k2 || focus
+    raw.meta_title = fixed?.meta_title || t2
+    raw.slug = fixed?.slug || t2
+  }
   const category = o.ctx.categories.some(c => c.slug === raw.category_slug) ? String(raw.category_slug)
     : o.brief.category_slug && o.ctx.categories.some(c => c.slug === o.brief.category_slug) ? o.brief.category_slug : null
   const tags = [...new Set(((Array.isArray(raw.tags) ? raw.tags : []) as unknown[])
@@ -281,11 +335,18 @@ export async function suggestTopics(o: {
   existing: string[]
   count: number
   mix?: Record<Intent, number>
+  /** Artikel yang sudah ada (draf & tayang) dengan kata kuncinya; default dari ctx.taken. */
+  taken?: TakenItem[]
   timeoutMs: number
 }): Promise<SuggestedTopic[]> {
   const deadline = Date.now() + o.timeoutMs
   const quota = intentQuota(o.count, o.mix)
-  const seen = new Set(o.existing.map(t => t.toLowerCase().trim()))
+  // Pembanding anti-kanibalisasi: artikel (judul + kata kunci) dan semua topik yang pernah dibuat
+  const compare: TakenItem[] = [
+    ...(o.taken ?? takenPosts(o.ctx)),
+    ...o.existing.map(t => ({ title: t, kind: 'topik' as const })),
+  ]
+  const usedKeywords = [...new Set(compare.map(c => c.focus_keyword).filter(Boolean))] as string[]
   const picked: Record<Intent, SuggestedTopic[]> = { informasional: [], transaksional: [], navigasional: [], komersial: [] }
   const missing = () => INTENTS.filter(i => picked[i].length < quota[i])
 
@@ -307,6 +368,7 @@ Balas HANYA JSON berkelompok per intent, dengan JUMLAH PERSIS sesuai permintaan:
         role: 'user',
         content: `Jumlah topik yang diminta per intent: ${need.map(i => `${i} = ${quota[i] - picked[i].length}`).join(', ')}.
 Kategori yang tersedia (isi category_slug dengan slug): ${o.ctx.categories.map(c => `${c.slug} (${c.name})`).join(', ')}.
+Kata kunci utama yang SUDAH DIPAKAI (jangan dipakai lagi, juga jangan sinonimnya): ${usedKeywords.slice(0, 200).join('; ') || '(belum ada)'}
 Jangan mengulang atau terlalu mirip dengan topik yang sudah ada berikut:
 ${[...o.existing.slice(0, 200), ...INTENTS.flatMap(i => picked[i].map(t => t.topic))].map(t => `- ${t}`).join('\n') || '- (belum ada)'}`,
       }],
@@ -326,12 +388,14 @@ ${[...o.existing.slice(0, 200), ...INTENTS.flatMap(i => picked[i].map(t => t.top
       for (const t of (Array.isArray(buckets[i]) ? buckets[i] : [])) {
         if (picked[i].length >= quota[i]) break
         const topic = clip(t?.topic, 200)
-        const key = topic.toLowerCase()
-        if (topic.length < 5 || seen.has(key)) continue
-        seen.add(key)
+        const focusKeyword = clip(t?.focus_keyword, 80)
+        if (topic.length < 5) continue
+        // Tolak topik yang bersaing dengan artikel/topik lain atau dengan usulan lain di batch ini
+        if (findOverlap({ title: topic, focus_keyword: focusKeyword }, compare)) continue
+        compare.push({ title: topic, focus_keyword: focusKeyword, kind: 'topik' })
         picked[i].push({
           topic,
-          focus_keyword: clip(t?.focus_keyword, 80),
+          focus_keyword: focusKeyword,
           category_slug: o.ctx.categories.some(c => c.slug === t?.category_slug) ? String(t.category_slug) : null,
           intent: i,
         })
