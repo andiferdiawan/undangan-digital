@@ -8,7 +8,11 @@ interface PostRow { id: string, slug: string, title: string, status: 'draft' | '
 interface TopicRow { id: number, topic: string, focus_keyword: string, category_slug: string | null, intent: Intent, status: 'queued' | 'done' | 'failed', post_id: string | null, note: string | null }
 interface Cat { slug: string, name: string }
 interface Author { id: string, slug: string, name: string, job_title: string, bio: string, same_as: string[] }
-interface Settings { auto_enabled: boolean, auto_publish: boolean, default_author_id: string | null, default_editor_id: string | null, last_auto_at: string | null, last_auto_status: string | null }
+interface Settings {
+  auto_enabled: boolean, auto_publish: boolean, default_author_id: string | null, default_editor_id: string | null, last_auto_at: string | null, last_auto_status: string | null
+  auto_per_day: number, auto_interval_minutes: number, auto_start_time: string, auto_models: string[]
+  auto_day: string | null, auto_day_count: number, last_success_at: string | null, auto_running_since: string | null, auto_halted_at: string | null, auto_halt_reason: string | null
+}
 
 const supabase = useSupabaseClient()
 const route = useRoute()
@@ -127,19 +131,64 @@ const suggest = () => run('suggest', () => $fetch<{ added: number, got: Record<I
 }), r => `${r.added} topik baru ditambahkan ke antrean (${MIX_ORDER.map(i => `${i} ${r.got?.[i] ?? 0}`).join(' · ')}).`)
 
 // ── Otomatisasi ──
-const auto = reactive({ auto_enabled: false, auto_publish: false, default_author_id: '', default_editor_id: '' })
+// Jadwal: N artikel per hari mulai jam tertentu (WIB), berjarak interval; urutan model cadangan bila satu gagal
+const DEFAULT_MODELS = ['gemini-3.5-flash', 'gemini-3-flash-preview', 'gemini-3.1-flash-lite-preview']
+const auto = reactive({
+  auto_enabled: false, auto_publish: false, default_author_id: '', default_editor_id: '',
+  per_day: 1, every: 4, unit: 'jam' as 'jam' | 'menit', start: '08:00', models: [...DEFAULT_MODELS] as string[],
+})
 watch(() => data.value?.settings, (s) => {
-  if (s) Object.assign(auto, { auto_enabled: s.auto_enabled, auto_publish: s.auto_publish, default_author_id: s.default_author_id ?? '', default_editor_id: s.default_editor_id ?? '' })
+  if (!s) return
+  const mins = s.auto_interval_minutes ?? 240
+  Object.assign(auto, {
+    auto_enabled: s.auto_enabled, auto_publish: s.auto_publish, default_author_id: s.default_author_id ?? '', default_editor_id: s.default_editor_id ?? '',
+    per_day: s.auto_per_day ?? 1, every: mins % 60 === 0 ? mins / 60 : mins, unit: mins % 60 === 0 ? 'jam' : 'menit',
+    start: String(s.auto_start_time ?? '08:00').slice(0, 5),
+    models: [...(s.auto_models?.length ? s.auto_models : DEFAULT_MODELS), '', '', ''].slice(0, 3),
+  })
 }, { immediate: true })
+const intervalMinutes = computed(() => Math.round((Number(auto.every) || 0) * (auto.unit === 'jam' ? 60 : 1)))
+const hhmm = (m: number) => `${String(Math.floor(m / 60)).padStart(2, '0')}.${String(m % 60).padStart(2, '0')}`
+/** Jam-jam artikel dalam sehari (WIB) sesuai jadwal; artikel yang melewati tengah malam tidak dibuat hari itu. */
+const schedule = computed(() => {
+  const [h, m] = auto.start.split(':').map(Number)
+  const first = (h ?? 0) * 60 + (m ?? 0)
+  const step = Math.max(15, intervalMinutes.value)
+  const times: string[] = []
+  for (let k = 0; k < Math.min(48, Number(auto.per_day) || 1); k++) {
+    const t = first + k * step
+    if (t >= 24 * 60) break
+    times.push(hhmm(t))
+  }
+  return times
+})
+const todayWib = () => new Date(Date.now() + 7 * 3600_000).toISOString().slice(0, 10)
+const todayCount = computed(() => (data.value?.settings?.auto_day === todayWib() ? data.value.settings.auto_day_count : 0))
+const geminiModels = computed(() => ai.value?.gemini.models ?? [])
+const modelLabel = (id: string) => geminiModels.value.find(m => m.id === id)?.name ?? id
+
 const saveAuto = () => run('auto', async () => {
+  const minutes = intervalMinutes.value
+  if (minutes < 15 || minutes > 1440) throw new Error('Jarak antar artikel minimal 15 menit dan maksimal 24 jam.')
+  const perDay = Math.round(Number(auto.per_day) || 0)
+  if (perDay < 1 || perDay > 48) throw new Error('Jumlah artikel per hari 1–48.')
+  if (!/^\d{2}:\d{2}$/.test(auto.start)) throw new Error('Jam mulai tidak valid.')
+  const models = [...new Set(auto.models.map(m => m.trim()).filter(Boolean))]
+  if (!models.length) throw new Error('Pilih minimal satu model AI.')
   const { error } = await supabase.from('blog_settings').update({
     auto_enabled: auto.auto_enabled, auto_publish: auto.auto_publish,
-    default_author_id: auto.default_author_id || null, default_editor_id: auto.default_editor_id || null, updated_at: new Date().toISOString(),
+    default_author_id: auto.default_author_id || null, default_editor_id: auto.default_editor_id || null,
+    auto_per_day: perDay, auto_interval_minutes: minutes, auto_start_time: auto.start, auto_models: models,
+    updated_at: new Date().toISOString(),
   } as never).eq('id', true)
   if (error) throw error
 }, () => 'Pengaturan otomatis tersimpan.')
-const runNow = () => run('run', () => $fetch<{ slug: string, title: string, status: string }>('/api/admin/blog/run-auto', { method: 'POST', timeout: 300_000, body: { provider: provider.value ?? undefined } }),
-  r => `Artikel “${r.title}” dibuat (${r.status === 'published' ? 'langsung tayang' : 'draf'}).`)
+const resumeAuto = () => run('resume', async () => {
+  const { error } = await supabase.from('blog_settings').update({ auto_halted_at: null, auto_halt_reason: null, auto_running_since: null } as never).eq('id', true)
+  if (error) throw error
+}, () => 'Artikel otomatis dilanjutkan sesuai jadwal.')
+const runNow = () => run('run', () => $fetch<{ slug?: string, title?: string, status?: string, model?: string, skipped?: string }>('/api/admin/blog/run-auto', { method: 'POST', timeout: 300_000, body: { provider: provider.value ?? undefined } }),
+  r => r.skipped ?? `Artikel “${r.title}” dibuat dengan ${modelLabel(r.model ?? '')} (${r.status === 'published' ? 'langsung tayang' : 'draf'}).`)
 
 // ── Penulis & editor ──
 const authorForm = reactive({ id: '', name: '', slug: '', job_title: '', bio: '', same_as: '' })
@@ -310,10 +359,62 @@ const fmt = (d: string | null) => d ? new Date(d).toLocaleDateString('id-ID', { 
 
         <!-- Otomatis -->
         <form class="card grid h-max gap-3 p-5" @submit.prevent="saveAuto">
-          <h2 class="font-semibold text-brand">Artikel otomatis harian</h2>
-          <p class="text-xs text-brand-600">Setiap hari pukul 08.00 WIB satu topik dari antrean ditulis AI (antrean diisi ulang otomatis bila hampir habis). Memakai penyedia AI utama di Pengaturan.</p>
-          <label class="flex items-center gap-2 text-sm font-medium text-brand-800"><input v-model="auto.auto_enabled" type="checkbox" class="h-4 w-4 accent-[#2f4a3a]"> Aktifkan 1 artikel per hari</label>
+          <div class="flex flex-wrap items-center justify-between gap-2">
+            <h2 class="font-semibold text-brand">Artikel otomatis</h2>
+            <span v-if="data?.settings?.auto_enabled" class="chip" :class="data.settings.auto_halted_at ? 'bg-red-50 text-red-700' : 'bg-green-50 text-green-700'">
+              {{ data.settings.auto_halted_at ? 'Dihentikan' : `Aktif · hari ini ${todayCount}/${data.settings.auto_per_day}` }}
+            </span>
+          </div>
+          <p class="text-xs text-brand-600">Topik antrean ditulis AI sesuai jadwal (WIB). Antrean kosong/hampir habis diisi ulang otomatis lebih dulu. Bila sebuah model gagal, model berikutnya dicoba; bila semua gagal, otomatis dihentikan dan admin dikirimi email.</p>
+
+          <div v-if="data?.settings?.auto_halted_at" class="grid gap-2 rounded-xl bg-red-50 p-3 text-sm text-red-800">
+            <p><b>Dihentikan sejak {{ fmt(data.settings.auto_halted_at) }}</b> agar tidak mengulang kesalahan.</p>
+            <p class="text-xs">{{ data.settings.auto_halt_reason }}</p>
+            <div class="flex flex-wrap gap-2">
+              <button type="button" class="btn-primary btn-sm" :disabled="!!busy || !provider" @click="runNow">{{ busy === 'run' ? 'Menulis… (±1–3 menit)' : 'Jalankan sekarang' }}</button>
+              <button type="button" class="btn-ghost btn-sm" :disabled="!!busy" @click="resumeAuto">Lanjutkan otomatis</button>
+            </div>
+          </div>
+
+          <label class="flex items-center gap-2 text-sm font-medium text-brand-800"><input v-model="auto.auto_enabled" type="checkbox" class="h-4 w-4 accent-[#2f4a3a]"> Aktifkan artikel otomatis</label>
           <label class="flex items-center gap-2 text-sm font-medium text-brand-800"><input v-model="auto.auto_publish" type="checkbox" class="h-4 w-4 accent-[#2f4a3a]"> Langsung tayang (tanpa tinjauan)</label>
+
+          <div class="grid gap-3 sm:grid-cols-3">
+            <label class="label">Artikel per hari
+              <input v-model.number="auto.per_day" type="number" min="1" max="48" class="input" required>
+            </label>
+            <label class="label">Jarak antar artikel
+              <span class="flex gap-1.5">
+                <input v-model.number="auto.every" type="number" min="1" :max="auto.unit === 'jam' ? 24 : 1440" class="input min-w-0" required>
+                <select v-model="auto.unit" class="input w-auto">
+                  <option value="jam">jam</option>
+                  <option value="menit">menit</option>
+                </select>
+              </span>
+            </label>
+            <label class="label">Mulai jam (WIB)
+              <input v-model="auto.start" type="time" class="input" required>
+            </label>
+          </div>
+          <p class="text-xs" :class="schedule.length < auto.per_day ? 'font-semibold text-amber-700' : 'text-brand-500'">
+            Jadwal harian: {{ schedule.join(', ') }} WIB<template v-if="schedule.length < auto.per_day"> — hanya {{ schedule.length }} artikel yang muat sebelum tengah malam; kurangi jarak atau majukan jam mulai.</template>
+            <template v-else-if="intervalMinutes < 15"> — jarak minimal 15 menit.</template>
+          </p>
+
+          <div class="grid gap-2 rounded-xl bg-brand-50/60 p-3">
+            <p class="text-xs font-semibold text-brand-800">Urutan model Gemini (dicoba berurutan bila gagal)</p>
+            <div class="grid gap-2 sm:grid-cols-3 lg:grid-cols-1">
+              <label v-for="i in 3" :key="i" class="label text-xs">{{ i === 1 ? 'Utama' : `Cadangan ${i - 1}` }}
+                <select v-model="auto.models[i - 1]" class="input py-2 text-sm">
+                  <option value="">{{ i === 1 ? 'Pilih model…' : '— tidak dipakai —' }}</option>
+                  <option v-for="m in geminiModels" :key="m.id" :value="m.id">{{ m.name }}</option>
+                  <option v-if="auto.models[i - 1] && !geminiModels.some(m => m.id === auto.models[i - 1])" :value="auto.models[i - 1]">{{ auto.models[i - 1] }}</option>
+                </select>
+              </label>
+            </div>
+            <p v-if="ai && !geminiModels.length" class="text-xs text-amber-700">Daftar model Gemini belum termuat (API key Gemini di Pengaturan). Model tersimpan tetap dipakai.</p>
+          </div>
+
           <div class="grid gap-3 sm:grid-cols-2">
             <label class="label">Penulis default
               <select v-model="auto.default_author_id" class="input">
@@ -331,7 +432,7 @@ const fmt = (d: string | null) => d ? new Date(d).toLocaleDateString('id-ID', { 
           <p v-if="data?.settings?.last_auto_at" class="text-xs text-brand-600">Terakhir: {{ fmt(data.settings.last_auto_at) }} — {{ data.settings.last_auto_status }}</p>
           <div class="flex flex-wrap gap-2">
             <button class="btn-primary btn-sm" :disabled="!!busy">{{ busy === 'auto' ? 'Menyimpan…' : 'Simpan' }}</button>
-            <button type="button" class="btn-ghost btn-sm" :disabled="!!busy || !provider" @click="runNow">{{ busy === 'run' ? 'Menulis… (±1–2 menit)' : 'Jalankan sekarang' }}</button>
+            <button v-if="!data?.settings?.auto_halted_at" type="button" class="btn-ghost btn-sm" :disabled="!!busy || !provider" @click="runNow">{{ busy === 'run' ? 'Menulis… (±1–3 menit)' : 'Jalankan sekarang' }}</button>
           </div>
         </form>
       </div>

@@ -8,7 +8,7 @@ export default defineEventHandler(async (event) => {
   await requireAdmin(event)
   const body = await readValidatedBody(event, b => Body.parse(b ?? {}))
   try {
-    return await runDailyArticle(event, { force: true, provider: body.provider, deadline })
+    return await runAutoArticle(event, { force: true, provider: body.provider, deadline })
   }
   catch (e) {
     throw createError({ statusCode: 500, statusMessage: (e instanceof Error ? e.message : String(e)).slice(0, 300) })
