@@ -201,7 +201,7 @@ const STATUS: Record<string, [string, string]> = {
         <div class="card overflow-hidden">
           <div class="p-4"><h2 class="font-semibold text-brand-900">Pesanan pelanggan</h2></div>
           <ul class="divide-y divide-brand-50">
-            <li v-for="o in orders" :key="o.id" class="grid gap-2 p-4">
+            <li v-for="o in orders" :key="o.id" class="grid grid-cols-[minmax(0,1fr)] gap-2 p-4">
               <div class="flex items-start justify-between gap-2">
                 <div class="min-w-0">
                   <p class="truncate font-semibold text-brand-900">{{ o.customer_name }} <span class="font-normal text-brand-500">· {{ o.theme?.name }} · {{ o.package?.name }}</span></p>

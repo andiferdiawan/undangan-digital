@@ -24,7 +24,9 @@ defineExpose({ fee: (code: string) => { const c = channels.value?.find(x => x.co
 
 <template>
   <div>
-    <p v-if="pending" class="rounded-2xl bg-brand-50 p-4 text-sm text-brand-600">Memuat metode pembayaran…</p>
+    <!-- Daftar diambil di browser saja: sebelum ada data (termasuk saat render server) tampilkan status memuat
+         agar HTML server & browser sama (tanpa hydration mismatch) -->
+    <p v-if="pending || (!channels && !error)" class="rounded-2xl bg-brand-50 p-4 text-sm text-brand-600">Memuat metode pembayaran…</p>
     <p v-else-if="error" class="rounded-2xl bg-red-50 p-4 text-sm text-red-700">Metode pembayaran belum tersedia. Coba muat ulang halaman.</p>
     <div v-else class="grid gap-4">
       <div v-for="[group, list] in groups" :key="group">

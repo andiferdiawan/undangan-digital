@@ -11,7 +11,8 @@ const pkg = computed(() => data.value?.packages.find(p => p.id === packageId.val
 const form = reactive({ name: '', email: '', phone: '' })
 const method = ref('')
 const picker = ref<{ fee: (code: string) => number } | null>(null)
-const fee = computed(() => (method.value && picker.value ? picker.value.fee(method.value) : 0))
+// fee() diekspos MethodPicker setelah datanya siap; sebelum itu biaya dianggap 0
+const fee = computed(() => (method.value && typeof picker.value?.fee === 'function' ? picker.value.fee(method.value) : 0))
 
 const busy = ref(false)
 const error = ref('')
