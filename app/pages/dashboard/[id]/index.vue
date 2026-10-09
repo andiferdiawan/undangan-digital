@@ -277,8 +277,17 @@ const url = computed(() => inviteUrl(inv.value!.slug))
           </label>
         </EditorCard>
 
-        <EditorCard v-model:open="open.gallery" title="Galeri" :hint="`${content.gallery.length}/20 foto · kosongkan untuk menyembunyikan`">
-          <div v-if="content.gallery.length" class="grid grid-cols-3 gap-2">
+        <EditorCard v-model:open="open.gallery" title="Galeri" :hint="content.gallery_section.enabled ? `${content.gallery.length}/20 foto` : 'Disembunyikan'">
+          <label class="flex items-center justify-between gap-3 text-sm font-medium text-brand-800">
+            Tampilkan galeri foto di undangan
+            <input v-model="content.gallery_section.enabled" type="checkbox" class="h-5 w-5 accent-[#2f4a3a]">
+          </label>
+          <p class="text-xs text-brand-500">
+            {{ content.gallery_section.enabled
+              ? 'Foto pertama juga dipakai sebagai gambar pratinjau saat link dibagikan di WhatsApp. Tanpa foto, section galeri otomatis tidak tampil.'
+              : 'Section galeri tidak tampil dan foto tidak dipakai di undangan maupun pratinjau link. Foto tetap tersimpan, bisa ditampilkan lagi kapan saja.' }}
+          </p>
+          <div v-if="content.gallery.length" class="grid grid-cols-3 gap-2" :class="!content.gallery_section.enabled && 'opacity-50'">
             <div v-for="(g, i) in content.gallery" :key="g.url" class="group relative aspect-square overflow-hidden rounded-xl bg-brand-50">
               <img :src="g.url" alt="" class="h-full w-full object-cover">
               <div class="absolute inset-x-0 bottom-0 flex justify-between bg-black/45 p-1 text-xs text-white">

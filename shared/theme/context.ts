@@ -209,7 +209,8 @@ export function buildContext(
         venue: e.venue, address: e.address, map_url: safeUrl(e.map_url),
       }
     }),
-    gallery: c.gallery.filter(g => safeUrl(g.url)).map(g => ({ url: safeUrl(g.url), caption: g.caption })),
+    // Galeri yang disembunyikan pelanggan dianggap kosong (section galeri & slider sampul tidak memakainya)
+    gallery: c.gallery_section?.enabled === false ? [] : c.gallery.filter(g => safeUrl(g.url)).map(g => ({ url: safeUrl(g.url), caption: g.caption })),
     story: c.story.map(s => ({ ...s })),
     gifts: c.gifts.map(g => ({ ...g })),
   }

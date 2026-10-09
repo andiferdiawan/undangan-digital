@@ -57,6 +57,11 @@ export interface InvitationContent {
   /** Pernikahan/anak: cerita. Kantor/acara umum: susunan acara (date = jam, mis. "09.00"). */
   story: { date: string, title: string, text: string }[]
   gallery: { url: string, caption: string }[]
+  /**
+   * Section galeri tampil secara bawaan; pelanggan bisa menyembunyikannya. Saat disembunyikan, foto galeri
+   * tidak dipakai di mana pun (section galeri, slider sampul, gambar pratinjau link) tetapi tetap tersimpan.
+   */
+  gallery_section: { enabled: boolean }
   /** Foto untuk slider sampul (tema dengan photo_slider). */
   cover_photos: { url: string }[]
   gifts: { bank: string, number: string, holder: string }[]
@@ -139,6 +144,7 @@ export const DEFAULT_CONTENT: InvitationContent = {
     { date: 'Desember 2026', title: 'Akad Nikah', text: 'Insya Allah kami mengikat janji suci di hadapan Allah.' },
   ],
   gallery: [],
+  gallery_section: { enabled: true },
   cover_photos: [],
   gifts: [
     { bank: 'Bank Syariah Indonesia', number: '1234567890', holder: 'Ahmad Fauzan' },
@@ -434,10 +440,12 @@ export function inviteTitle(c: InvitationContent, kind: ContentKind = 'wedding')
 
 /**
  * Foto untuk gambar pratinjau link: foto pertama galeri yang diunggah pelanggan (dari isi tersimpan, bukan
- * contoh tema). null bila galeri kosong → pakai gambar default platform.
+ * contoh tema). null bila galeri kosong atau disembunyikan pelanggan → pakai gambar default platform.
  */
 export function sharePhoto(saved: unknown): string | null {
-  const gallery = (saved as { gallery?: unknown } | null)?.gallery
+  const s = saved as { gallery?: unknown, gallery_section?: { enabled?: unknown } } | null
+  if (s?.gallery_section?.enabled === false) return null
+  const gallery = s?.gallery
   if (!Array.isArray(gallery)) return null
   for (const g of gallery) {
     const url = typeof (g as { url?: unknown })?.url === 'string' ? (g as { url: string }).url.trim() : ''

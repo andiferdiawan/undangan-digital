@@ -59,12 +59,14 @@ const ctx = computed(() =>
 )
 
 // Section RSVP & ucapan disembunyikan bila user menonaktifkan RSVP.
+// Section galeri disembunyikan bila pelanggan menyembunyikannya atau belum ada foto (pratinjau katalog selalu tampil).
 // Acara kantor/umum: section gift = donasi kegiatan, tampil hanya bila diaktifkan (pratinjau katalog selalu tampil).
 const sections = computed(() => {
   const c = contentWithDefaults(props.content, kind.value)
   const donationOn = !isHostKind(kind.value) || props.content === undefined || c.donation.enabled
+  const galleryOn = props.content === undefined || ctx.value.lists.gallery.length > 0
   return props.definition.sections.filter(s =>
-    (c.rsvp.enabled || (s.type !== 'rsvp' && s.type !== 'wishes')) && (donationOn || s.type !== 'gift'))
+    (c.rsvp.enabled || (s.type !== 'rsvp' && s.type !== 'wishes')) && (donationOn || s.type !== 'gift') && (galleryOn || s.type !== 'gallery'))
 })
 const cover = computed(() => (sections.value[0]?.type === 'cover' ? sections.value[0] : null))
 const body = computed(() => {
