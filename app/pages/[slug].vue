@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { PublicInvitation } from '#shared/types/models'
-import { withDefaults as contentWithDefaults, inviteNames, inviteTitle } from '#shared/theme/content'
+import { withDefaults as contentWithDefaults, inviteNames, inviteTitle, sharePhoto } from '#shared/theme/content'
 import { dateParts } from '#shared/theme/context'
 
 definePageMeta({ layout: false })
@@ -24,11 +24,13 @@ const when = computed(() => {
   const e = content.value.events[0]
   return [dateParts(e?.date ?? '')?.full, e?.venue].filter(Boolean).join(' · ')
 })
-// Gambar pratinjau WhatsApp dibuat server sesuai tema & nama mempelai; ?v= berubah bila isi berubah
+// Gambar pratinjau WhatsApp dibuat server: foto galeri pertama yang diunggah pelanggan (JPEG), atau gambar
+// default platform bergaya brand dengan nama mempelai bila galeri kosong. ?v= berubah bila foto/isi berubah.
 const origin = useSiteOrigin()
+const photo = computed(() => sharePhoto(inv.value?.content))
 const ogImage = computed(() => {
-  const c = content.value
-  const v = shortHash(JSON.stringify(['brand1', names.value, c.events[0]?.date]))
+  if (photo.value) return `${origin}/og/${slug}.jpg?v=${shortHash(JSON.stringify(['foto1', photo.value]))}`
+  const v = shortHash(JSON.stringify(['brand1', names.value, content.value.events[0]?.date]))
   return `${origin}/og/${slug}.png?v=${v}`
 })
 useSeoMeta({
@@ -38,6 +40,7 @@ useSeoMeta({
   description: () => guest.value ? `Kepada Yth. ${guest.value} — ${when.value}` : when.value || 'Kami mengundang Anda di hari bahagia kami.',
   ogDescription: () => guest.value ? `Kepada Yth. ${guest.value} · ${when.value}` : when.value || content.value.opening.text,
   ogImage,
+  ogImageType: () => (photo.value ? 'image/jpeg' : 'image/png'),
   ogImageWidth: 1200,
   ogImageHeight: 630,
   ogImageAlt: () => title.value,

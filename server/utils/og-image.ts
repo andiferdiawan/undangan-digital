@@ -1,5 +1,6 @@
-import satori from 'satori'
 import { Resvg } from '@resvg/resvg-js'
+import satori from 'satori'
+import sharp from 'sharp'
 
 /**
  * Gambar pratinjau link (Open Graph) 1200×630 bergaya iklan brand Undangan Virtual:
@@ -148,4 +149,51 @@ export async function renderBlogOg(opts: { title: string, category?: string, met
     ],
   })
   return new Resvg(svg, { fitTo: { mode: 'width', value: OG_W }, font: { loadSystemFonts: false } }).render().asPng()
+}
+
+// ---------- Foto pelanggan sebagai gambar pratinjau ----------
+const MAX_PHOTO_BYTES = 15 * 1024 * 1024
+
+/**
+ * Unduh foto galeri pelanggan. Hanya dari Supabase Storage publik proyek ini (isi undangan bisa diisi bebas,
+ * jadi URL lain ditolak agar server tidak dipakai mengambil alamat sembarang).
+ */
+export async function fetchMediaPhoto(url: string, supabaseUrl: string): Promise<Buffer | null> {
+  const base = `${supabaseUrl.replace(/\/$/, '')}/storage/v1/object/public/`
+  if (!supabaseUrl || !url.startsWith(base) || url.includes('..')) return null
+  const res = await fetch(url, { signal: AbortSignal.timeout(8000), redirect: 'error' })
+  if (!res.ok || !/^image\//.test(res.headers.get('content-type') ?? '')) return null
+  if (Number(res.headers.get('content-length') ?? 0) > MAX_PHOTO_BYTES) return null
+  const buf = Buffer.from(await res.arrayBuffer())
+  return buf.length && buf.length <= MAX_PHOTO_BYTES ? buf : null
+}
+
+/**
+ * Foto → JPEG 1200×630 (ringan untuk WhatsApp, umumnya < 200 KB). Foto lanskap dipotong memenuhi bingkai
+ * dengan fokus ke bagian paling menarik (wajah/objek); foto potret/persegi ditampilkan utuh di tengah di atas
+ * latar foto yang sama yang diburamkan, agar wajah tidak terpotong.
+ */
+export async function renderPhotoOg(photo: Buffer): Promise<Buffer> {
+  const { data, info } = await sharp(photo, { failOn: 'none' }).rotate()
+    .resize(1600, 1600, { fit: 'inside', withoutEnlargement: true })
+    .toBuffer({ resolveWithObject: true })
+  let frame: Buffer
+  if (info.width / info.height >= 1.3) {
+    frame = await sharp(data).resize(OG_W, OG_H, { fit: 'cover', position: sharp.strategy.attention }).png({ compressionLevel: 0 }).toBuffer()
+  }
+  else {
+    const [bg, fg] = await Promise.all([
+      sharp(data).resize(OG_W, OG_H, { fit: 'cover' }).blur(30).modulate({ brightness: 0.75 }).toBuffer(),
+      sharp(data).resize(OG_W, OG_H, { fit: 'inside' }).toBuffer(),
+    ])
+    frame = await sharp(bg).composite([{ input: fg, gravity: 'centre' }]).png({ compressionLevel: 0 }).toBuffer()
+  }
+  // WhatsApp kadang tidak menampilkan gambar pratinjau > ±300 KB: foto sangat detail dikompres ulang lebih kecil
+  const out = await sharp(frame).jpeg({ quality: 82, mozjpeg: true }).toBuffer()
+  return out.length <= 250 * 1024 ? out : sharp(frame).jpeg({ quality: 68, mozjpeg: true }).toBuffer()
+}
+
+/** PNG (gambar brand) → JPEG, untuk alamat /og/<slug>.jpg saat foto tidak bisa dipakai. */
+export function pngToJpeg(png: Buffer): Promise<Buffer> {
+  return sharp(png).jpeg({ quality: 88, mozjpeg: true }).toBuffer()
 }

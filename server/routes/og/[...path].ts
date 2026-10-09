@@ -1,10 +1,11 @@
-import { withDefaults as contentWithDefaults, isHostKind, type DemoText } from '#shared/theme/content'
+import { withDefaults as contentWithDefaults, isHostKind, sharePhoto, type DemoText } from '#shared/theme/content'
 import { dateParts } from '#shared/theme/context'
 import type { EventKind } from '#shared/theme/constants'
 
 /**
  * Gambar pratinjau link (gaya iklan brand, nama mempelai dinamis):
- *   /og/<slug>.png       → undangan pelanggan
+ *   /og/<slug>.png       → undangan pelanggan (gaya brand, untuk undangan tanpa foto galeri)
+ *   /og/<slug>.jpg       → undangan pelanggan dengan foto galeri pertama (gagal → gaya brand dalam JPEG)
  *   /og/tema/<slug>.png  → tema di katalog (nama contoh)
  *   /og/blog/<slug>.png  → artikel blog (judul & kategori)
  * Hasil di-cache CDN; URL memuat ?v=<hash> sehingga berubah saat nama/tanggal berubah.
@@ -22,9 +23,9 @@ export default defineEventHandler(async (event) => {
     setHeader(event, 'cache-control', 'public, max-age=3600, s-maxage=604800, stale-while-revalidate=86400')
     return png
   }
-  const m = /^(?:(tema)\/)?([a-z0-9-]{2,60})\.png$/.exec(path)
-  if (!m) throw createError({ statusCode: 404, statusMessage: 'Tidak ditemukan' })
-  const [, kind, slug] = m
+  const m = /^(?:(tema)\/)?([a-z0-9-]{2,60})\.(png|jpg)$/.exec(path)
+  if (!m || (m[1] && m[3] === 'jpg')) throw createError({ statusCode: 404, statusMessage: 'Tidak ditemukan' })
+  const [, kind, slug, ext] = m
   const db = publicDb(event)
 
   let raw: unknown
@@ -42,6 +43,18 @@ export default defineEventHandler(async (event) => {
     const { data } = await db.rpc('get_public_invitation', { p_slug: slug } as never)
     if (!data) throw createError({ statusCode: 404, statusMessage: 'Undangan tidak ditemukan' })
     raw = (data as { content: unknown }).content
+    // Foto galeri pertama yang diunggah pelanggan → gambar pratinjau dari foto itu
+    if (ext === 'jpg') {
+      const url = sharePhoto(raw)
+      const supabaseUrl = String((useRuntimeConfig(event).public.supabase as { url?: string } | undefined)?.url ?? '')
+      const photo = url ? await fetchMediaPhoto(url, supabaseUrl).catch(() => null) : null
+      const jpg = photo ? await renderPhotoOg(photo).catch((e) => { console.warn(`[og] foto ${slug} gagal diolah:`, e?.message ?? e); return null }) : null
+      if (jpg) {
+        setHeader(event, 'content-type', 'image/jpeg')
+        setHeader(event, 'cache-control', 'public, max-age=3600, s-maxage=604800, stale-while-revalidate=86400')
+        return jpg
+      }
+    }
     const def = (data as { theme?: { definition?: { kind?: EventKind, demo?: DemoText } } }).theme?.definition
     eventKind = def?.kind ?? 'wedding'
     demo = def?.demo
@@ -57,7 +70,7 @@ export default defineEventHandler(async (event) => {
     childLabel: { khitan: 'WALIMATUL KHITAN', birthday: 'SYUKURAN ULANG TAHUN', office: 'UNDANGAN RESMI', general: 'UNDANGAN' }[eventKind as string] ?? 'TASYAKURAN AQIQAH',
   })
 
-  setHeader(event, 'content-type', 'image/png')
+  setHeader(event, 'content-type', ext === 'jpg' ? 'image/jpeg' : 'image/png')
   setHeader(event, 'cache-control', 'public, max-age=3600, s-maxage=604800, stale-while-revalidate=86400')
-  return png
+  return ext === 'jpg' ? await pngToJpeg(png) : png
 })

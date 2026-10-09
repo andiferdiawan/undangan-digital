@@ -426,7 +426,22 @@ export function inviteNames(c: InvitationContent, kind: ContentKind = 'wedding')
   if (isHostKind(kind)) return c.host.title || c.host.name
   return isChildKind(kind) ? c.child.nickname || c.child.name : `${c.groom.nickname} & ${c.bride.nickname}`
 }
+/** Judul halaman & pratinjau link: nama (mempelai/anak/acara) di depan agar langsung terbaca di WhatsApp. */
 export function inviteTitle(c: InvitationContent, kind: ContentKind = 'wedding'): string {
-  if (isHostKind(kind)) return `Undangan ${inviteNames(c, kind)}`
-  return `Undangan ${KIND_LABEL[kind] ?? 'Pernikahan'} ${inviteNames(c, kind)}`
+  if (isHostKind(kind)) return `${inviteNames(c, kind)} — Undangan`
+  return `${inviteNames(c, kind)} — Undangan ${KIND_LABEL[kind] ?? 'Pernikahan'}`
+}
+
+/**
+ * Foto untuk gambar pratinjau link: foto pertama galeri yang diunggah pelanggan (dari isi tersimpan, bukan
+ * contoh tema). null bila galeri kosong → pakai gambar default platform.
+ */
+export function sharePhoto(saved: unknown): string | null {
+  const gallery = (saved as { gallery?: unknown } | null)?.gallery
+  if (!Array.isArray(gallery)) return null
+  for (const g of gallery) {
+    const url = typeof (g as { url?: unknown })?.url === 'string' ? (g as { url: string }).url.trim() : ''
+    if (/^https?:\/\//.test(url)) return url
+  }
+  return null
 }
