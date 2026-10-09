@@ -163,7 +163,8 @@ const STATUS: Record<string, [string, string]> = {
     <div v-else-if="!active" class="card p-8 text-center">
       <FeatureIcon name="pending" class="mx-auto" />
       <p class="mt-2 font-semibold text-brand-900">Status akun: {{ summary.reseller.status === 'pending' ? 'menunggu persetujuan admin' : summary.reseller.status }}</p>
-      <p class="mt-1 text-sm text-brand-600">Fitur penjualan aktif setelah akun disetujui.</p>
+      <p class="mt-1 text-sm text-brand-600">Fitur penjualan aktif setelah akun disetujui. Sambil menunggu, pelajari cara berjualannya.</p>
+      <NuxtLink to="/reseller/panduan" class="btn-ghost mt-4">📘 Baca panduan reseller</NuxtLink>
     </div>
 
     <template v-else>
@@ -172,7 +173,10 @@ const STATUS: Record<string, [string, string]> = {
           <p class="text-sm text-brand-500">Reseller · {{ summary.reseller.code }}</p>
           <h1 class="font-display text-3xl text-brand">{{ summary.reseller.business_name }}</h1>
         </div>
-        <span class="chip bg-clay-100 text-clay-700">Bagi hasil {{ Number(summary.effective_rate) }}%</span>
+        <div class="flex flex-wrap items-center gap-2">
+          <span class="chip bg-clay-100 text-clay-700">Bagi hasil {{ Number(summary.effective_rate) }}%</span>
+          <NuxtLink to="/reseller/panduan" class="btn-ghost btn-sm">📘 Panduan reseller</NuxtLink>
+        </div>
       </div>
 
       <div class="mt-5 grid grid-cols-2 gap-3 lg:grid-cols-4">

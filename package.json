@@ -8,6 +8,7 @@
     "preview": "nuxt preview",
     "generate:types": "echo 'Jalankan: supabase gen types typescript --project-id <id> > app/types/database.types.ts'",
     "seed:themes": "tsx scripts/build-seed-themes.ts",
+    "panduan:screenshots": "tsx scripts/panduan/screenshots.ts",
     "typecheck": "nuxt typecheck",
     "postinstall": "nuxt prepare"
   },
@@ -36,6 +37,7 @@
   "devDependencies": {
     "@unocss/nuxt": "^66.10.5",
     "@unocss/reset": "^66.10.5",
+    "playwright-core": "^1.63.0",
     "tsx": "^4.23.15",
     "typescript": "~5.9",
     "unocss": "^66.10.5",

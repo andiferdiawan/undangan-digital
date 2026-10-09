@@ -60,6 +60,7 @@ export async function sitemapUrls(event: H3Event): Promise<SitemapUrl[]> {
     { loc: `${origin}/katalog`, lastmod: latest, priority: '0.9', freq: 'daily' },
     ...catalogUrls,
     { loc: `${origin}/reseller`, priority: '0.6', freq: 'monthly' },
+    { loc: `${origin}/reseller/panduan`, priority: '0.5', freq: 'monthly' },
     ...blogUrls,
     ...pages.map(p => ({ loc: `${origin}/${encodeURIComponent(p.slug)}`, lastmod: p.updated_at, priority: '0.4', freq: 'monthly' })),
     ...themes.map(t => ({ loc: `${origin}/tema/${encodeURIComponent(t.slug)}`, lastmod: t.updated_at, priority: '0.8', freq: 'weekly' })),

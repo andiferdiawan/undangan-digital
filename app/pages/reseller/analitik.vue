@@ -121,7 +121,10 @@ const devices = computed(() => Object.entries(data.value?.devices ?? {}).sort((a
 
 <template>
   <div class="mx-auto max-w-5xl px-4 py-8">
-    <NuxtLink to="/reseller/dashboard" class="text-sm text-brand-600 underline">← Dashboard reseller</NuxtLink>
+    <div class="flex flex-wrap items-center justify-between gap-2 text-sm">
+      <NuxtLink to="/reseller/dashboard" class="text-brand-600 underline">← Dashboard reseller</NuxtLink>
+      <NuxtLink to="/reseller/panduan#link-pelacakan" class="font-semibold text-brand-700 underline">📘 Panduan link & analitik</NuxtLink>
+    </div>
     <div class="mt-3 flex flex-wrap items-end justify-between gap-3">
       <div>
         <h1 class="font-display text-3xl text-brand">Analitik Link</h1>

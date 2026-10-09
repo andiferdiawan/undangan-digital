@@ -65,6 +65,7 @@ watch(() => route.fullPath, () => (menuOpen.value = false))
         <NuxtLink to="/#faq" class="hover:text-brand">FAQ</NuxtLink>
         <NuxtLink to="/blog" class="hover:text-brand">Blog</NuxtLink>
         <NuxtLink to="/reseller" class="hover:text-brand">Program Reseller</NuxtLink>
+        <NuxtLink to="/reseller/panduan" class="hover:text-brand">Panduan Reseller</NuxtLink>
         <a :href="waLink(config.public.adminWhatsapp, 'Assalamu\'alaikum, saya ingin bertanya tentang Undangan Virtual.')" target="_blank" rel="noopener" class="hover:text-brand">Hubungi Kami</a>
       </nav>
       <nav class="mt-3 flex flex-wrap justify-center gap-x-4 gap-y-2 text-brand-500" aria-label="Informasi & kebijakan">

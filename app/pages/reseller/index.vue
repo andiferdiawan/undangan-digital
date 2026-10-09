@@ -103,12 +103,16 @@ const days = computed(() => settings.value?.payout_days?.join(' & ') ?? '5 & 25'
             <div><h2 class="font-semibold text-brand-900">Pencairan tanggal {{ days }}</h2><p class="mt-1 text-brand-600">Ajukan kapan saja, minimal {{ rupiah(settings?.min_payout ?? 50000) }}, ditransfer ke rekening Anda.</p></div>
           </li>
         </ul>
+        <NuxtLink to="/reseller/panduan" class="mt-4 inline-flex items-center gap-1 text-sm font-semibold text-clay-600 underline">📘 Baca panduan lengkap reseller (dengan gambar) →</NuxtLink>
       </div>
 
       <div>
         <div v-if="mine?.status === 'active'" class="card p-6 text-center">
           <p class="font-semibold text-brand-900">Akun reseller Anda aktif ({{ mine.code }})</p>
-          <NuxtLink to="/reseller/dashboard" class="btn-primary mt-4">Buka Dashboard Reseller</NuxtLink>
+          <div class="mt-4 flex flex-wrap justify-center gap-2">
+            <NuxtLink to="/reseller/dashboard" class="btn-primary">Buka Dashboard Reseller</NuxtLink>
+            <NuxtLink to="/reseller/panduan" class="btn-ghost">Panduan</NuxtLink>
+          </div>
         </div>
         <div v-else-if="mine?.status === 'pending' || done" class="card p-6 text-center">
           <FeatureIcon name="pending" class="mx-auto" />
