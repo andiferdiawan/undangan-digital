@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { BlogPost, BlogSummary } from '~/composables/useBlog'
+import { ownLinkPath } from '#shared/blog-links'
 
 const route = useRoute()
 const slug = String(route.params.slug)
@@ -36,6 +37,8 @@ const { data: more } = await useAsyncData(`blog-related-${slug}`, async () => {
 })
 
 const article = computed(() => renderArticle(post.value?.body ?? ''))
+// Referensi hanya situs eksternal (bukan domain sendiri/tiruan merek yang terlanjur tersimpan)
+const sources = computed(() => (post.value?.sources ?? []).filter(s => /^https:\/\//i.test(s.url) && !ownLinkPath(s.url)))
 const toc = computed(() => article.value.toc.filter(t => t.level === 2))
 
 const origin = useSiteOrigin()
@@ -102,7 +105,7 @@ useJsonLd('blog-post', () => {
         'inLanguage': 'id-ID',
         'isAccessibleForFree': true,
         'isPartOf': { '@type': 'Blog', '@id': `${origin}/blog#blog`, 'name': `Blog ${BRAND.name}`, 'url': `${origin}/blog` },
-        'citation': p.sources.length ? p.sources.map(s => ({ '@type': 'CreativeWork', 'name': s.title, 'url': s.url })) : undefined,
+        'citation': sources.value.length ? sources.value.map(s => ({ '@type': 'CreativeWork', 'name': s.title, 'url': s.url })) : undefined,
       },
       {
         '@type': 'BreadcrumbList',
@@ -169,10 +172,10 @@ const updated = computed(() => !!post.value && blogDate(post.value.content_updat
           </div>
         </section>
 
-        <section v-if="post.sources.length" class="mt-10 rounded-2xl bg-brand-50 p-5" aria-labelledby="referensi">
+        <section v-if="sources.length" class="mt-10 rounded-2xl bg-brand-50 p-5" aria-labelledby="referensi">
           <h2 id="referensi" class="text-sm font-semibold text-brand">Referensi</h2>
           <ol class="mt-2 grid list-decimal gap-1 pl-5 text-sm text-brand-700">
-            <li v-for="s in post.sources" :key="s.url"><a :href="s.url" target="_blank" rel="noopener" class="underline hover:text-clay-700">{{ s.title }}</a></li>
+            <li v-for="s in sources" :key="s.url"><a :href="s.url" target="_blank" rel="noopener" class="underline hover:text-clay-700">{{ s.title }}</a></li>
           </ol>
         </section>
 

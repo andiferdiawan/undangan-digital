@@ -4,6 +4,8 @@
  * ## / ### judul, - daftar, 1. daftar bernomor, **tebal**, *miring*, [teks](url).
  * Garis miring terbalik menampilkan karakter apa adanya: \\ \* \[ \] \# \> \- \. \)
  */
+import { MD_LINK, ownLinkPath } from '#shared/blog-links'
+
 const esc = (s: string) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;')
 
 const SAFE_HREF = /^(https?:\/\/|mailto:|tel:|\/(?!\/)|#)/i
@@ -26,8 +28,11 @@ function protect(text: string) {
 function inline(text: string): string {
   const p = protect(text)
   let s = esc(p.s)
-  s = s.replace(/\[([^\]]+)\]\(([^)\s]+)\)/g, (_, label: string, url: string) => {
-    const href = safeHref(url.replace(/&amp;/g, '&'))
+  s = s.replace(MD_LINK, (_, label: string, url: string) => {
+    const raw = url.replace(/&amp;/g, '&')
+    // Tautan ke situs sendiri yang terlanjur ditulis dengan domain (benar atau tiruan merek, mis. undanganvirtual.id)
+    // ditampilkan sebagai tautan internal relatif
+    const href = safeHref(ownLinkPath(raw) ?? raw)
     if (!href) return label
     const ext = /^https?:\/\//i.test(href)
     return `<a href="${esc(href)}"${ext ? ' target="_blank" rel="noopener"' : ''}>${label}</a>`
@@ -138,7 +143,7 @@ export interface EditorNode {
 }
 
 const escText = (s: string) => s.replace(/[\\*[\]]/g, '\\$&')
-const escUrl = (u: string) => u.trim().replace(/[\s)*"<>]/g, c => `%${c.charCodeAt(0).toString(16).toUpperCase().padStart(2, '0')}`)
+const escUrl = (u: string) => u.trim().replace(/[\s()*"<>]/g, c => `%${c.charCodeAt(0).toString(16).toUpperCase().padStart(2, '0')}`)
 const hasMark = (n: EditorNode, t: string) => !!n.marks?.some(m => m.type === t)
 const hrefOf = (n: EditorNode) => {
   const h = n.marks?.find(m => m.type === 'link')?.attrs?.href

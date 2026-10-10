@@ -2,11 +2,14 @@ import type { H3Event } from 'h3'
 import { extractJson } from './openrouter'
 import { type AiConfig, type AiProvider, aiText } from './ai'
 import { describeOverlap, findOverlap, mostSimilar, type TakenItem } from './blog-overlap'
+import { brokenMap, checkExternalUrls, externalUrls, repairLinks } from './blog-links'
+import { MD_LINK, internalKey, isOwnHost, mdUrl, ownLinkPath } from '../../shared/blog-links'
 
 /**
  * Generator artikel blog SEO (teks saja, tanpa gambar) untuk mendongkrak trafik organik situs undangan.
  * Model menulis Markdown; server lalu membersihkan & memvalidasi: internal link hanya ke URL yang benar-benar
- * ada di situs, eksternal link hanya https ke situs lain, panjang meta sesuai batas, slug rapi.
+ * ada di situs (domain apa pun yang mirip merek diubah ke path relatif), eksternal link hanya https ke situs lain
+ * dan benar-benar bisa dibuka (dicek sebelum disimpan), panjang meta sesuai batas, slug rapi.
  */
 
 export type Intent = 'informasional' | 'komersial' | 'transaksional' | 'navigasional'
@@ -69,8 +72,8 @@ export async function siteLinks(event: H3Event): Promise<BlogLink[]> {
   ]
 }
 
-function systemPrompt(siteName: string) {
-  return `Anda adalah penulis konten SEO senior berbahasa Indonesia untuk ${siteName}, layanan pembuatan undangan digital (pernikahan, aqiqah, khitanan, ulang tahun, acara kantor & umum).
+function systemPrompt(siteName: string, siteHost: string) {
+  return `Anda adalah penulis konten SEO senior berbahasa Indonesia untuk ${siteName} (${siteHost}), layanan pembuatan undangan digital (pernikahan, aqiqah, khitanan, ulang tahun, acara kantor & umum).
 Tulis artikel blog orisinal, akurat, dan benar-benar membantu pembaca (prinsip E-E-A-T & helpful content Google), sekaligus mengarahkan pembaca secara halus untuk membuat undangan digital di situs kami.
 
 # Aturan konten
@@ -78,8 +81,9 @@ Tulis artikel blog orisinal, akurat, dan benar-benar membantu pembaca (prinsip E
 - Panjang body 1.200–1.800 kata. Jangan menulis H1 (judul sudah menjadi H1). Mulai dengan paragraf pembuka yang langsung menjawab inti pertanyaan dan memuat kata kunci utama dalam 100 kata pertama.
 - Struktur: 5–8 subjudul "## " (H2) yang memuat variasi kata kunci, boleh "### " (H3) di dalamnya; gunakan daftar berbutir/bernomor dan contoh kalimat/teks undangan bila relevan; akhiri dengan "## Kesimpulan".
 - Format Markdown sederhana saja: ##, ###, paragraf, "- " daftar, "1. " daftar bernomor, **tebal**, *miring*, [teks](url), dan "> " kutipan untuk contoh teks. DILARANG: gambar, tabel, HTML, emoji berlebihan.
-- Internal link: sisipkan 3–6 tautan kontekstual dengan anchor text deskriptif (bukan "klik di sini"), HANYA ke URL dari daftar "URL internal yang boleh ditautkan" (tulis persis, diawali "/"). Utamakan artikel terkait, dan minimal satu tautan ke halaman katalog/harga yang relevan sebagai ajakan bertindak.
-- Eksternal link: 2–4 tautan ke sumber tepercaya yang Anda yakini benar ada (situs pemerintah .go.id, Kemenag, KBBI, Wikipedia bahasa Indonesia, lembaga resmi). Pakai URL halaman utama/halaman stabil, wajib https. Cantumkan juga di "sources".
+- Internal link: sisipkan 3–6 tautan kontekstual dengan anchor text deskriptif (bukan "klik di sini"), HANYA ke URL dari daftar "URL internal yang boleh ditautkan". Tulis PERSIS sebagai path relatif yang diawali "/" (contoh: [contoh teks](/blog/slug-artikel)). JANGAN PERNAH menulis nama domain untuk tautan internal — bukan https://${siteHost}/..., apalagi domain lain seperti undanganvirtual.id/.co.id/.net (domain itu bukan milik kami). Utamakan artikel terkait, dan minimal satu tautan ke halaman katalog/harga yang relevan sebagai ajakan bertindak.
+- Eksternal link: 2–4 tautan https ke sumber tepercaya yang PASTI ada (situs pemerintah .go.id, Kemenag https://kemenag.go.id, KBBI https://kbbi.kemendikdasmen.go.id/entri/<kata> — domain lama kbbi.kemdikbud.go.id sudah tidak aktif —, Wikipedia bahasa Indonesia, lembaga resmi). Jangan mengarang alamat halaman (judul artikel Wikipedia harus benar-benar ada): bila tidak yakin halaman spesifiknya ada, pakai halaman utama situs tersebut. Semua tautan diperiksa otomatis; yang tidak bisa dibuka akan dihapus. Cantumkan juga di "sources" — "sources" hanya berisi situs eksternal, bukan halaman ${siteName}.
+- Setiap tautan WAJIB berformat [teks](url). Jangan menulis URL atau path polos di kalimat, dan jangan memakai penanda kutipan seperti 【…】 atau [1].
 - Jangan mencantumkan FAQ di body; FAQ diisi terpisah (4–6 pertanyaan yang sering dicari orang, jawaban 2–4 kalimat).
 
 # Metadata SEO
@@ -126,7 +130,9 @@ const clip = (s: unknown, n: number) => {
 
 /**
  * Bersihkan body: H1 → H2, buang gambar/HTML, internal link yang tidak dikenal dijadikan teks biasa,
- * eksternal link hanya https ke domain lain. Mengembalikan jumlah link untuk statistik.
+ * eksternal link hanya https ke domain lain. Tautan absolut ke situs sendiri atau domain tiruan merek
+ * (mis. https://undanganvirtual.id/blog/x) diperlakukan sebagai internal: diubah ke path relatif yang valid.
+ * Mengembalikan jumlah link untuk statistik.
  */
 export function sanitizeBody(md: string, allowed: Set<string>, siteHost: string) {
   let internal = 0
@@ -137,20 +143,35 @@ export function sanitizeBody(md: string, allowed: Set<string>, siteHost: string)
     .replace(/!\[[^\]]*\]\([^)]*\)/g, '')
     .replace(/<[^>]+>/g, '')
     .replace(/\\(['"])/g, '$1') // sisa escape JSON dari model, mis. Assalamu\'alaikum
-  body = body.replace(/\[([^\]]+)\]\(([^)\s]+)\)/g, (_, label: string, rawUrl: string) => {
+    .replace(/[ \t]*【[^】\n]*】/g, '') // penanda kutipan gaya chatbot, mis. 【https://…】
+  // URL polos di teks → tautan Markdown, agar ikut divalidasi (domain sendiri → internal, eksternal → diperiksa).
+  // Tautan Markdown yang sudah ada disisihkan dulu supaya URL di dalamnya tidak ikut diubah.
+  const kept: string[] = []
+  body = body.replace(MD_LINK, m => `\uE010${kept.push(m) - 1}\uE011`)
+    .replace(/(^|[\s:])(https?:\/\/[^\s<>[\]"'\uE010\uE011]+)/gm, (m, pre: string, raw: string) => {
+      const url = raw.replace(/[.,;:!?)]+$/, '')
+      try {
+        const host = new URL(url).hostname.replace(/^www\./, '')
+        return `${pre}[${isOwnHost(host, siteHost) ? siteHost : host}](${url})${raw.slice(url.length)}`
+      }
+      catch { return m }
+    })
+    .replace(/\uE010(\d+)\uE011/g, (_, i: string) => kept[Number(i)] ?? '')
+  body = body.replace(MD_LINK, (_, label: string, rawUrl: string) => {
     const url = rawUrl.trim()
-    if (url.startsWith('/')) {
-      const path = url.split('#')[0]!.split('?')[0]!.replace(/\/$/, '') || '/'
-      const key = url.startsWith('/#') ? url : path
+    const own = ownLinkPath(url, siteHost)
+    if (own !== null || url.startsWith('/')) {
+      const key = internalKey(own ?? url)
       if (!allowed.has(key)) return label
       internal++
       return `[${label}](${key})`
     }
     try {
       const u = new URL(url)
-      if (u.protocol !== 'https:' || u.hostname === siteHost || u.hostname.endsWith(`.${siteHost}`)) return label
-      external.push({ title: label, url: u.toString() })
-      return `[${label}](${u.toString()})`
+      if (u.protocol !== 'https:' || isOwnHost(u.hostname, siteHost)) return label
+      const href = mdUrl(u.toString())
+      external.push({ title: label, url: href })
+      return `[${label}](${href})`
     }
     catch { return label }
   })
@@ -192,10 +213,10 @@ export async function generateArticle(o: {
 
   const res = await aiText({
     cfg: o.cfg, provider: o.provider, model: o.model, json: true, temperature: 0.7,
-    system: systemPrompt(String(config.public.siteName || 'Undangan Virtual')),
+    system: systemPrompt(String(config.public.siteName || 'Undangan Virtual'), siteHost),
     turns: [{ role: 'user', content: userPrompt(o.brief, o.ctx, links) }],
-    // Sisakan waktu untuk putaran perbaikan judul bila ternyata mirip artikel lain
-    siteUrl: origin, timeoutMs: Math.max(30_000, o.timeoutMs - 25_000),
+    // Sisakan waktu untuk putaran perbaikan judul bila ternyata mirip artikel lain & pemeriksaan tautan eksternal
+    siteUrl: origin, timeoutMs: Math.max(30_000, o.timeoutMs - 35_000),
   })
   if (res.finish === 'length') throw new Error('Artikel terpotong (batas token model). Coba lagi atau pilih model lain.')
   let raw: any
@@ -224,7 +245,7 @@ Artikel lain yang juga sudah ada (jangan mirip):
 ${mostSimilar({ title, focus_keyword: focus }, taken, 15).map(p => `- ${p.title} — ${p.focus_keyword || '-'}`).join('\n')}
 Ringkasan isi artikel: ${clip(raw.excerpt || raw.meta_description || '', 300)}`,
       }],
-      siteUrl: origin, timeoutMs: left - 2_000,
+      siteUrl: origin, timeoutMs: Math.max(8_000, left - 10_000),
     })
     let fixed: any = null
     try { fixed = extractJson(fix.text) }
@@ -260,16 +281,30 @@ Ringkasan isi artikel: ${clip(raw.excerpt || raw.meta_description || '', 300)}`,
   if (words < 500) throw new Error(`Artikel terlalu pendek (${words} kata). Coba lagi.`)
 
   const srcIn = (Array.isArray(raw.sources) ? raw.sources : []) as { title?: string, url?: string }[]
-  const sources: { title: string, url: string }[] = []
+  let sources: { title: string, url: string }[] = []
   for (const s of [...srcIn.map(s => ({ title: String(s?.title ?? ''), url: String(s?.url ?? '') })), ...clean.external]) {
     try {
       const u = new URL(s.url)
-      if (u.protocol !== 'https:' || u.hostname.endsWith(siteHost)) continue
-      if (sources.some(x => x.url === u.toString())) continue
-      sources.push({ title: clip(s.title || u.hostname, 120), url: u.toString() })
+      if (u.protocol !== 'https:' || isOwnHost(u.hostname, siteHost)) continue
+      const href = mdUrl(u.toString())
+      if (sources.some(x => x.url === href)) continue
+      sources.push({ title: clip(s.title || u.hostname, 120), url: href })
     }
     catch { /* abaikan URL rusak */ }
   }
+  sources = sources.slice(0, 10)
+
+  // Pastikan setiap tautan eksternal benar-benar bisa dibuka: yang rusak/tidak merespons dilepas (teks tetap)
+  // dan dihapus dari sumber. Tetap diberi waktu minimal walau AI memakai hampir seluruh jatah waktunya.
+  const checks = await checkExternalUrls(externalUrls(body, sources, siteHost), {
+    deadline: Math.max(startedAt + o.timeoutMs - 2_000, Date.now() + 10_000),
+  })
+  const fixed = repairLinks({ body, sources, isValid: k => allowed.has(k), siteHost, broken: brokenMap(checks, { includeUnchecked: true }) })
+  body = fixed.body
+  sources = fixed.sources
+  const dropped = fixed.changes.filter(c => c.kind === 'external').length
+  const removed = [...new Set(fixed.changes.filter(c => !c.to).map(c => `${c.from} (${c.reason})`))]
+  if (removed.length) console.info('[blog] tautan eksternal dilepas:', removed.join('; '))
 
   const faq = ((Array.isArray(raw.faq) ? raw.faq : []) as { q?: string, a?: string, question?: string, answer?: string }[])
     .map(f => ({ q: clip(f.q ?? f.question, 200), a: clip(f.a ?? f.answer, 700) }))
@@ -289,9 +324,9 @@ Ringkasan isi artikel: ${clip(raw.excerpt || raw.meta_description || '', 300)}`,
     focus_keyword: focus,
     search_intent: intent,
     faq,
-    sources: sources.slice(0, 10),
+    sources,
     ai_model: res.model,
-    stats: { words, internalLinks: internal, externalLinks: clean.external.length },
+    stats: { words, internalLinks: internal, externalLinks: clean.external.length - dropped },
   }
 }
 

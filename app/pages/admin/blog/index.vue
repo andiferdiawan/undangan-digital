@@ -544,6 +544,9 @@ const fmt = (d: string | null) => d ? new Date(d).toLocaleDateString('id-ID', { 
         </nav>
       </section>
 
+      <!-- Periksa tautan -->
+      <BlogLinkAudit />
+
       <!-- Penulis -->
       <section class="card mt-5 p-5">
         <div class="flex items-center justify-between gap-2">
