@@ -8,6 +8,7 @@ const { data } = await useAsyncData('admin-settings', async () => {
   return data as unknown as {
     default_reseller_rate: number, payout_days: number[], min_payout: number, order_expiry_hours: number
     bing_site_verification: string | null, google_site_verification: string | null
+    google_tag_ids?: string[] | null, google_ads_purchase?: string | null
   } | null
 })
 const form = reactive({
@@ -75,6 +76,42 @@ async function pingIndexNow() {
     seoMsg.value = { ok: false, text: e?.data?.statusMessage || 'Gagal menghubungi IndexNow.' }
   }
   seoBusy.value = pinging.value = false
+}
+
+// ── Google tag (gtag.js) & konversi pembelian Google Ads. Admin menempel kode dari Google; yang disimpan hanya
+//    ID tag & tujuan konversi (send_to). Skripnya dirangkai app.vue (head) & halaman pesanan (konversi).
+const gt = reactive({ tag: (data.value?.google_tag_ids ?? []).join(', '), purchase: data.value?.google_ads_purchase ?? '' })
+const gtIds = computed(() => parseTagIds(gt.tag))
+const gtSendTo = computed(() => parseSendTo(gt.purchase))
+const gtMsg = ref<{ ok: boolean, text: string } | null>(null)
+const gtBusy = ref(false)
+async function saveGoogleTag() {
+  gtMsg.value = null
+  if (gt.tag.trim() && !gtIds.value.length) {
+    gtMsg.value = { ok: false, text: 'ID Google tag tidak ditemukan. Tempel kode Google tag (gtag.js) dari Google Ads/Analytics, atau ID-nya saja (mis. AW-18353791089).' }
+    return
+  }
+  if (gt.purchase.trim() && !gtSendTo.value) {
+    gtMsg.value = { ok: false, text: 'Tujuan konversi tidak ditemukan. Tempel cuplikan event konversi dari Google Ads (berisi send_to AW-…/…), atau "AW-…/label" saja.' }
+    return
+  }
+  gtBusy.value = true
+  const { error } = await supabase.from('app_settings').update({
+    google_tag_ids: gtIds.value, google_ads_purchase: gtSendTo.value,
+  } as never).eq('id', true)
+  gtBusy.value = false
+  if (error) {
+    gtMsg.value = { ok: false, text: friendlyError(error) }
+    return
+  }
+  Object.assign(gt, { tag: gtIds.value.join(', '), purchase: gtSendTo.value ?? '' })
+  await refreshNuxtData('google-tag')
+  gtMsg.value = {
+    ok: true,
+    text: gtIds.value.length || gtSendTo.value
+      ? 'Google tag tersimpan dan langsung terpasang di semua halaman (kecuali admin). Cek dengan Google Tag Assistant di beranda.'
+      : 'Google tag dikosongkan dan dilepas dari situs.',
+  }
 }
 
 // ── Koneksi API mesin pencari: Bing Webmaster & Google Search Console (kredensial di Supabase Vault).
@@ -335,6 +372,30 @@ async function saveAiOptions() {
           </button>
         </div>
         <p v-if="seoMsg" class="text-sm" :class="seoMsg.ok ? 'text-green-700' : 'text-red-600'">{{ seoMsg.text }}</p>
+      </form>
+
+      <form id="google-tag" class="card grid scroll-mt-20 gap-4 p-5" @submit.prevent="saveGoogleTag">
+        <div>
+          <h2 class="font-semibold text-brand-900">Google tag (Google Ads & Analytics)</h2>
+          <p class="mt-1 text-xs text-brand-500">
+            Tempel kode <b>Google tag (gtag.js)</b> dari Google Ads atau Google Analytics. Boleh seluruh kodenya, ID-nya diambil otomatis.
+            Tag dipasang di <code class="text-brand-700">&lt;head&gt;</code> semua halaman situs kecuali halaman admin.
+          </p>
+        </div>
+        <label class="label">Kode Google tag
+          <textarea v-model="gt.tag" class="input font-mono text-xs" rows="4" placeholder="Tempel kode gtag.js di sini, atau ID-nya saja: AW-18353791089, G-XXXXXXXXXX" autocomplete="off" spellcheck="false" />
+          <span class="text-xs font-normal text-brand-500">Terdeteksi: <b class="font-mono text-brand-700">{{ gtIds.join(', ') || '—' }}</b></span>
+        </label>
+        <label class="label">Konversi pembelian (Google Ads)
+          <textarea v-model="gt.purchase" class="input font-mono text-xs" rows="3" placeholder="Tempel cuplikan event konversi (gtag('event', 'conversion', …)), atau AW-…/label saja" autocomplete="off" spellcheck="false" />
+          <span class="text-xs font-normal text-brand-500">
+            Terdeteksi: <b class="break-all font-mono text-brand-700">{{ gtSendTo || '—' }}</b>.
+            Dikirim sekali per pesanan di halaman pesanan setelah lunas (yang menampilkan token). Nilai (harga paket), mata uang IDR,
+            dan ID transaksi (nomor pesanan) diisi otomatis, jadi tidak perlu diubah.
+          </span>
+        </label>
+        <button class="btn-primary justify-self-start" :disabled="gtBusy">{{ gtBusy ? 'Menyimpan…' : 'Simpan Google tag' }}</button>
+        <p v-if="gtMsg" class="text-sm" :class="gtMsg.ok ? 'text-green-700' : 'text-red-600'">{{ gtMsg.text }}</p>
       </form>
 
       <div id="seo" class="card grid scroll-mt-20 gap-4 p-5">

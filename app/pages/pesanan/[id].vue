@@ -54,6 +54,15 @@ onMounted(() => {
 })
 onBeforeUnmount(() => clearInterval(timer))
 
+// Konversi pembelian Google Ads (Admin → Pengaturan): sekali per pesanan, saat halaman menampilkan token (lunas).
+// Nilai = harga paket, transaction_id = nomor pesanan agar tidak tercatat dua kali.
+const googleTag = useNuxtData<GoogleTagSettings | null>('google-tag').data
+onMounted(() => {
+  watch(() => order.value?.status === 'paid' && !!order.value.token, (paid) => {
+    if (paid && order.value) reportAdsPurchase(googleTag.value?.google_ads_purchase, order.value)
+  }, { immediate: true })
+})
+
 const copied = ref('')
 async function copy(text: string, k: string) {
   try { await navigator.clipboard.writeText(text) }
