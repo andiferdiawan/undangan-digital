@@ -88,34 +88,32 @@ export const definition: ThemeDefinition = {
     bride_photo: '/theme-assets/rustic-senja/bride-2.jpg',
   },
   sections: [
-    // ---------- Sampul: nama + polaroid + pita cokelat bersudut ----------
+    // ---------- Sampul: nama + polaroid besar + pita cokelat bersudut ----------
     {
       type: 'cover',
       class: `relative flex flex-col overflow-hidden ${paper} text-center`,
       children: [
         twig('-left-16 bottom-24 w-[230px] opacity-40'),
         twig('-right-20 -top-6 w-[230px] rotate-180 opacity-30'),
-        div('relative px-6 pt-10', [
-          p('uv-reveal font-heading text-[42px] font-medium uppercase leading-none tracking-[0.04em] text-primary', '{{groom_nickname}}'),
-          p('uv-reveal uv-d1 -mt-1 font-script text-[42px] leading-tight text-primary', '& {{bride_nickname}}'),
+        div('relative px-6 pt-9', [
+          p('uv-reveal font-heading text-[38px] font-medium uppercase leading-none tracking-[0.04em] text-primary', '{{groom_nickname}}'),
+          p('uv-reveal uv-d1 -mt-1 font-script text-[36px] leading-tight text-primary', '& {{bride_nickname}}'),
         ]),
-        div('uv-reveal-zoom uv-d2 relative mx-auto mt-3 w-[210px] -rotate-2', [
+        // Foto polaroid besar mendominasi sampul
+        div('uv-reveal-zoom uv-d2 relative mx-auto mt-3 w-[78%] max-w-[320px] -rotate-2', [
           polaroid(
             div('relative aspect-[4/5] overflow-hidden bg-secondary', [
               div('absolute inset-0 grid place-items-center', [el('span', 'font-script text-[40px] text-primary', '{{couple_names}}')]),
               comp('photo_slider', '', { interval: '4500', image_class: photoTone, dots: 'false' }),
             ]),
-            p('pt-3 font-heading text-[20px] tracking-[0.15em] text-primary', '{{event_dd}} · {{event_mm}} · {{event_yy}}'),
+            p('pt-3 font-heading text-[22px] tracking-[0.15em] text-primary', '{{event_dd}} · {{event_mm}} · {{event_yy}}'),
             'pb-2',
           ),
         ]),
-        div('relative mt-6 flex flex-1 flex-col items-center bg-primary px-8 pb-16 pt-7 text-surface [clip-path:polygon(0_0,100%_0,100%_86%,50%_100%,0_86%)]', [
-          p('uv-reveal font-body text-[13px] font-semibold uppercase tracking-[0.35em] text-surface/80', 'Undangan'),
-          p('uv-reveal uv-d1 font-heading text-[40px] font-medium uppercase leading-none tracking-[0.04em]', 'Istimewa'),
-          p('uv-reveal uv-d2 -mt-1 font-script text-[34px] leading-tight text-surface/90', 'pernikahan kami'),
-          p('uv-reveal uv-d3 mt-4 font-body text-[15px] italic text-surface/80', 'Kepada Yth. Bapak/Ibu/Saudara/i'),
-          comp('guest_name', 'mt-0.5 block font-heading text-[20px] uppercase tracking-[0.08em] text-surface', { fallback: 'Tamu Undangan' }),
-          div('uv-reveal-pop uv-d4 mt-5', [comp('open_button', btnLight, { label: 'Buka Undangan' })]),
+        div('relative mt-auto flex flex-col items-center bg-primary px-8 pb-12 pt-6 text-surface [clip-path:polygon(0_0,100%_0,100%_80%,50%_100%,0_80%)]', [
+          p('uv-reveal font-body text-[15px] italic text-surface/80', 'Kepada Yth. Bapak/Ibu/Saudara/i'),
+          comp('guest_name', 'mt-0.5 block font-heading text-[19px] uppercase tracking-[0.08em] text-surface', { fallback: 'Tamu Undangan' }),
+          div('uv-reveal-pop uv-d3 mt-4', [comp('open_button', btnLight, { label: 'Buka Undangan' })]),
         ]),
       ],
     },
