@@ -3,7 +3,7 @@ import { comp, div, el, img, p } from './_h'
 
 /**
  * Tinta Merah — luxury monokrom: kartu putih berlengkung (arch) di atas latar kain satin abu-krem,
- * foto hitam-putih, nama bertulisan tangan hitam, dan aksen tinta merah (Ephesis): tanggal, judul,
+ * foto pengguna tampil berwarna sesuai aslinya, nama bertulisan tangan hitam, dan aksen tinta merah (Ephesis): tanggal, judul,
  * dan dinding tulisan "datang ya" berulang. Ciri khas: strip kalender tiga hari (H-1, hari H, H+1)
  * dengan tanggal dilingkari hati coretan pena merah yang "tergambar" saat masuk layar (uv-play),
  * kata-kata tinta merah di atas foto, dan tombol pil bergaris tipis.
@@ -12,7 +12,6 @@ const A = '/theme-assets/tinta-merah'
 
 // ---------- Gaya ----------
 const LINEN = 'bg-[linear-gradient(118deg,#e4e0da,#f3f1ed_26%,#dedad3_45%,#f1eee9_66%,#e3dfd8)]'
-const BW = 'grayscale contrast-[1.08] brightness-[.96]'
 const SHADOW = 'shadow-[0_26px_44px_-30px_rgba(20,20,20,0.55)]'
 const pill = 'inline-flex items-center justify-center rounded-full border border-ink/70 px-6 py-2 font-heading text-[11px] uppercase tracking-[0.28em] text-ink'
 const pillDark = 'inline-flex items-center justify-center rounded-full bg-ink px-7 py-3 font-heading text-[12px] uppercase tracking-[0.28em] text-surface'
@@ -25,10 +24,10 @@ const body = (t: string, cls = '', opt?: Parameters<typeof p>[2]) => p(`font-bod
 const heart = (cls: string) => img(`pointer-events-none select-none ${cls}`, '{{asset.hati_kecil}}', '')
 /** Kartu putih; bentuk lengkung (arch) diberikan lewat cls. */
 const card = (cls: string, children: ThemeNode[]) => div(`relative mx-auto w-full max-w-[350px] overflow-hidden bg-surface ${SHADOW} ${cls}`, children)
-/** Bingkai foto hitam-putih berpuncak lengkung, berisi slider Foto Sampul (cadangan: nama berdua). */
+/** Bingkai foto berpuncak lengkung, berisi slider Foto Sampul (cadangan: nama berdua). */
 const archPhoto = (cls: string, interval = '4800') => div(`relative overflow-hidden rounded-t-[999px] bg-ink/10 ${cls}`, [
   div('absolute inset-0 grid place-items-center px-6', [pen('{{couple_names}}', 'text-center text-[34px] text-ink/40')]),
-  comp('photo_slider', '', { interval, image_class: BW, dots: 'false' }),
+  comp('photo_slider', '', { interval, dots: 'false' }),
 ])
 /** Dinding tulisan tinta merah berulang di bawah kartu (baris bergeser bergantian, terpotong tepi kartu). */
 function wall(word: string, cls: string): ThemeNode {
@@ -49,7 +48,7 @@ const dayCol = (weekday: string, num: string, cls = '', extra: ThemeNode[] = [])
 function person(who: 'groom' | 'bride'): ThemeNode {
   return card('uv-reveal rounded-t-[175px] rounded-b-[28px] px-5 pb-8 pt-5 text-center', [
     div('relative mx-auto aspect-[4/5] w-full overflow-hidden rounded-t-[999px] bg-ink/10', [
-      img(`absolute inset-0 h-full w-full object-cover object-top ${BW}`, `{{${who}_photo}}`, who === 'groom' ? 'Foto mempelai pria' : 'Foto mempelai wanita', { if: `${who}_photo` }),
+      img(`absolute inset-0 h-full w-full object-cover object-top`, `{{${who}_photo}}`, who === 'groom' ? 'Foto mempelai pria' : 'Foto mempelai wanita', { if: `${who}_photo` }),
       div('absolute inset-0 grid place-items-center', [pen(`{{${who}_nickname}}`, 'text-[44px] text-ink/40')], { if: `!${who}_photo` }),
       ink(who === 'groom' ? 'Mempelai Pria' : 'Mempelai Wanita', `absolute bottom-3 ${who === 'groom' ? 'left-4 -rotate-[6deg]' : 'right-5 rotate-[5deg]'} text-[30px] [text-shadow:0_0_6px_#fff,0_0_14px_rgba(255,255,255,0.8)]`),
     ]),
@@ -65,7 +64,7 @@ export const meta = {
   slug: 'tinta-merah',
   name: 'Tinta Merah',
   category: 'elegan',
-  description: 'Luxury monokrom: kartu putih berlengkung di atas kain satin, foto hitam-putih, nama bertulisan tangan, dan aksen tinta merah — kalender tiga hari dengan tanggal dilingkari hati coretan pena, dinding tulisan "datang ya", dan susunan acara bertulisan tangan.',
+  description: 'Luxury monokrom: kartu putih berlengkung di atas kain satin, foto berwarna sesuai aslinya, nama bertulisan tangan, dan aksen tinta merah — kalender tiga hari dengan tanggal dilingkari hati coretan pena, dinding tulisan "datang ya", dan susunan acara bertulisan tangan.',
 }
 
 export const definition: ThemeDefinition = {
@@ -94,7 +93,7 @@ export const definition: ThemeDefinition = {
     bride_photo: '/theme-assets/aurelia-luxe/bride.jpg',
   },
   sections: [
-    // ---------- Sampul: kartu lengkung, tanggal tinta merah, foto hitam-putih, nama tulisan tangan ----------
+    // ---------- Sampul: kartu lengkung, tanggal tinta merah, foto, nama tulisan tangan ----------
     {
       type: 'cover',
       class: `relative flex flex-col items-center justify-center overflow-hidden ${LINEN} px-4 py-8 text-center`,
@@ -228,7 +227,7 @@ export const definition: ThemeDefinition = {
         ], { if: 'story' }),
       ],
     },
-    // ---------- Galeri hitam-putih berbingkai lengkung ----------
+    // ---------- Galeri berbingkai lengkung ----------
     {
       type: 'gallery',
       class: `relative overflow-hidden ${LINEN} px-4 text-center`,
@@ -238,7 +237,7 @@ export const definition: ThemeDefinition = {
           ink('momen kami', 'uv-reveal uv-d1 mt-1 text-[40px]'),
           div('mt-6 grid grid-cols-2 gap-3', [
             el('figure', `uv-reveal relative aspect-[3/4] overflow-hidden rounded-t-[999px] bg-surface p-1.5 ${SHADOW} [&:nth-child(3n+1)]:col-span-2 [&:nth-child(3n+1)]:aspect-[4/3] [&:nth-child(3n+1)]:rounded-t-[200px]`, [
-              img(`h-full w-full rounded-t-[inherit] object-cover ${BW}`, '{{item.url}}', '{{item.caption}}'),
+              img(`h-full w-full rounded-t-[inherit] object-cover`, '{{item.url}}', '{{item.caption}}'),
             ], { repeat: 'gallery' }),
           ]),
         ], { if: 'gallery' }),
