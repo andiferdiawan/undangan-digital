@@ -60,8 +60,9 @@ import * as anggrekEmas from './themes/anggrek-emas'
 import * as pilotCilik from './themes/pilot-cilik'
 import * as guntingPita from './themes/gunting-pita'
 import * as kubahZamrud from './themes/kubah-zamrud'
+import * as rantingKopi from './themes/ranting-kopi'
 
-const themes = [sakinah, minimalis, floral, moccaGypsophila, lengkungMawar, kubahZamrud, arka, noir, rustic, bugis, makassar, toraja, senja, arunika, lontara, aurelia, doodle, alur, aqBintang, aqBunga, anggrekEmas, khCeria, khMihrab, utBalon, utEmas, polaroidManis, pilotCilik, ofPrima, ofAgenda, guntingPita, acSilaturahmi, acKumpul, exPramuka, exPmr, exSeni, kabarCinta, harianBahagia, zoomCinta, pintuHati, suratCinta, piringanRindu, bolaUgi, layarPhinisi, tongkonanRindu, kisahPopUp, terminalCinta, kotakRahasia, amplopZaitun, pitaMarun, catatanCinta, perangkoCinta, tintaMerah, hatiTerakota, bukuNikah, cetakKenangan]
+const themes = [sakinah, minimalis, floral, moccaGypsophila, lengkungMawar, kubahZamrud, arka, noir, rustic, rantingKopi, bugis, makassar, toraja, senja, arunika, lontara, aurelia, doodle, alur, aqBintang, aqBunga, anggrekEmas, khCeria, khMihrab, utBalon, utEmas, polaroidManis, pilotCilik, ofPrima, ofAgenda, guntingPita, acSilaturahmi, acKumpul, exPramuka, exPmr, exSeni, kabarCinta, harianBahagia, zoomCinta, pintuHati, suratCinta, piringanRindu, bolaUgi, layarPhinisi, tongkonanRindu, kisahPopUp, terminalCinta, kotakRahasia, amplopZaitun, pitaMarun, catatanCinta, perangkoCinta, tintaMerah, hatiTerakota, bukuNikah, cetakKenangan]
 const q = (s: string) => `'${s.replace(/'/g, "''")}'`
 const rows: string[] = []
 const perTheme: { slug: string, row: string }[] = []
