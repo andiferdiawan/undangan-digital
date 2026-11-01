@@ -1,4 +1,4 @@
-import { withDefaults as contentWithDefaults, isHostKind, sharePhoto, type DemoText } from '#shared/theme/content'
+import { withDefaults as contentWithDefaults, isHostKind, mainEvent, sharePhoto, type DemoText } from '#shared/theme/content'
 import { dateParts } from '#shared/theme/context'
 import type { EventKind } from '#shared/theme/constants'
 
@@ -65,7 +65,7 @@ export default defineEventHandler(async (event) => {
   const png = await renderBrandOg({
     groom: c.groom.nickname,
     bride: c.bride.nickname,
-    date: dateParts(c.events[0]?.date ?? '')?.full ?? '',
+    date: dateParts(mainEvent(c.events)?.date ?? '')?.full ?? '',
     child: eventKind === 'wedding' ? undefined : host ? (c.host.title || c.host.name) : (c.child.nickname || c.child.name),
     childLabel: { khitan: 'WALIMATUL KHITAN', birthday: 'SYUKURAN ULANG TAHUN', office: 'UNDANGAN RESMI', general: 'UNDANGAN' }[eventKind as string] ?? 'TASYAKURAN AQIQAH',
   })

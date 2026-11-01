@@ -43,6 +43,13 @@ export interface EventItem {
   venue: string
   address: string
   map_url: string
+  /** Acara utama: tanggalnya tampil di sampul, hitung mundur, kalender & pratinjau link. Kosong = acara pertama. */
+  main?: boolean
+}
+
+/** Acara utama undangan: yang ditandai main, atau acara pertama (undangan lama tanpa penanda tetap sama). */
+export function mainEvent<T extends { main?: boolean }>(events: T[] | null | undefined): T | undefined {
+  return events?.find(e => e?.main) ?? events?.[0]
 }
 
 export interface InvitationContent {

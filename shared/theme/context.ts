@@ -1,4 +1,4 @@
-import type { InvitationContent } from './content'
+import { type InvitationContent, mainEvent } from './content'
 import type { EventKind, PlaceholderKey, RepeatSource } from './constants'
 
 const DAYS = ['Ahad', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jum\'at', 'Sabtu']
@@ -138,7 +138,7 @@ export function buildContext(
   c: InvitationContent,
   opts: { guestName?: string, assets: Record<string, string>, kind?: EventKind },
 ): RenderContext {
-  const main = c.events[0]
+  const main = mainEvent(c.events)
   const p = main ? dateParts(main.date) : null
   const start = main ? eventStart(main) : null
   const end = main && main.time_end ? eventStart({ ...main, time_start: main.time_end }) : null

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { PublicInvitation } from '#shared/types/models'
-import { withDefaults as contentWithDefaults, inviteNames, inviteTitle, sharePhoto } from '#shared/theme/content'
+import { withDefaults as contentWithDefaults, inviteNames, inviteTitle, mainEvent, sharePhoto } from '#shared/theme/content'
 import { dateParts } from '#shared/theme/context'
 
 definePageMeta({ layout: false })
@@ -21,7 +21,7 @@ const content = computed(() => contentWithDefaults(inv.value?.content, eventKind
 const names = computed(() => inviteNames(content.value, eventKind.value))
 const title = computed(() => inviteTitle(content.value, eventKind.value))
 const when = computed(() => {
-  const e = content.value.events[0]
+  const e = mainEvent(content.value.events)
   return [dateParts(e?.date ?? '')?.full, e?.venue].filter(Boolean).join(' · ')
 })
 // Gambar pratinjau WhatsApp dibuat server: foto galeri pertama yang diunggah pelanggan (JPEG), atau gambar
@@ -30,7 +30,7 @@ const origin = useSiteOrigin()
 const photo = computed(() => sharePhoto(inv.value?.content))
 const ogImage = computed(() => {
   if (photo.value) return `${origin}/og/${slug}.jpg?v=${shortHash(JSON.stringify(['foto1', photo.value]))}`
-  const v = shortHash(JSON.stringify(['brand1', names.value, content.value.events[0]?.date]))
+  const v = shortHash(JSON.stringify(['brand1', names.value, mainEvent(content.value.events)?.date]))
   return `${origin}/og/${slug}.png?v=${v}`
 })
 useSeoMeta({

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ALLOWED_FONTS, COLOR_KEYS, type ColorKey } from '#shared/theme/constants'
-import { withDefaults as contentWithDefaults, isChildKind, isHostKind, type EventItem, type InvitationContent } from '#shared/theme/content'
+import { withDefaults as contentWithDefaults, isChildKind, isHostKind, mainEvent, type EventItem, type InvitationContent } from '#shared/theme/content'
 
 const route = useRoute()
 const id = String(route.params.id)
@@ -77,13 +77,20 @@ if (import.meta.client) {
 // ---------- Helper daftar ----------
 // Isian jam selesai yang sedang diketik ulang tetap tampil walau sempat kosong; kosong saat ditinggal = "sampai selesai"
 const editingEnd = shallowRef<EventItem | null>(null)
+/** Hanya satu acara utama; yang lain dilepas penandanya. Urutan acara tidak berubah. */
+function setMainEvent(ev: EventItem) {
+  for (const e of content.value.events) {
+    if (e === ev) e.main = true
+    else delete e.main
+  }
+}
 /** Jam selesai kosong = "sampai selesai" (undangan menampilkan "08.00 WIB – Selesai"). Saat dimatikan, isi 2 jam setelah mulai. */
 function setUntilDone(ev: EventItem, on: boolean) {
   if (on) { ev.time_end = ''; return }
   const [h, m] = (/^\d{2}:\d{2}$/.test(ev.time_start) ? ev.time_start : '09:00').split(':').map(Number)
   ev.time_end = `${String(Math.min(23, h! + 2)).padStart(2, '0')}:${String(m).padStart(2, '0')}`
 }
-const newEvent = (): EventItem => ({ name: isChild.value ? 'Pengajian & Doa' : isHost.value ? 'Sesi Lanjutan' : 'Resepsi', date: content.value.events[0]?.date ?? '', time_start: '11:00', time_end: '13:00', timezone: 'WIB', venue: '', address: '', map_url: '' })
+const newEvent = (): EventItem => ({ name: isChild.value ? 'Pengajian & Doa' : isHost.value ? 'Sesi Lanjutan' : 'Resepsi', date: mainEvent(content.value.events)?.date ?? '', time_start: '11:00', time_end: '13:00', timezone: 'WIB', venue: '', address: '', map_url: '' })
 function move<T>(list: T[], i: number, d: -1 | 1) {
   const j = i + d
   if (j < 0 || j >= list.length) return
@@ -231,16 +238,23 @@ const url = computed(() => inviteUrl(inv.value!.slug))
           </div>
         </EditorCard>
 
-        <EditorCard v-model:open="open.events" title="Jadwal Acara" :hint="`${content.events.length} acara · acara pertama dipakai untuk hitung mundur`">
+        <EditorCard v-model:open="open.events" title="Jadwal Acara" :hint="`${content.events.length} acara · acara utama: ${mainEvent(content.events)?.name || 'Acara 1'}`">
           <div v-for="(ev, i) in content.events" :key="i" class="grid gap-3 rounded-2xl bg-brand-50/60 p-3">
             <div class="flex items-center justify-between">
-              <p class="text-sm font-bold text-brand">Acara {{ i + 1 }}</p>
+              <p class="text-sm font-bold text-brand">
+                Acara {{ i + 1 }}
+                <span v-if="content.events.length > 1 && mainEvent(content.events) === ev" class="ml-1 rounded-full bg-brand px-2 py-0.5 text-[11px] font-semibold text-white">Utama</span>
+              </p>
               <div class="flex gap-1 text-xs">
                 <button type="button" class="rounded-lg px-2 py-1 hover:bg-white" :disabled="i === 0" @click="move(content.events, i, -1)">↑</button>
                 <button type="button" class="rounded-lg px-2 py-1 hover:bg-white" @click="move(content.events, i, 1)">↓</button>
                 <button v-if="content.events.length > 1" type="button" class="rounded-lg px-2 py-1 text-red-600 hover:bg-white" @click="content.events.splice(i, 1)">Hapus</button>
               </div>
             </div>
+            <label v-if="content.events.length > 1" class="flex items-start gap-2 rounded-xl bg-white/70 px-3 py-2 text-sm text-brand-800">
+              <input type="radio" name="acara-utama" class="mt-0.5 h-4 w-4 shrink-0 accent-[#2f4a3a]" :checked="mainEvent(content.events) === ev" @change="setMainEvent(ev)">
+              <span><b>Jadikan acara utama</b><span class="block text-xs text-brand-500">Tanggalnya tampil di sampul, hitung mundur, kalender, dan pratinjau link WhatsApp.</span></span>
+            </label>
             <label class="label">Nama acara
               <input v-model="ev.name" class="input" :placeholder="isHost ? (eventKind === 'office' ? 'Peresmian' : 'Pengajian') : isBirthday ? 'Syukuran Ulang Tahun' : isKhitan ? 'Walimatul Khitan' : isAqiqah ? 'Tasyakuran Aqiqah' : 'Akad Nikah'">
             </label>
