@@ -15,6 +15,7 @@ export default defineEventHandler((event) => {
     'Disallow: /confirm',
     'Disallow: /reset-password',
     'Disallow: /reseller/dashboard',
+    'Disallow: /kelola/',
     'Disallow: /reseller/analitik',
     'Disallow: /r/',
     '',

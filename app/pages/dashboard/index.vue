@@ -8,11 +8,15 @@ const { profile, refresh } = useProfile()
 await refresh()
 
 const { data: list } = await useAsyncData('my-invitations', async () => {
+  const uid = (user.value as { sub?: string } | null)?.sub ?? ''
+  // Undangan yang dibagikan reseller lewat kode token (akses editor)
+  const { data: shared } = await supabase.from('invitation_editors').select('invitation_id').eq('user_id', uid)
+  const sharedIds = ((shared ?? []) as { invitation_id: string }[]).map(r => r.invitation_id)
   const { data } = await supabase
     .from('invitations')
     .select('id, slug, guest_limit, content, is_published, updated_at, theme:themes(name, code, kind:definition->>kind, demo:definition->demo), guests(count), rsvps(count)')
-    // Admin bisa membaca semua undangan (RLS); dashboard pribadi hanya milik akun ini.
-    .eq('owner_id', (user.value as { sub?: string } | null)?.sub ?? '')
+    // Admin bisa membaca semua undangan (RLS); dashboard pribadi hanya milik akun ini + yang dibagikan.
+    .or(sharedIds.length ? `owner_id.eq.${uid},id.in.(${sharedIds.join(',')})` : `owner_id.eq.${uid}`)
     .order('created_at', { ascending: false })
   return (data ?? []) as any[]
 })
@@ -24,7 +28,11 @@ const { data: isReseller } = await useAsyncData('is-reseller', async () => {
   return !!data
 })
 
+// Customer yang masuk lewat kode token (sesi anonim, tanpa akun)
+const isGuestAccess = computed(() => !!(user.value as { is_anonymous?: boolean } | null)?.is_anonymous)
+
 async function logout() {
+  if (isGuestAccess.value && !confirm('Keluar dari perangkat ini? Untuk mengelola undangan lagi, buka link kelola dari reseller dan masukkan kode token.')) return
   await supabase.auth.signOut()
   await navigateTo('/')
 }
@@ -35,7 +43,8 @@ async function logout() {
     <div class="flex items-start justify-between gap-3">
       <div>
         <p class="text-sm text-brand-500">Assalamu'alaikum,</p>
-        <h1 class="font-display text-3xl text-brand">{{ profile?.full_name || profile?.email || 'Pengguna' }}</h1>
+        <h1 class="font-display text-3xl text-brand">{{ isGuestAccess ? 'Pengelola Undangan' : profile?.full_name || profile?.email || 'Pengguna' }}</h1>
+        <p v-if="isGuestAccess" class="mt-1 text-xs text-brand-500">Masuk dengan kode token di perangkat ini, tanpa akun.</p>
       </div>
       <button class="btn-ghost btn-sm" @click="logout">Keluar</button>
     </div>
@@ -47,7 +56,7 @@ async function logout() {
 
     <div class="mt-8 flex items-center justify-between">
       <h2 class="font-semibold text-brand-900">Undangan Saya</h2>
-      <NuxtLink to="/daftar" class="btn-accent btn-sm">+ Aktifkan token</NuxtLink>
+      <NuxtLink v-if="!isGuestAccess" to="/daftar" class="btn-accent btn-sm">+ Aktifkan token</NuxtLink>
     </div>
 
     <div v-if="list?.length" class="mt-4 grid gap-3">
