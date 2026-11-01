@@ -2,8 +2,8 @@ import type { ThemeDefinition, ThemeNode } from '../../shared/theme/schema'
 import { comp, div, el, img, p } from './_h'
 
 /**
- * Kubah Zamrud — elegan islami bernuansa hijau zamrud, gading, dan emas lembut. Sampul foto penuh berbingkai
- * kisi jali (mashrabiya) di tepi, pembatas belah ketupat emas, pemandangan kubah & menara saat senja,
+ * Kubah Zamrud — elegan islami bernuansa hijau zamrud, gading, dan emas lembut. Sampul foto penuh bergradasi
+ * zamrud, pembatas belah ketupat emas, slide foto pasangan dalam bingkai lengkung,
  * kalender sebulan dengan hari H dilingkari, susunan acara berikon belah ketupat, hitung mundur di panel
  * lengkung zamrud, dan siluet garis kota bermasjid di penutup.
  * Warna turunan dari globals (bg-primary, text-accent, …) agar tetap serasi bila warna diganti user.
@@ -41,7 +41,7 @@ export const meta = {
   slug: 'kubah-zamrud',
   name: 'Kubah Zamrud',
   category: 'elegan',
-  description: 'Elegan islami hijau zamrud, gading, dan emas lembut. Sampul foto berbingkai kisi jali, pemandangan kubah senja, kalender hari H, susunan acara berikon belah ketupat, dan hitung mundur di panel lengkung.',
+  description: 'Elegan islami hijau zamrud, gading, dan emas lembut. Sampul foto penuh, slide foto dalam bingkai lengkung, kalender hari H, susunan acara berikon belah ketupat, dan hitung mundur di panel lengkung.',
 }
 
 export const definition: ThemeDefinition = {
@@ -62,7 +62,6 @@ export const definition: ThemeDefinition = {
   root_class: 'text-[17px] leading-relaxed [font-variant-numeric:lining-nums]',
   assets: {
     jali: `${A}/jali.svg`,
-    kubah: `${A}/kubah.svg`,
     siluet: `${A}/siluet.svg`,
     ornamen: `${A}/ornamen.svg`,
     cincin: `${A}/cincin.svg`,
@@ -81,9 +80,6 @@ export const definition: ThemeDefinition = {
       children: [
         comp('photo_slider', 'absolute inset-0', { interval: '5000', image_class: photoTone, dots: 'false' }),
         div('absolute inset-0 bg-[linear-gradient(180deg,rgba(18,40,33,0.55)_0%,rgba(18,40,33,0.1)_32%,rgba(18,40,33,0.35)_58%,rgba(14,34,28,0.92)_100%)]'),
-        // Hanya sepertiga panel yang terlihat di tiap tepi, seperti kisi jendela
-        jali('-left-[78px] top-[18%] w-[120px] opacity-90'),
-        jali('-right-[78px] top-[18%] w-[120px] -scale-x-100 opacity-90'),
         div('absolute inset-x-0 top-12', [
           caps('Undangan Pernikahan', 'uv-reveal text-[11px] tracking-[0.45em] text-surface/90'),
           img('uv-reveal uv-d1 mx-auto mt-3 w-32 brightness-150', '{{asset.ornamen}}'),
@@ -98,13 +94,17 @@ export const definition: ThemeDefinition = {
         ]),
       ],
     },
-    // ---------- Sapaan + pemandangan kubah + kalender ----------
+    // ---------- Sapaan + slide foto + kalender ----------
     {
       type: 'hero',
       class: 'relative overflow-hidden bg-base px-6 pb-14 pt-12 text-center',
       children: [
-        div('uv-reveal relative mx-auto max-w-[340px] overflow-hidden rounded-t-[170px] border border-accent/70 p-[6px]', [
-          div('overflow-hidden rounded-t-[164px]', [img('block w-full', '{{asset.kubah}}', 'Siluet kubah dan menara saat senja')]),
+        // Foto pasangan (Foto Sampul, lalu galeri) bergeser otomatis dalam bingkai lengkung
+        div('uv-reveal-mask relative mx-auto max-w-[320px] rounded-t-[160px] border border-accent/70 p-[6px]', [
+          div('relative aspect-[4/5] overflow-hidden rounded-t-[154px] bg-primary', [
+            div('absolute inset-0 grid place-items-center px-6', [el('span', 'font-script text-[44px] leading-tight text-surface', '{{couple_names}}')]),
+            comp('photo_slider', '', { interval: '4000', image_class: photoTone, dot_class: 'bg-surface' }),
+          ]),
         ]),
         divider('uv-reveal mt-8'),
         p('uv-reveal uv-d1 mt-5 font-body text-[14px] font-semibold uppercase tracking-[0.2em] text-muted', '{{greeting}}'),
