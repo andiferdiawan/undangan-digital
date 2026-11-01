@@ -75,7 +75,9 @@ if (import.meta.client) {
 }
 
 // ---------- Helper daftar ----------
-/** Jam selesai kosong = "sampai selesai" (undangan menampilkan "08.00 – Selesai WIB"). Saat dimatikan, isi 2 jam setelah mulai. */
+// Isian jam selesai yang sedang diketik ulang tetap tampil walau sempat kosong; kosong saat ditinggal = "sampai selesai"
+const editingEnd = shallowRef<EventItem | null>(null)
+/** Jam selesai kosong = "sampai selesai" (undangan menampilkan "08.00 WIB – Selesai"). Saat dimatikan, isi 2 jam setelah mulai. */
 function setUntilDone(ev: EventItem, on: boolean) {
   if (on) { ev.time_end = ''; return }
   const [h, m] = (/^\d{2}:\d{2}$/.test(ev.time_start) ? ev.time_start : '09:00').split(':').map(Number)
@@ -250,8 +252,8 @@ const url = computed(() => inviteUrl(inv.value!.slug))
                 <input v-model="ev.time_start" type="time" class="input">
               </label>
               <div class="label">Selesai
-                <div v-if="!ev.time_end" class="input flex items-center bg-brand-50/60 text-brand-700">Sampai selesai</div>
-                <input v-else v-model="ev.time_end" type="time" class="input" aria-label="Jam selesai">
+                <div v-if="!ev.time_end && editingEnd !== ev" class="input flex items-center bg-brand-50/60 text-brand-700">Sampai selesai</div>
+                <input v-else v-model="ev.time_end" type="time" class="input" aria-label="Jam selesai" @focus="editingEnd = ev" @blur="editingEnd = null">
               </div>
               <label class="col-span-2 -mt-1 flex items-center gap-2 text-sm text-brand-700">
                 <input type="checkbox" class="h-4 w-4 accent-[#2f4a3a]" :checked="!ev.time_end" @change="setUntilDone(ev, ($event.target as HTMLInputElement).checked)">

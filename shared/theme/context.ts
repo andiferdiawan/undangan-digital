@@ -82,7 +82,8 @@ export function eventStart(ev: { date: string, time_start: string, timezone: key
 function timeRange(ev: { time_start: string, time_end: string, timezone: string }) {
   const f = (t: string) => t.replace(':', '.')
   if (!ev.time_start) return ''
-  return `${f(ev.time_start)} – ${ev.time_end ? f(ev.time_end) : 'Selesai'} ${ev.timezone}`
+  // Tanpa jam selesai (opsi "Sampai selesai" di editor): "08.00 WIB – Selesai"
+  return ev.time_end ? `${f(ev.time_start)} – ${f(ev.time_end)} ${ev.timezone}` : `${f(ev.time_start)} ${ev.timezone} – Selesai`
 }
 
 /** Hanya URL http(s) yang boleh keluar dari placeholder ke atribut href/src. */
