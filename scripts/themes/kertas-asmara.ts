@@ -3,7 +3,7 @@ import { comp, div, el, img, p } from './_h'
 
 /**
  * Kertas Asmara — krem kertas dengan merah tua: coretan tulisan tangan "love you" di latar, foto polaroid
- * hitam-putih yang dimiringkan, nama tulisan tangan "A + B =" dengan hati cat kuas, amplop merah berisi kartu
+ * yang dimiringkan, nama tulisan tangan "A + B =" dengan hati cat kuas, amplop merah berisi kartu
  * surat, strip tanggal berkotak dengan hati di hari H, kartu merah membulat untuk ucapan & hadiah, dan
  * polaroid "sampai jumpa!" di penutup.
  * Warna turunan dari globals (bg-primary, text-primary, …) agar tetap serasi bila warna diganti user.
@@ -15,7 +15,8 @@ const small = (t: string, cls = '') => p(`font-body text-[14px] leading-relaxed 
 const heart = (cls: string) => img(`pointer-events-none select-none ${cls}`, '{{asset.hati}}')
 const btn = 'inline-flex items-center justify-center rounded-full bg-primary px-7 py-3 font-body text-[12px] font-semibold uppercase tracking-[0.22em] text-surface'
 const btnLight = 'inline-flex items-center justify-center rounded-full border border-primary px-6 py-2.5 font-body text-[12px] font-semibold uppercase tracking-[0.22em] text-primary'
-const bw = 'grayscale contrast-[1.05]'
+/** Foto tampil apa adanya (berwarna atau hitam-putih sesuai foto asli pelanggan). */
+const photoTone = ''
 
 /** Coretan tulisan tangan "love you" berulang di latar (merah tipis, miring). */
 function scribbles(cls: string): ThemeNode {
@@ -35,7 +36,7 @@ const polaroid = (inner: ThemeNode, caption: ThemeNode | null, cls: string) =>
 function person(who: 'groom' | 'bride'): ThemeNode {
   return div('uv-reveal text-center', [
     polaroid(div('relative aspect-[4/5] overflow-hidden bg-secondary', [
-      img(`absolute inset-0 h-full w-full object-cover object-top ${bw}`, `{{${who}_photo}}`, who === 'groom' ? 'Foto mempelai pria' : 'Foto mempelai wanita', { if: `${who}_photo` }),
+      img(`absolute inset-0 h-full w-full object-cover object-top ${photoTone}`, `{{${who}_photo}}`, who === 'groom' ? 'Foto mempelai pria' : 'Foto mempelai wanita', { if: `${who}_photo` }),
       div('absolute inset-0 grid place-items-center', [el('span', 'font-script text-[40px] text-primary', `{{${who}_nickname}}`)], { if: `!${who}_photo` }),
     ]), p('pt-2 font-script text-[26px] leading-none text-primary', `{{${who}_nickname}}`), `mx-auto w-full ${who === 'groom' ? '-rotate-3' : 'rotate-3'}`),
     p('mt-5 font-body text-[10px] font-semibold uppercase tracking-[0.25em] text-muted', who === 'groom' ? 'Mempelai Pria' : 'Mempelai Wanita'),
@@ -49,7 +50,7 @@ export const meta = {
   slug: 'kertas-asmara',
   name: 'Kertas Asmara',
   category: 'modern',
-  description: 'Krem kertas & merah tua: coretan "love you" tulisan tangan, foto polaroid hitam-putih miring, hati cat kuas, amplop merah berisi kartu surat, strip tanggal berkotak dengan hati, dan kartu merah membulat.',
+  description: 'Krem kertas & merah tua: coretan "love you" tulisan tangan, foto polaroid miring, hati cat kuas, amplop merah berisi kartu surat, strip tanggal berkotak dengan hati, dan kartu merah membulat.',
 }
 
 export const definition: ThemeDefinition = {
@@ -88,13 +89,13 @@ export const definition: ThemeDefinition = {
           // polaroid kecil di belakang (foto mempelai wanita bila ada)
           div('absolute -right-1 -top-2 w-[42%] rotate-[9deg]', [
             polaroid(div('relative aspect-square overflow-hidden bg-secondary', [
-              img(`absolute inset-0 h-full w-full object-cover object-top ${bw}`, '{{bride_photo}}', 'Foto mempelai wanita'),
+              img(`absolute inset-0 h-full w-full object-cover object-top ${photoTone}`, '{{bride_photo}}', 'Foto mempelai wanita'),
             ]), null, ''),
           ], { if: 'bride_photo' }),
           div('uv-reveal-zoom relative w-[86%] -rotate-[4deg]', [
             polaroid(div('relative aspect-[4/5] overflow-hidden bg-secondary', [
               div('absolute inset-0 grid place-items-center', [el('span', 'font-script text-[40px] text-primary', '{{couple_names}}')]),
-              comp('photo_slider', '', { interval: '4500', image_class: bw, dots: 'false' }),
+              comp('photo_slider', '', { interval: '4500', image_class: photoTone, dots: 'false' }),
             ]), p('pt-2 font-script text-[28px] leading-none text-primary', '{{event_dd}}.{{event_mm}}.{{event_yy}}'), ''),
           ]),
         ]),
@@ -113,17 +114,17 @@ export const definition: ThemeDefinition = {
       class: 'relative overflow-hidden bg-base px-6 pb-14 pt-12 text-center',
       children: [
         scribbles(''),
-        // Dua polaroid foto hitam-putih yang miring (seperti panel pembuka referensi)
+        // Dua polaroid foto yang miring (seperti panel pembuka referensi)
         div('relative mx-auto h-[300px] w-full max-w-[340px]', [
           div('uv-reveal-left absolute left-0 top-0 w-[56%] -rotate-[7deg]', [
             polaroid(div('relative aspect-[4/5] overflow-hidden bg-secondary', [
               div('absolute inset-0 grid place-items-center', [el('span', 'font-script text-[34px] text-primary', '{{couple_names}}')]),
-              comp('photo_slider', '', { interval: '4000', image_class: bw, dots: 'false' }),
+              comp('photo_slider', '', { interval: '4000', image_class: photoTone, dots: 'false' }),
             ]), null, ''),
           ]),
           div('uv-reveal-right uv-d1 absolute right-0 top-10 w-[50%] rotate-[6deg]', [
             polaroid(div('relative aspect-[4/5] overflow-hidden bg-secondary', [
-              img(`absolute inset-0 h-full w-full object-cover object-top ${bw}`, '{{bride_photo}}', 'Foto mempelai wanita'),
+              img(`absolute inset-0 h-full w-full object-cover object-top ${photoTone}`, '{{bride_photo}}', 'Foto mempelai wanita'),
             ]), null, ''),
           ], { if: 'bride_photo' }),
         ]),
@@ -231,7 +232,7 @@ export const definition: ThemeDefinition = {
         ], { if: 'story' }),
       ],
     },
-    // ---------- Galeri: polaroid hitam-putih miring ----------
+    // ---------- Galeri: polaroid miring ----------
     {
       type: 'gallery',
       class: 'relative overflow-hidden bg-surface px-6 text-center',
@@ -241,7 +242,7 @@ export const definition: ThemeDefinition = {
           script('Momen kami', 'uv-reveal relative'),
           div('relative mt-8 grid grid-cols-2 gap-x-4 gap-y-6', [
             el('figure', 'uv-reveal bg-surface p-2 pb-6 shadow-[0_14px_24px_-16px_rgba(60,20,20,0.6)] [&:nth-child(4n+1)]:-rotate-3 [&:nth-child(4n+2)]:mt-6 [&:nth-child(4n+2)]:rotate-2 [&:nth-child(4n+3)]:rotate-2 [&:nth-child(4n)]:mt-6 [&:nth-child(4n)]:-rotate-2', [
-              img(`aspect-[4/5] w-full object-cover ${bw}`, '{{item.url}}', '{{item.caption}}'),
+              img(`aspect-[4/5] w-full object-cover ${photoTone}`, '{{item.url}}', '{{item.caption}}'),
             ], { repeat: 'gallery' }),
           ]),
         ], { if: 'gallery' }),
@@ -305,7 +306,7 @@ export const definition: ThemeDefinition = {
         small('{{closing_text}}', 'uv-reveal mx-auto max-w-[300px]'),
         div('uv-reveal relative mx-auto mt-10 w-[78%] max-w-[290px] rotate-2', [
           polaroid(div('relative aspect-[4/5] overflow-hidden bg-secondary', [
-            comp('photo_slider', '', { interval: '5000', image_class: bw, dots: 'false' }),
+            comp('photo_slider', '', { interval: '5000', image_class: photoTone, dots: 'false' }),
           ]), p('pt-3 font-script text-[34px] leading-none text-primary', 'sampai jumpa!'), ''),
           heart('absolute -bottom-4 -right-5 w-14 rotate-12'),
         ]),
