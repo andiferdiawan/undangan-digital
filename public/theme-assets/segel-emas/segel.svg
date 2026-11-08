@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs>
+<radialGradient id="g" cx=".35" cy=".3" r=".85"><stop offset="0" stop-color="#f1d78f"/><stop offset=".45" stop-color="#d2a84e"/><stop offset="1" stop-color="#9c7425"/></radialGradient>
+<radialGradient id="i" cx=".6" cy=".65" r=".7"><stop offset="0" stop-color="#e2bd6a"/><stop offset="1" stop-color="#b58a35"/></radialGradient></defs>
+<polygon points="97.2,50.0 95.9,55.2 94.3,60.1 93.9,65.3 91.9,70.2 89.4,74.7 84.3,77.3 83.6,83.6 78.0,85.1 73.9,88.0 71.9,95.6 65.1,93.3 60.6,96.3 55.1,95.6 50.0,96.6 44.8,96.6 39.6,95.4 34.3,94.9 30.0,91.5 25.0,89.8 19.4,88.4 18.8,81.2 13.1,79.4 10.7,74.7 9.3,69.6 6.3,65.3 3.6,60.6 4.4,55.1 3.0,50.0 2.6,44.7 1.9,39.0 4.8,34.2 9.0,30.2 9.9,24.8 14.2,21.5 14.4,14.4 20.3,12.7 26.5,12.6 30.7,10.0 35.2,7.8 38.8,0.8 44.9,4.6 50.0,3.4 55.1,5.2 60.2,5.1 65.8,4.8 69.7,9.1 74.7,10.7 78.9,13.7 83.8,16.2 88.5,19.3 90.5,24.5 92.9,29.4 95.5,34.1 95.6,39.6 96.6,44.7" fill="url(#g)"/>
+<circle cx="50" cy="50" r="32" fill="url(#i)" stroke="#8c6620" stroke-opacity=".55" stroke-width="2.2"/>
+<circle cx="50" cy="50" r="28.5" fill="none" stroke="#f6e1a6" stroke-opacity=".7" stroke-width="1"/>
+<g fill="none" stroke="#8c6620" stroke-opacity=".55" stroke-width="1.4" stroke-linecap="round">
+<path d="M50 30 c-6 6 -6 14 0 20 c6 -6 6 -14 0 -20 z"/><path d="M50 70 c-6 -6 -6 -14 0 -20 c6 6 6 14 0 20 z"/>
+<path d="M30 50 c6 -6 14 -6 20 0 c-6 6 -14 6 -20 0 z"/><path d="M70 50 c-6 -6 -14 -6 -20 0 c6 6 14 6 20 0 z"/></g>
+<ellipse cx="36" cy="30" rx="10" ry="5" fill="#fff6d8" opacity=".45" transform="rotate(-30 36 30)"/></svg>
