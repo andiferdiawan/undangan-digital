@@ -110,9 +110,28 @@ export const definition: ThemeDefinition = {
     // ---------- Amplop merah berisi kartu surat + strip tanggal ----------
     {
       type: 'hero',
-      class: 'relative overflow-hidden bg-base px-6 pb-14 pt-14 text-center',
+      class: 'relative overflow-hidden bg-base px-6 pb-14 pt-12 text-center',
       children: [
-        div('uv-reveal relative mx-auto h-[350px] w-full max-w-[330px]', [
+        scribbles(''),
+        // Dua polaroid foto hitam-putih yang miring (seperti panel pembuka referensi)
+        div('relative mx-auto h-[300px] w-full max-w-[340px]', [
+          div('uv-reveal-left absolute left-0 top-0 w-[56%] -rotate-[7deg]', [
+            polaroid(div('relative aspect-[4/5] overflow-hidden bg-secondary', [
+              div('absolute inset-0 grid place-items-center', [el('span', 'font-script text-[34px] text-primary', '{{couple_names}}')]),
+              comp('photo_slider', '', { interval: '4000', image_class: bw, dots: 'false' }),
+            ]), null, ''),
+          ]),
+          div('uv-reveal-right uv-d1 absolute right-0 top-10 w-[50%] rotate-[6deg]', [
+            polaroid(div('relative aspect-[4/5] overflow-hidden bg-secondary', [
+              img(`absolute inset-0 h-full w-full object-cover object-top ${bw}`, '{{bride_photo}}', 'Foto mempelai wanita'),
+            ]), null, ''),
+          ], { if: 'bride_photo' }),
+        ]),
+        div('uv-reveal relative mt-4 flex items-center justify-center gap-2 font-script text-[40px] leading-none text-ink', [
+          el('span', '', '{{groom_nickname}}'), el('span', 'text-[30px]', '+'), el('span', '', '{{bride_nickname}}'), el('span', 'text-[30px]', '='),
+        ]),
+        heart('uv-reveal-pop uv-d1 relative mx-auto mt-2 w-[64px]'),
+        div('uv-reveal relative mx-auto mt-8 h-[350px] w-full max-w-[330px]', [
           // punggung amplop + tutup terbuka
           div('absolute inset-x-0 bottom-0 h-[140px] bg-accent'),
           div('absolute inset-x-0 bottom-[140px] h-[60px] bg-accent [clip-path:polygon(0_100%,50%_0,100%_100%)]'),
